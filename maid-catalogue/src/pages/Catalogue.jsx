@@ -169,7 +169,8 @@ export default function Catalogue() {
   const ageMatch = maid.age >= ageRange[0] && maid.age <= ageRange[1];
   const skillMatch = skillsets.length === 0 || skillsets.some((s) => maid.skills.includes(s));
   const languageMatch = languages.length === 0 || languages.some((l) => maid.languages.includes(l));
-  const typeMatch = types.length === 0 || types.includes(maid.type);
+  const typeMatch =
+  types.length === 0 || types.some((t) => maid.type.includes(t));
 
   return countryMatch  && salaryMatch && ageMatch && skillMatch && languageMatch && typeMatch;
 });
