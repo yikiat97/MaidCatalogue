@@ -16,7 +16,7 @@ import PetsIcon from '@mui/icons-material/Pets'; // Dog(s), Cat(s)
 import FavoriteIcon from '@mui/icons-material/Favorite'; // Caregiving
 import Tooltip from '@mui/material/Tooltip';
 
-export default function MaidCard({ maid , isShortlisted}) {
+export default function MaidCard({ maid , isAuthenticated}) {
   const navigate = useNavigate();
   const [isFavorited, setIsFavorited] = useState(false);
 
@@ -65,6 +65,8 @@ export default function MaidCard({ maid , isShortlisted}) {
             md: '300px',   //   200px width for medium and up
             },
             objectFit: 'cover',
+            filter: isAuthenticated ? 'none' : 'blur(10px)',
+            transition: 'filter 0.3s ease'
         }}
         onClick={handleView}
         />

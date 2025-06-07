@@ -153,6 +153,7 @@ const [ageRange, setAgeRange] = useState([18, 60]);
 const [types, setTypes] = useState([]);
 
 const [showFilter, setShowFilter] = useState(false);
+const [isAuthenticated, setIsAuthenticated] = useState(false);
 
 const toggleFilter = () => {
   setShowFilter((prev) => !prev);
@@ -213,7 +214,7 @@ const filteredMaids = maids.filter((maid) => {
 
           {/* NAVBAR full width on top right */}
           <Box sx={{ flexGrow: 1}}>
-            <NavBar />     
+            <NavBar isAuthenticated={isAuthenticated} />     
           </Box>
       
           <Box sx={{ flexGrow: 1 ,mt:{xs:0, md:20} }} >

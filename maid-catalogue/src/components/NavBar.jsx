@@ -33,7 +33,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   padding: '8px 12px',
 }));
 
-export default function NavBar() {
+export default function NavBar({isAuthenticated}) {
     const [open, setOpen] = React.useState(false);
     const location = useLocation();
     const navigate = useNavigate();
@@ -44,9 +44,24 @@ export default function NavBar() {
         setOpen(newOpen);
     };
 
-    const handleLogout = () => {
-    // removeToken();
-    window.location.href = '/login';
+    const handleLogout =  () => {
+
+      try {
+        const res = fetch('http://localhost:3000/api/auth/logout', {
+          method : 'POST',
+          credentials: 'include', // Send cookies
+        });
+console.log(res)
+        if (res.ok) {
+          window.location.href = '/login';
+        } 
+      } catch (err) {
+        console.error(err);
+        alert("error")
+        // window.location.href = '/login';
+      }
+    
+    
     };
 
 return (
@@ -129,13 +144,24 @@ return (
               alignItems: 'center',
             }}
           >
-            <Button color="primary" variant="text" size="small">
-              Sign in
-            </Button>
-            <AccountCircleRoundedIcon style={{ color: "#151515cc", width:40 }} onClick={() => navigate('/profile')}/>
+          {isAuthenticated
+            ?     
+            <div>  
+            <AccountCircleRoundedIcon style={{ color: "#151515cc", width:40 }} onClick={() => navigate('/profile')}/>      
             <Button color="primary" variant="contained" size="small" onClick={handleLogout}>
               Sign out
             </Button>
+</div>
+            :
+            <div>
+            <Button color="primary" variant="text" size="small" href='/login'>
+              Sign in
+            </Button>
+            <Button color="primary" variant="contained" size="small" href='/signup'>
+              Sign up
+            </Button>
+            </div>
+            }
           </Box>
           <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1 }}>
             <AccountCircleRoundedIcon size="medium" style={{ color: "#151515cc", marginTop: 9}} onClick={() => navigate('/profile')} />
@@ -181,16 +207,25 @@ return (
                 <MenuItem>Pricing</MenuItem>
                 <MenuItem>Recomendation</MenuItem>
                 <Divider sx={{ my: 3 }} />
-                <MenuItem>
-                  <Button color="primary" variant="contained" fullWidth>
-                    Sign up
-                  </Button>
-                </MenuItem>
+
+                {isAuthenticated
+                ?                 
                 <MenuItem>
                   <Button color="primary" variant="outlined" fullWidth>
-                    Sign in
+                    Sign Out
                   </Button>
                 </MenuItem>
+                :                
+                <MenuItem>
+                  <Button color="primary" variant="outlined" fullWidth href='/login'>
+                    Sign in
+                  </Button>
+                  <Button color="primary" variant="outlined" fullWidth href='/signup'>
+                    Sign Up
+                  </Button>
+                </MenuItem>
+                }
+ 
               </Box>
             </Drawer>
           </Box>

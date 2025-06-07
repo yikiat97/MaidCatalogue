@@ -1,19 +1,34 @@
 import { useState } from 'react';
 
 export default function Login() {
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
-    // try {
-    //   const res = await api.post('/auth/login', { username, password });
-    //   setToken(res.data.token);
-    //   window.location.href = '/';
-    // } catch (err) {
-    //   alert('Login failed');
-    // }
+    try {
+      const res = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // ✅ important!
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        alert('Login failed: ' + (await res.text()));
+        return;
+      }
+
+      const data = await res.json();
+      localStorage.setItem('token', data.token);
+      alert('Login successful!');
+      window.location.href = '/'; // or wherever you want to redirect
+    } catch (err) {
+      console.error(err);
+      alert('Login failed due to server error.');
+    }
   };
+
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -248,9 +263,9 @@ export default function Login() {
           <div style={styles.inputGroup}>
             <input
               type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               style={styles.input}
               onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
               onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}

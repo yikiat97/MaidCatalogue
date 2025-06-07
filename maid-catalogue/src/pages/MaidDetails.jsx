@@ -145,8 +145,32 @@ export default function MaidDetails() {
   const { id } = useParams();
   const maid = maids.find((m) => m.id === parseInt(id));
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('http://localhost:3000/api/auth/profile', {
+          credentials: 'include', // Send cookies
+        });
+
+        if (res.ok) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (err) {
+        console.error(err);
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   if (!maid) return <Typography>Maid not found</Typography>;
+
+  
 
   return (
     <div>
@@ -164,7 +188,7 @@ export default function MaidDetails() {
     
       </Box>
 
-      <NavBar></NavBar>
+      <NavBar  isAuthenticated={isAuthenticated}></NavBar>
 
     <Container sx={{ mt: 4 }}>
       <Button variant="outlined" onClick={() => navigate(-1)} sx={{ mb: 2 }}>
@@ -176,6 +200,9 @@ export default function MaidDetails() {
             src={maid.photoUrl || maidPic}
             alt={maid.name}
             style={{ width: '340px', height:'430px',borderRadius: 8 }}
+            sx={{objectFit: 'cover',
+            filter: isAuthenticated ? 'none' : 'blur(10px)',
+            transition: 'filter 0.3s ease'}}
           />
 
           <Box display="flex" gap={2} alignItems="center" justifyContent={{ xs: 'center', md: 'flex-start' }} mt={2}>
