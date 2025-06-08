@@ -148,6 +148,7 @@ const maids = [
 
 
 export default function Catalogue() {
+  const [maids, setMaids] = useState([]);
   const [salaryRange, setSalaryRange] = useState([400, 1000]);
   const [selectedCountries, setSelectedCountries] = useState([]);
   const [skillsets, setSkillsets] = useState([]);
@@ -155,30 +156,61 @@ export default function Catalogue() {
   const [ageRange, setAgeRange] = useState([18, 60]);
   const [types, setTypes] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
+  const [userFavorites, setUserFavorites] = useState([]);
 
   // 👇 NEW: Auth state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('http://localhost:3000/api/auth/profile', {
-          credentials: 'include', // Send cookies
-        });
+useEffect(() => {
+  // Function to check authentication
+  const checkAuth = async () => {
+    try {
+      const res = await fetch('http://localhost:3000/api/auth/profile', {
+        credentials: 'include',
+      });
 
-        if (res.ok) {
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch (err) {
-        console.error(err);
+      if (res.ok) {
+        setIsAuthenticated(true);
+        fetch('http://localhost:3000/api/user/GetUserfavorites', {
+          credentials: 'include',
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            setUserFavorites(data); // e.g., [1, 2, 5, 8]
+          })
+          .catch((err) => console.error(err));
+  
+      } 
+      
+      else {
         setIsAuthenticated(false);
       }
-    };
+    } 
+    catch (err) {
+      console.error(err);
+      setIsAuthenticated(false);
+    }
+  };
 
-    checkAuth();
-  }, []);
+  // Function to get all maids
+  const fetchMaids = async () => {
+    try {
+      const res = await fetch('http://localhost:3000/api/maids', {
+        credentials: 'include',
+      });
+      const data = await res.json();
+      setMaids(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Call both functions independently
+  checkAuth();
+  fetchMaids();
+}, []);
+
+
 
   const toggleFilter = () => {
     setShowFilter((prev) => !prev);
@@ -235,7 +267,7 @@ export default function Catalogue() {
             <Grid container spacing={2} justifyContent="center">
               {filteredMaids.map((maid) => (
                 <Grid item xs={6} sm={6} md={4} key={maid.id}>
-                  <MaidCard maid={maid} isAuthenticated={isAuthenticated} />
+                  <MaidCard userFavorites={userFavorites} maid={maid} isAuthenticated={isAuthenticated} />
                 </Grid>
               ))}
             </Grid>

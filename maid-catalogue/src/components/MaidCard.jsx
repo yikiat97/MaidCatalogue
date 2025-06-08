@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState ,useEffect} from 'react';
 import { Card, CardContent, Typography, Button, CardMedia,Stack,Box, Chip } from '@mui/material';
 import maidPic from '../assets/maidPic.jpg';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
@@ -16,18 +16,70 @@ import PetsIcon from '@mui/icons-material/Pets'; // Dog(s), Cat(s)
 import FavoriteIcon from '@mui/icons-material/Favorite'; // Caregiving
 import Tooltip from '@mui/material/Tooltip';
 
-export default function MaidCard({ maid , isAuthenticated}) {
+export default function MaidCard({ userFavorites, maid , isAuthenticated}) {
   const navigate = useNavigate();
-  const [isFavorited, setIsFavorited] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(
+    userFavorites.includes(maid.id) // 🟢 Initial state based on API response
+  );
 
-  const toggleFavorite = () => {
-  setIsFavorited((prev) => !prev);
-  console.log(`Maid ${maid.id} favorite toggled!`);
-    };
+  useEffect(() => {
+    setIsFavorited(userFavorites.includes(maid.id));
+  }, [userFavorites, maid.id]);
+
+const toggleFavorite = () => {
+  if (!isAuthenticated) {
+    navigate('/signup');
+    return;
+  }
+
+  const maidId = maid.id;
+
+  if (isFavorited) {
+    // 🟢 If already favorited, unfavorite (DELETE)
+    fetch(`http://localhost:3000/api/user/RemoveFavorites/${maidId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to remove favorite');
+        return res.json();
+      })
+      .then((data) => {
+        console.log('Maid removed from favorites:', data);
+        setIsFavorited(false); // Update icon
+      })
+      .catch((err) => console.error(err));
+  } else {
+    // 🔴 If not yet favorited, add to favorites (POST)
+    fetch('http://localhost:3000/api/user/favorites', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ maidId }),
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to add favorite');
+        return res.json();
+      })
+      .then((data) => {
+        console.log('Maid added to favorites:', data);
+        setIsFavorited(true); // Update icon
+      })
+      .catch((err) => console.error(err));
+  }
+};
+
+
 
   const handleView = () => {
     navigate(`/maid/${maid.id}`);
   };
+
+  const displayLabel = maid.type.includes("Transfer")
+  ? "Transfer"
+  : maid.type.includes("New/Fresh")
+  ? "New/Fresh"
+  : "Experienced";
 
   const skillIcons = {
     Cooking: KitchenIcon,
@@ -56,7 +108,7 @@ export default function MaidCard({ maid , isAuthenticated}) {
         <CardMedia
         component="img"
         height="200"
-        image={maid.photoUrl || maidPic}
+        image={`http://localhost:3000${maid.imageUrl}`  || maidPic}
         alt={maid.name}
         sx={{
             width: {
@@ -81,17 +133,19 @@ export default function MaidCard({ maid , isAuthenticated}) {
                 <Typography variant="body2" style={{fontSize:'18px'}}>{maid.name}</Typography>
             </Box>
             <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
-            {maid.type.map((t, idx) => {
+            {/* {maid.type.map((t, idx) => {
                 let displayLabel;
                 if (t === "Transfer" || t === "New/Fresh") {
                 displayLabel = t;
+                break
                 } else {
                 displayLabel = "Experienced";
-                }
+                break
+                } */}
 
-                return (
+                {/* return ( */}
                 <Chip
-                    key={idx}
+                    // key={idx}
                     label={displayLabel}
                     variant="outlined"
                     size="small"
@@ -103,8 +157,8 @@ export default function MaidCard({ maid , isAuthenticated}) {
                     height: '20px',
                     }}
                 />
-                );
-            })}
+                {/* ); */}
+            {/* })} */}
             </Stack>
 
         <Typography variant="body2" color="text.secondary">
@@ -166,26 +220,22 @@ export default function MaidCard({ maid , isAuthenticated}) {
             </WhatsAppIcon>
 
               {/* Favorite (heart) icon */}
-                {isFavorited ? (
-                <FavoriteIcon
-                    sx={{
-                    cursor: 'pointer',
-                    fontSize: 30,
-                    color: 'error.main',
-                    }}
-                    onClick={toggleFavorite}
-                />
-                ) : (
-                <FavoriteBorderIcon
-                    sx={{
-                    cursor: 'pointer',
-                    fontSize: 30,
-                    color: 'error.main',
-                    '&:hover': { color: 'error.dark' },
-                    }}
-                    onClick={toggleFavorite}
-                />
-                )}
+            {isFavorited ? (
+              <FavoriteIcon
+                sx={{ cursor: 'pointer', fontSize: 30, color: 'error.main' }}
+                onClick={toggleFavorite}
+              />
+            ) : (
+              <FavoriteBorderIcon
+                sx={{
+                  cursor: 'pointer',
+                  fontSize: 30,
+                  color: 'error.main',
+                  '&:hover': { color: 'error.dark' },
+                }}
+                onClick={toggleFavorite}
+              />
+            )}
           </Box>
     </Card>
   );

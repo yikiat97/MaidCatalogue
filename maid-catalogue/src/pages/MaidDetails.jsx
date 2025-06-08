@@ -197,7 +197,7 @@ export default function MaidDetails() {
       <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={2}>
         <Box>
           <img
-            src={maid.photoUrl || maidPic}
+            src={`http://localhost:3000${maid.imageUrl}` || maidPic}
             alt={maid.name}
             style={{ width: '340px', height:'430px',borderRadius: 8 }}
             sx={{objectFit: 'cover',

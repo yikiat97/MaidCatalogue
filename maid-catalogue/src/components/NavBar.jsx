@@ -44,25 +44,24 @@ export default function NavBar({isAuthenticated}) {
         setOpen(newOpen);
     };
 
-    const handleLogout =  () => {
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('http://localhost:3000/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include', // Send cookies
+      });
 
-      try {
-        const res = fetch('http://localhost:3000/api/auth/logout', {
-          method : 'POST',
-          credentials: 'include', // Send cookies
-        });
-console.log(res)
-        if (res.ok) {
-          window.location.href = '/login';
-        } 
-      } catch (err) {
-        console.error(err);
-        alert("error")
-        // window.location.href = '/login';
+      console.log(res);
+
+      if (res.ok) {
+        window.location.href = '/login';
+      } else {
+        console.error('Logout failed');
       }
-    
-    
-    };
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
 
 return (
     <AppBar
