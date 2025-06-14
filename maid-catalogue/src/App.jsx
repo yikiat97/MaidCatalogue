@@ -4,12 +4,14 @@ import Catalogue from './pages/Catalogue';
 import MaidDetails from './pages/MaidDetails';
 import Shortlisted from './pages/Shortlisted';
 import Signup from './pages/Signup';
+import { MaidContextProvider } from './context/maidList';
 // import { getToken } from './utils/auth';
 
 export default function App() {
   const isAuthenticated = true//!!getToken();
 
-  return (
+return (
+  <MaidContextProvider>
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
@@ -19,19 +21,26 @@ export default function App() {
             isAuthenticated ? <Catalogue /> : <Navigate to="/login" replace />
           }
         />
-        <Route path="/maid/:id" element={
-           isAuthenticated ? <MaidDetails/> : <Navigate to="/login" replace/>
+        <Route
+          path="/maid/:id"
+          element={
+            isAuthenticated ? <MaidDetails /> : <Navigate to="/login" replace />
           }
         />
-        <Route path="/shortlisted" element={
-           isAuthenticated ? <Shortlisted/> : <Navigate to="/login" replace/>
+        <Route
+          path="/shortlisted"
+          element={
+            isAuthenticated ? <Shortlisted /> : <Navigate to="/login" replace />
           }
         />
-        <Route path="/Signup" element={
-           isAuthenticated ? <Signup/> : <Navigate to="/login" replace/>
+        <Route
+          path="/Signup"
+          element={
+            isAuthenticated ? <Signup /> : <Navigate to="/login" replace />
           }
         />
       </Routes>
     </Router>
-  );
+  </MaidContextProvider>
+);
 }

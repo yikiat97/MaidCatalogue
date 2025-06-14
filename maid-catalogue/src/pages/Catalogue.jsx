@@ -4,147 +4,7 @@ import MaidCard from '../components/MaidCard';
 import FilterBar from '../components/FilterBar';
 import NavBar from '../components/navBar';
 import logoBlack from '../assets/logoBlack.png';
-
-
-
-// import { removeToken } from '../utils/auth';
-
-const maids = [
-  {
-    id: 1,
-    name: 'Mary jane elvis lim james',
-    country: 'Philippines',
-    experience: 2,
-    salary: 500,
-    age: 25,
-    skills: ['Cooking', 'Housekeeping', 'Childcare','Babysitting', 'Elderly Care','Dog(s)','Cat(s)',"Caregiving"],
-    languages: ['English', 'Mandarin'],
-    type: ['Transfer'],
-  },
-  {
-    id: 2,
-    name: 'Anna',
-    country: 'Indonesia',
-    experience: 3,
-    salary: 550,
-    age: 30,
-    skills: ['Housekeeping', 'Elderly Care'],
-    languages: ['English'],
-    type: ['Transfer'],
-  },
-  {
-    id: 3,
-    name: 'Lily',
-    country: 'Myanmar',
-    experience: 1,
-    salary: 480,
-    age: 22,
-    skills: ['Cooking', 'Housekeeping'],
-    languages: ['English', 'Malay'],
-    type: ['New/Fresh'],
-  },
-  {
-    id: 4,
-    name: 'Jane',
-    country: 'Philippines',
-    experience: 4,
-    salary: 600,
-    age: 35,
-    skills: ['Childcare', 'Elderly Care','Cooking', 'Housekeeping'],
-    languages: ['English', 'Tagalog'],
-    type: ['Ex-Hongkong'],
-  },
-  {
-    id: 5,
-    name: 'Mary',
-    country: 'Philippines',
-    experience: 2,
-    salary: 500,
-    age: 26,
-    skills: ['Cooking'],
-    languages: ['English'],
-    type: ['Ex-Middle East'],
-  },
-  {
-    id: 6,
-    name: 'Anna',
-    country: 'Indonesia',
-    experience: 3,
-    salary: 550,
-    age: 28,
-    skills: ['Childcare'],
-    languages: ['English', 'Malay'],
-    type: ['Transfer'],
-  },
-  {
-    id: 7,
-    name: 'Lily',
-    country: 'Myanmar',
-    experience: 1,
-    salary: 480,
-    age: 21,
-    skills: ['Housekeeping'],
-    languages: ['English'],
-    type: ['New/Fresh'],
-  },
-  {
-    id: 8,
-    name: 'Jane',
-    country: 'Philippines',
-    experience: 4,
-    salary: 600,
-    age: 34,
-    skills: ['Cooking', 'Childcare','Elderly Care'],
-    languages: ['English', 'Tagalog'],
-    type: ['Ex-Taiwan'],
-  },
-  {
-    id: 9,
-    name: 'Mary',
-    country: 'Philippines',
-    experience: 2,
-    salary: 500,
-    age: 27,
-    skills: ['Elderly Care'],
-    languages: ['English'],
-    type: ['Ex-Middle East'],
-  },
-  {
-    id: 10,
-    name: 'Anna',
-    country: 'Indonesia',
-    experience: 3,
-    salary: 550,
-    age: 29,
-    skills: ['Cooking', 'Housekeeping'],
-    languages: ['English', 'Malay'],
-    type: ['Transfer'],
-  },
-  {
-    id: 11,
-    name: 'Lily',
-    country: 'Myanmar',
-    experience: 1,
-    salary: 480,
-    age: 23,
-    skills: ['Childcare', 'Cooking'],
-    languages: ['English'],
-    type: ['New/Fresh'],
-  },
-  {
-    id: 12,
-    name: 'Jane',
-    country: 'Philippines',
-    experience: 4,
-    salary: 600,
-    age: 36,
-    skills: ['Elderly Care'],
-    languages: ['English', 'Tagalog'],
-    type: ['Ex-Hongkong'],
-  },
-];
-
-
+import { useMaidContext } from '../context/maidList';
 
 
 export default function Catalogue() {
@@ -157,6 +17,9 @@ export default function Catalogue() {
   const [types, setTypes] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [userFavorites, setUserFavorites] = useState([]);
+  
+
+const { maidList, setMaidList } = useMaidContext();
 
   // 👇 NEW: Auth state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -200,6 +63,7 @@ useEffect(() => {
       });
       const data = await res.json();
       setMaids(data);
+      setMaidList(data)
     } catch (err) {
       console.error(err);
     }
