@@ -22,15 +22,19 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
           set -e
-          if [ ! -d ~/vite-app ]; then
-            git clone https://${{ secrets.REPO_CLONE_TOKEN  }}@github.com/yikiat97/MaidCatalogue.git ~/EasyHiresg
+
+          # Clone if folder doesn't exist
+          if [ ! -d ~/EasyHiresg ]; then
+            git clone https://${{ secrets.REPO_CLONE_TOKEN }}@github.com/yikiat97/MaidCatalogue.git ~/EasyHiresg
           fi
-          cd ~/vite-app
+
+          cd ~/EasyHiresg
           git pull origin main
           npm install
           npm run build
 
-          sudo rm -rf /var/www/vite-app/*
-          sudo cp -r dist/* /var/www/vite-app/
+          # Deploy to nginx web root
+          sudo rm -rf /var/www/EasyHireSg/*
+          sudo cp -r dist/* /var/www/EasyHireSg/
           sudo systemctl reload nginx
         EOF
