@@ -2,7 +2,7 @@ import { useState ,useEffect} from 'react';
 import { Container, Typography, Grid, Button, Collapse , Box } from '@mui/material';
 import MaidCard from '../components/MaidCard';
 import FilterBar from '../components/FilterBar';
-import NavBar from '../components/navBar';
+import NavBar from '../components/NavBar';
 import logoBlack from '../assets/logoBlack.png';
 import { useMaidContext } from '../context/maidList';
 

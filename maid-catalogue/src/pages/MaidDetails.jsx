@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Container, Typography, Button, Box,Stack, Chip } from '@mui/material';
 import maidPic from '../assets/maidPic.jpg';
-import NavBar from '../components/navBar';
+import NavBar from '../components/NavBar';
 import logoBlack from '../assets/logoBlack.png';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
