@@ -1,0 +1,34 @@
+name: Deploy Vite Frontend to AWS Lightsail with nginx
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Deploy via SSH
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
+          set -e
+          cd /home/bitnami/vite-app       # replace with your actual repo folder
+          git pull origin main
+          npm install
+          npm run build
+
+          # Deploy built files to nginx root
+          sudo rm -rf /var/www/vite-app/*
+          sudo cp -r dist/* /var/www/vite-app/
+          sudo systemctl reload nginx
+        EOF

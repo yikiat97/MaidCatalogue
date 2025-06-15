@@ -48,7 +48,7 @@ export default function Favorites() {
 
         <Grid container spacing={2} justifyContent="center">
           {favoriteMaids.length === 0 ? (
-            <Typography sx={{ mt: 4 }}>No favorites found.</Typography>
+            <Typography sx={{ mt: 4 }}>No favorites found. testing</Typography>
           ) : (
             favoriteMaids.map((maid) => (
               <Grid item xs={6} sm={6} md={4} key={maid.id}>
