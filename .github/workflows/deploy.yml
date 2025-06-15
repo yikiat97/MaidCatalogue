@@ -22,12 +22,14 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
           set -e
-          cd /home/bitnami/vite-app       # replace with your actual repo folder
+          if [ ! -d ~/vite-app ]; then
+            git clone https://${{ secrets.REPO_CLONE_TOKEN  }}@github.com/yikiat97/MaidCatalogue.git ~/EasyHiresg
+          fi
+          cd ~/vite-app
           git pull origin main
           npm install
           npm run build
 
-          # Deploy built files to nginx root
           sudo rm -rf /var/www/vite-app/*
           sudo cp -r dist/* /var/www/vite-app/
           sudo systemctl reload nginx
