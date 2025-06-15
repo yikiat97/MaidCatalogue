@@ -34,7 +34,7 @@ jobs:
           npm run build
 
           # Deploy to nginx web root
-          sudo rm -rf /var/www/EasyHireSg/*
-          sudo cp -r dist/* /var/www/EasyHireSg/
+          sudo rm -rf /var/www/EasyHiresg/*
+          sudo cp -r dist/* /var/www/EasyHiresg/
           sudo systemctl reload nginx
         EOF
