@@ -11,7 +11,7 @@ export default function Favorites() {
     const checkAuthAndFetchFavorites = async () => {
       try {
         // 1️⃣ Check if authenticated
-        const res = await fetch('http://localhost:3000/api/auth/profile', {
+        const res = await fetch('http://54.169.107.1157.115:3000/api/auth/profile', {
           credentials: 'include',
         });
 
@@ -19,7 +19,7 @@ export default function Favorites() {
           setIsAuthenticated(true);
 
           // 2️⃣ Fetch user's favorite maids
-          const favRes = await fetch('http://localhost:3000/api/user/favorites', {
+          const favRes = await fetch('http://54.169.107.115/:3000/api/user/favorites', {
             credentials: 'include',
           });
           const data = await favRes.json();

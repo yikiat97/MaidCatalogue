@@ -46,7 +46,7 @@ export default function NavBar({isAuthenticated}) {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/auth/logout', {
+      const res = await fetch('http://54.169.107.115:3000/api/auth/logout', {
         method: 'POST',
         credentials: 'include', // Send cookies
       });

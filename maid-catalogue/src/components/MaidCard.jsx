@@ -36,7 +36,7 @@ const toggleFavorite = () => {
 
   if (isFavorited) {
     // 🟢 If already favorited, unfavorite (DELETE)
-    fetch(`http://localhost:3000/api/user/RemoveFavorites/${maidId}`, {
+    fetch(`http://54.169.107.115:3000/api/user/RemoveFavorites/${maidId}`, {
       method: 'DELETE',
       credentials: 'include',
     })
@@ -51,7 +51,7 @@ const toggleFavorite = () => {
       .catch((err) => console.error(err));
   } else {
     // 🔴 If not yet favorited, add to favorites (POST)
-    fetch('http://localhost:3000/api/user/favorites', {
+    fetch('http://54.169.107.115:3000/api/user/favorites', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ maidId }),
@@ -108,7 +108,7 @@ const toggleFavorite = () => {
         <CardMedia
         component="img"
         height="200"
-        image={`http://localhost:3000${maid.imageUrl}`  || maidPic}
+        image={`http://54.169.107.115:3000${maid.imageUrl}`  || maidPic}
         alt={maid.name}
         sx={{
             width: {
