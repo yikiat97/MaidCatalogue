@@ -28,7 +28,7 @@ jobs:
             git clone https://${{ secrets.REPO_CLONE_TOKEN }}@github.com/yikiat97/MaidCatalogue.git ~/EasyHiresg
           fi
 
-          cd ~/EasyHiresg
+          cd ~/EasyHiresg/maid-catalogue
           git pull origin main
           npm install
           npm run build
