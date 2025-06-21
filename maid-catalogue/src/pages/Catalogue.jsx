@@ -28,13 +28,13 @@ useEffect(() => {
   // Function to check authentication
   const checkAuth = async () => {
     try {
-      const res = await fetch('http://54.169.107.115:3000/api/auth/profile', {
+      const res = await fetch('http://18.140.119.246:3000/api/auth/profile', {
         credentials: 'include',
       });
 
       if (res.ok) {
         setIsAuthenticated(true);
-        fetch('http://54.169.107.115:3000/api/user/GetUserfavorites', {
+        fetch('http://18.140.119.246:3000/api/user/GetUserfavorites', {
           credentials: 'include',
         })
           .then((res) => res.json())
@@ -58,7 +58,7 @@ useEffect(() => {
   // Function to get all maids
   const fetchMaids = async () => {
     try {
-      const res = await fetch('http://54.169.107.115:3000/api/maids', {
+      const res = await fetch('http://18.140.119.246:3000/api/maids', {
         credentials: 'include',
       });
       const data = await res.json();

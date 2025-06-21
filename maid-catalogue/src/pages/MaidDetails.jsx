@@ -23,7 +23,7 @@ export default function MaidDetails() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch('http://54.169.107.115:3000/api/auth/profile', {
+        const res = await fetch('http://18.140.119.246:3000/api/auth/profile', {
           credentials: 'include', // Send cookies
         });
 
@@ -70,7 +70,7 @@ export default function MaidDetails() {
       <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={2}>
         <Box>
           <img
-            src={`http://54.169.107.115:3000${maid.imageUrl}` || maidPic}
+            src={`http://18.140.119.246:3000${maid.imageUrl}` || maidPic}
             alt={maid.name}
             style={{ width: '340px', height:'430px',borderRadius: 8 }}
             sx={{objectFit: 'cover',

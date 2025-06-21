@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Primary Colors */
+    --primary-orange: #ff690d;
+    --primary-orange-light: #ff8a3d;
+    --primary-orange-dark: #e55a0a;
+    
+    /* Background Colors */
+    --bg-light-gray: #f8f8f8;
+    --bg-medium-gray: #edebeb;
+    --bg-dark-gray: #585757;
+    --bg-light-blue: #f3f3f3;
+    
+    /* Text Colors */
+    --text-dark-gray: #585757;
+    --text-black: #000000;
+    --text-white: #ffffff;
+    --text-light-white: #f3f3f3;
+    --text-medium-gray: #333232;
+    --text-light-gray: #333333d3;
+    --text-dark-black: #0e0e0e;
+    
+    /* Border Colors */
+    --border-light: #d9d9d9;
+    --border-medium: #bababa;
+    --border-orange-light: #ff690d26;
+  }
+}
+
+@layer utilities {
+  /* Background Color Utilities */
+  .bg-primary-orange {
+    background-color: var(--primary-orange);
+  }
+  
+  .bg-primary-orange-light {
+    background-color: var(--primary-orange-light);
+  }
+  
+  .bg-primary-orange-dark {
+    background-color: var(--primary-orange-dark);
+  }
+  
+  .bg-light-gray {
+    background-color: var(--bg-light-gray);
+  }
+  
+  .bg-medium-gray {
+    background-color: var(--bg-medium-gray);
+  }
+  
+  .bg-dark-gray {
+    background-color: var(--bg-dark-gray);
+  }
+  
+  .bg-light-blue {
+    background-color: var(--bg-light-blue);
+  }
+
+  /* Text Color Utilities */
+  .text-primary-orange {
+    color: var(--primary-orange);
+  }
+  
+  .text-dark-gray {
+    color: var(--text-dark-gray);
+  }
+  
+  .text-light-white {
+    color: var(--text-light-white);
+  }
+  
+  .text-medium-gray {
+    color: var(--text-medium-gray);
+  }
+  
+  .text-light-gray {
+    color: var(--text-light-gray);
+  }
+  
+  .text-dark-black {
+    color: var(--text-dark-black);
+  }
+
+  /* Border Color Utilities */
+  .border-light {
+    border-color: var(--border-light);
+  }
+  
+  .border-medium {
+    border-color: var(--border-medium);
+  }
+  
+  .border-orange-light {
+    border-color: var(--border-orange-light);
+  }
+}

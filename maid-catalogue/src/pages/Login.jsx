@@ -7,7 +7,7 @@ export default function Login() {
 
   const handleLogin = async () => {
     try {
-      const res = await fetch('http://54.169.107.115:3000/api/auth/login', {
+      const res = await fetch('http://18.140.119.246:3000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // ✅ important!
@@ -22,7 +22,7 @@ export default function Login() {
       const data = await res.json();
       localStorage.setItem('token', data.token);
       alert('Login successful!');
-      window.location.href = '/'; // or wherever you want to redirect
+      window.location.href = '/Catalogue'; // or wherever you want to redirect
     } catch (err) {
       console.error(err);
       alert('Login failed due to server error.');

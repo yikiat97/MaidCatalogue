@@ -6,6 +6,7 @@ import Shortlisted from './pages/Shortlisted';
 import Signup from './pages/Signup';
 import { MaidContextProvider } from './context/maidList';
 // import { getToken } from './utils/auth';
+import HomePage from './pages/Home';
 
 export default function App() {
   const isAuthenticated = true//!!getToken();
@@ -14,9 +15,10 @@ return (
   <MaidContextProvider>
     <Router>
       <Routes>
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route
-          path="/"
+          path="/Catalogue"
           element={
             isAuthenticated ? <Catalogue /> : <Navigate to="/login" replace />
           }
