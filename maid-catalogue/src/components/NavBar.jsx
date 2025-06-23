@@ -46,7 +46,7 @@ export default function NavBar({isAuthenticated}) {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch('http://18.140.119.246:3000/api/auth/logout', {
+      const res = await fetch('http://localhost:3000/api/auth/logout', {
         method: 'POST',
         credentials: 'include', // Send cookies
       });
@@ -124,10 +124,10 @@ return (
             <Button
                 variant="text"
                 size="small"
-                onClick={() => navigate('/recommendation')}
+                onClick={() => navigate('/Recommend')}
                 sx={{
                 color: '#151515cc',
-                borderBottom: isActive('/recommendation') ? '2px solid rgb(212, 180, 22)' : 'none',
+                borderBottom: isActive('/Recommend') ? '2px solid rgb(212, 180, 22)' : 'none',
                 borderRadius: 0,
                 }}
             >

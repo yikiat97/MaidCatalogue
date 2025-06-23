@@ -4,6 +4,7 @@ import Catalogue from './pages/Catalogue';
 import MaidDetails from './pages/MaidDetails';
 import Shortlisted from './pages/Shortlisted';
 import Signup from './pages/Signup';
+import Recommend from './pages/Recommend';
 import { MaidContextProvider } from './context/maidList';
 // import { getToken } from './utils/auth';
 import HomePage from './pages/Home';
@@ -33,6 +34,12 @@ return (
           path="/shortlisted"
           element={
             isAuthenticated ? <Shortlisted /> : <Navigate to="/login" replace />
+          }
+        />
+        <Route
+          path="/Recommend"
+          element={
+            isAuthenticated ? <Recommend /> : <Navigate to="/login" replace />
           }
         />
         <Route
