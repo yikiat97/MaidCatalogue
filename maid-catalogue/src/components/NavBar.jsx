@@ -88,10 +88,10 @@ return (
             <Button
                 variant="text"
                 size="small"
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/catalogue')}
                 sx={{
                 color: '#151515cc',
-                borderBottom: isActive('/') ? '2px solid rgb(212, 180, 22)' : 'none',
+                borderBottom: isActive('/catalogue') ? '2px solid rgb(212, 180, 22)' : 'none',
                 borderRadius: 0,
                 }}
             >
@@ -112,10 +112,10 @@ return (
             <Button
                 variant="text"
                 size="small"
-                onClick={() => navigate('/pricing')}
+                onClick={() => navigate('/')}
                 sx={{
                 color: '#151515cc',
-                borderBottom: isActive('/pricing') ? '2px solid rgb(212, 180, 22)' : 'none',
+                borderBottom: isActive('/') ? '2px solid rgb(212, 180, 22)' : 'none',
                 borderRadius: 0,
                 }}
             >

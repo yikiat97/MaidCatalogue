@@ -8,6 +8,7 @@ import Recommend from './pages/Recommend';
 import { MaidContextProvider } from './context/maidList';
 // import { getToken } from './utils/auth';
 import HomePage from './pages/Home';
+import  Admin  from "./pages/admin/admin";
 
 export default function App() {
   const isAuthenticated = true//!!getToken();
@@ -46,6 +47,12 @@ return (
           path="/Signup"
           element={
             isAuthenticated ? <Signup /> : <Navigate to="/login" replace />
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <Admin />
           }
         />
       </Routes>
