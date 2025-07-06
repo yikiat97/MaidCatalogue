@@ -13,7 +13,7 @@ export default function Catalogue() {
   const [selectedCountries, setSelectedCountries] = useState([]);
   const [skillsets, setSkillsets] = useState([]);
   const [languages, setLanguages] = useState([]);
-  const [ageRange, setAgeRange] = useState([18, 60]);
+  // const [ageRange, setAgeRange] = useState([18, 60]);
   const [types, setTypes] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [userFavorites, setUserFavorites] = useState([]);
@@ -62,6 +62,7 @@ useEffect(() => {
         credentials: 'include',
       });
       const data = await res.json();
+      console.log(data)
       setMaids(data);
       setMaidList(data)
     } catch (err) {
@@ -84,11 +85,11 @@ useEffect(() => {
   const filteredMaids = maids.filter((maid) => {
     const countryMatch = selectedCountries.length === 0 || selectedCountries.includes(maid.country);
     const salaryMatch = maid.salary >= salaryRange[0] && maid.salary <= salaryRange[1];
-    const ageMatch = maid.age >= ageRange[0] && maid.age <= ageRange[1];
+    // const ageMatch = maid.age >= ageRange[0] && maid.age <= ageRange[1];
     const skillMatch = skillsets.length === 0 || skillsets.some((s) => maid.skills.includes(s));
     const languageMatch = languages.length === 0 || languages.some((l) => maid.languages.includes(l));
     const typeMatch = types.length === 0 || types.some((t) => maid.type.includes(t));
-    return countryMatch && salaryMatch && ageMatch && skillMatch && languageMatch && typeMatch;
+    return countryMatch && salaryMatch  && skillMatch && languageMatch && typeMatch //&& ageMatch;
   });
 
   return (
@@ -106,7 +107,7 @@ useEffect(() => {
                 selectedCountries={selectedCountries} setSelectedCountries={setSelectedCountries}
                 skillsets={skillsets} setSkillsets={setSkillsets}
                 languages={languages} setLanguages={setLanguages}
-                ageRange={ageRange} setAgeRange={setAgeRange}
+                // ageRange={ageRange} setAgeRange={setAgeRange}
                 types={types} setTypes={setTypes}
               />
             </Box>

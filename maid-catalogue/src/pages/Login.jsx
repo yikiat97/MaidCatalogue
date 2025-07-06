@@ -14,7 +14,7 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!res.ok) {
+      if (!res.ok) {  
         alert('Login failed: ' + (await res.text()));
         return;
       }
