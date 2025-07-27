@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Container, Typography, Grid } from '@mui/material';
-import MaidCard from '../components/MaidCard';
-import NavBar from '../components/NavBar';
+import MaidCard from '../../components/Catalogue/MaidCard';
+import NavBar from '../../components/Catalogue/NavBar';
 
 export default function Favorites() {
   const [favoriteMaids, setFavoriteMaids] = useState([]);

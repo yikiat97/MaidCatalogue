@@ -14,7 +14,7 @@ import Drawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
-import logoBlack from '../assets/logoBlack.png';
+import logoBlack from '../../assets/logoBlack.png';
 
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({

@@ -20,11 +20,11 @@ import {
   Fab,
   Zoom
 } from '@mui/material';
-import MaidCard from '../components/MaidCard';
-import FilterBar from '../components/FilterBar';
-import NavBar from '../components/NavBar';
+import MaidCard from '../../components/Catalogue/MaidCard';
+import FilterBar from '../../components/Catalogue/FilterBar';
+import NavBar from '../../components/Catalogue/NavBar';
 import logoBlack from '../assets/logoBlack.png';
-import { useMaidContext } from '../context/maidList';
+import { useMaidContext } from '../../context/maidList';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';

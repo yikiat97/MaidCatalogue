@@ -6,6 +6,8 @@ const AddMaidModal = ({
   formData,
   handleInputChange,
   handleArrayFieldChange,
+  handleLanguageChange,
+  handleRatingChange,
   addArrayField,
   removeArrayField,
   handleEmploymentDetailChange,
@@ -389,46 +391,76 @@ const AddMaidModal = ({
                 </div>
 
                 {/* Languages Array */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Languages</label>
-                  {formData.languages.map((language, index) => (
-                    <div key={index} className="flex items-center gap-2 mb-2">
-                      <input
-                        type="text"
-                        list="languages-list"
-                        value={language}
-                        onChange={(e) => handleArrayFieldChange('languages', index, e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Select or type a language"
-                      />
-                      {formData.languages.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeArrayField('languages', index)}
-                          className="text-red-600 hover:text-red-800 p-2"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  <datalist id="languages-list">
-                    <option value="English" />
-                    <option value="Bahasa" />
-                    <option value="Mandarin" />
-                    <option value="Malay" />
-                    <option value="Tamil" />
-                    <option value="Hindi" />
-                    <option value="Tagalog" />
-                  </datalist>
-                  <button
-                    type="button"
-                    onClick={() => addArrayField('languages')}
-                    className="mt-2 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-1"
-                  >
-                    <Plus className="w-4 h-4" /> Add Language
-                  </button>
-                </div>
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">Languages</label>
+{formData.languages.map((language, index) => (
+  <div key={index} className="mb-3">
+    <div className="flex items-center gap-2 mb-1">
+      <input
+        type="text"
+        list="languages-list"
+        value={language}
+        onChange={(e) => handleLanguageChange(index, e.target.value)}
+        className="w-1/2 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        placeholder="Select a language"
+      />
+      {formData.languages.length > 1 && (
+        <button
+          type="button"
+          onClick={() => removeArrayField('languages', index)}
+          className="text-red-600 hover:text-red-800 p-2"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+
+    {/* Show rating if language is English, Chinese or Dialect */}
+    {['English', 'Chinese', 'Dialect'].includes(language) && (
+      <div className="ml-2">
+        <label className="block text-sm text-gray-600 mb-1">
+          {language} Rating
+        </label>
+        <select
+          value={formData.maidDetails[
+            language.toLowerCase() === 'chinese'
+              ? 'chineseRating'
+              : `${language.toLowerCase()}Rating`
+          ] || 0}
+          onChange={(e) =>
+            handleRatingChange(
+              language.toLowerCase() === 'chinese'
+                ? 'chineseRating'
+                : `${language.toLowerCase()}Rating`,
+              e.target.value
+            )
+          }
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        >
+          <option value={0}>Select rating</option>
+          {[1, 2, 3, 4, 5].map((r) => (
+            <option key={r} value={r}>{r}</option>
+          ))}
+        </select>
+      </div>
+    )}
+  </div>
+))}
+  <datalist id="languages-list">
+    <option value="English" />
+    <option value="Chinese" />
+    <option value="Dialect" />
+  </datalist>
+
+  <button
+    type="button"
+    onClick={() => addArrayField('languages')}
+    className="mt-2 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-1"
+  >
+    <Plus className="w-4 h-4" /> Add Language
+  </button>
+</div>
+
 
                 {/* Type Array */}
                 <div>

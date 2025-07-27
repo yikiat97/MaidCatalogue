@@ -1,19 +1,20 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function SignUp() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
-    phone: '',
     password: '',
     confirmPassword: '',
-    userType: 'employer', // 'employer' or 'helper'
+    role: 131, // 'employer' or 'helper'
     agreeToTerms: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -26,11 +27,9 @@ export default function SignUp() {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
-    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
     if (!formData.password) newErrors.password = 'Password is required';
     else if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
     if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
@@ -43,15 +42,85 @@ export default function SignUp() {
   const handleSignUp = async () => {
     if (!validateForm()) return;
     
-    // try {
-    //   const res = await api.post('/auth/signup', formData);
-    //   setToken(res.data.token);
-    //   window.location.href = '/dashboard';
-    // } catch (err) {
-    //   alert('Sign up failed');
-    // }
-    
-    console.log('Sign up data:', formData);
+    setIsLoading(true);
+    setErrors({});
+
+    try {
+      // Step 1: Sign up the user
+      const signupResponse = await fetch('http://localhost:3000/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Important for cookies/sessions
+        body: JSON.stringify({
+          email: formData.email,
+          name: formData.name,
+          password: formData.password,
+          role: formData.role
+        }),
+      });
+
+      const signupData = await signupResponse.json();
+
+      if (!signupResponse.ok) {
+        // Handle signup errors
+        if (signupData.message) {
+          setErrors({ submit: signupData.message });
+        } else {
+          setErrors({ submit: 'Something went wrong during signup. Please try again.' });
+        }
+        return;
+      }
+
+      console.log('Signup successful:', signupData);
+
+      // Step 2: Automatically log in the user after successful signup
+      const loginResponse = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // ✅ important for cookies!
+        body: JSON.stringify({ 
+          email: formData.email, 
+          password: formData.password 
+        }),
+      });
+
+      if (!loginResponse.ok) {
+        // If auto-login fails, show message but still redirect to login
+        console.error('Auto-login failed after signup');
+        setErrors({ submit: 'Account created successfully! Please log in.' });
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+        return;
+      }
+
+      // Step 3: Handle the auth callback (same as your login flow)
+      const callbackResponse = await fetch('http://localhost:3000/api/user/auth/callback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+      
+      console.log('Auth callback response:', callbackResponse);
+      const callbackData = await callbackResponse.json();
+      
+      if (callbackData.redirectTo) {
+        // Success - redirect to the specified URL (likely /catalogue)
+        console.log('Login successful, redirecting to:', callbackData.redirectTo);
+        window.location.href = callbackData.redirectTo;
+      } else {
+        // Fallback redirect if no redirectTo is provided
+        navigate('/catalogue');
+      }
+
+    } catch (error) {
+      console.error('Signup/Login error:', error);
+      setErrors({ submit: 'Network error. Please check your connection and try again.' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const styles = {
@@ -70,7 +139,7 @@ export default function SignUp() {
       boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
       padding: '40px',
       width: '100%',
-      maxWidth: '500px',
+      maxWidth: '450px',
       position: 'relative',
       overflow: 'hidden'
     },
@@ -117,7 +186,7 @@ export default function SignUp() {
     userTypeSelector: {
       display: 'flex',
       gap: '10px',
-      marginBottom: '20px',
+      marginBottom: '25px',
       padding: '4px',
       background: '#f8f9fa',
       borderRadius: '12px'
@@ -138,11 +207,6 @@ export default function SignUp() {
       background: '#ff8c42',
       color: 'white',
       boxShadow: '0 2px 8px rgba(255, 140, 66, 0.3)'
-    },
-    row: {
-      display: 'flex',
-      gap: '15px',
-      marginBottom: '20px'
     },
     inputGroup: {
       position: 'relative',
@@ -182,6 +246,17 @@ export default function SignUp() {
       fontSize: '12px',
       marginTop: '5px',
       marginLeft: '5px'
+    },
+    submitError: {
+      color: '#ff4757',
+      fontSize: '14px',
+      textAlign: 'center',
+      marginTop: '10px',
+      marginBottom: '15px',
+      padding: '10px',
+      background: '#fff5f5',
+      borderRadius: '8px',
+      border: '1px solid #ffebee'
     },
     checkboxContainer: {
       display: 'flex',
@@ -245,7 +320,12 @@ export default function SignUp() {
       cursor: 'pointer',
       transition: 'all 0.3s ease',
       marginTop: '10px',
-      opacity: '0.9'
+      opacity: isLoading ? '0.7' : '0.9',
+      position: 'relative'
+    },
+    buttonDisabled: {
+      cursor: 'not-allowed',
+      opacity: '0.5'
     },
     loginLink: {
       textAlign: 'center',
@@ -260,11 +340,30 @@ export default function SignUp() {
       textDecoration: 'none',
       fontWeight: '500',
       cursor: 'pointer'
+    },
+    loading: {
+      display: 'inline-block',
+      width: '20px',
+      height: '20px',
+      border: '2px solid #ffffff40',
+      borderTop: '2px solid #ffffff',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+      marginRight: '10px'
     }
   };
 
+  // Add keyframes for loading animation
+  const spinKeyframes = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+
   return (
     <div style={styles.container}>
+      <style>{spinKeyframes}</style>
       <div style={styles.signupCard}>
         <div style={styles.decorativeElement}></div>
         
@@ -275,7 +374,6 @@ export default function SignUp() {
             style={{
               width: '250px',
               height: 'auto',
-              // marginBottom: '20px',
               display: 'block',
               margin: '0 auto 20px auto'
             }}
@@ -300,59 +398,44 @@ export default function SignUp() {
           <button
             style={{
               ...styles.userTypeButton,
-              ...(formData.userType === 'employer' ? styles.userTypeButtonActive : {})
+              ...(formData.role === 'employer' ? styles.userTypeButtonActive : {})
             }}
-            onClick={() => handleInputChange('userType', 'employer')}
+            onClick={() => handleInputChange('role', 131)}
+            disabled={isLoading}
           >
             👨‍💼 I'm an Employer
           </button>
           <button
             style={{
               ...styles.userTypeButton,
-              ...(formData.userType === 'helper' ? styles.userTypeButtonActive : {})
+              ...(formData.role === 'helper' ? styles.userTypeButtonActive : {})
             }}
-            onClick={() => handleInputChange('userType', 'helper')}
+            onClick={() => handleInputChange('role', 'helper')}
+            disabled={isLoading}
           >
             👩‍🏠 I'm a Helper
           </button>
         </div>
 
-        {/* Name Fields */}
-        <div style={styles.row}>
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>First Name</label>
-            <input
-              type="text"
-              placeholder="Enter first name"
-              value={formData.firstName}
-              onChange={(e) => handleInputChange('firstName', e.target.value)}
-              style={{
-                ...styles.input,
-                padding: '15px 20px',
-                ...(errors.firstName ? styles.inputError : {})
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
-              onBlur={(e) => !errors.firstName && (e.target.style.borderColor = '#e0e0e0')}
-            />
-            {errors.firstName && <div style={styles.errorText}>{errors.firstName}</div>}
-          </div>
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Last Name</label>
-            <input
-              type="text"
-              placeholder="Enter last name"
-              value={formData.lastName}
-              onChange={(e) => handleInputChange('lastName', e.target.value)}
-              style={{
-                ...styles.input,
-                padding: '15px 20px',
-                ...(errors.lastName ? styles.inputError : {})
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
-              onBlur={(e) => !errors.lastName && (e.target.style.borderColor = '#e0e0e0')}
-            />
-            {errors.lastName && <div style={styles.errorText}>{errors.lastName}</div>}
-          </div>
+        {/* Full Name */}
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Full Name</label>
+          <input
+            type="text"
+            placeholder="Enter your full name"
+            value={formData.name}
+            onChange={(e) => handleInputChange('name', e.target.value)}
+            style={{
+              ...styles.input,
+              padding: '15px 50px 15px 20px',
+              ...(errors.name ? styles.inputError : {})
+            }}
+            onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
+            onBlur={(e) => !errors.name && (e.target.style.borderColor = '#e0e0e0')}
+            disabled={isLoading}
+          />
+          <span style={styles.inputIcon}>👤</span>
+          {errors.name && <div style={styles.errorText}>{errors.name}</div>}
         </div>
 
         {/* Email */}
@@ -365,34 +448,14 @@ export default function SignUp() {
             onChange={(e) => handleInputChange('email', e.target.value)}
             style={{
               ...styles.input,
-              padding: '15px 50px 15px 20px',
               ...(errors.email ? styles.inputError : {})
             }}
             onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
             onBlur={(e) => !errors.email && (e.target.style.borderColor = '#e0e0e0')}
+            disabled={isLoading}
           />
           <span style={styles.inputIcon}>📧</span>
           {errors.email && <div style={styles.errorText}>{errors.email}</div>}
-        </div>
-
-        {/* Phone */}
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Phone Number</label>
-          <input
-            type="tel"
-            placeholder="Enter your phone number"
-            value={formData.phone}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
-            style={{
-              ...styles.input,
-              padding: '15px 50px 15px 20px',
-              ...(errors.phone ? styles.inputError : {})
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
-            onBlur={(e) => !errors.phone && (e.target.style.borderColor = '#e0e0e0')}
-          />
-          <span style={styles.inputIcon}>📱</span>
-          {errors.phone && <div style={styles.errorText}>{errors.phone}</div>}
         </div>
 
         {/* Password */}
@@ -409,6 +472,7 @@ export default function SignUp() {
             }}
             onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
             onBlur={(e) => !errors.password && (e.target.style.borderColor = '#e0e0e0')}
+            disabled={isLoading}
           />
           <span 
             style={styles.inputIcon}
@@ -433,6 +497,7 @@ export default function SignUp() {
             }}
             onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
             onBlur={(e) => !errors.confirmPassword && (e.target.style.borderColor = '#e0e0e0')}
+            disabled={isLoading}
           />
           <span 
             style={styles.inputIcon}
@@ -463,27 +528,49 @@ export default function SignUp() {
           </div>
         </div>
 
+        {/* Submit Error */}
+        {errors.submit && (
+          <div style={styles.submitError}>
+            {errors.submit}
+          </div>
+        )}
+
         <button
           onClick={handleSignUp}
-          style={styles.button}
+          disabled={isLoading}
+          style={{
+            ...styles.button,
+            ...(isLoading ? styles.buttonDisabled : {})
+          }}
           onMouseEnter={(e) => {
-            e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = '0 10px 30px rgba(255, 107, 26, 0.25)';
-            e.target.style.opacity = '1';
+            if (!isLoading) {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 10px 30px rgba(255, 107, 26, 0.25)';
+              e.target.style.opacity = '1';
+            }
           }}
           onMouseLeave={(e) => {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = 'none';
-            e.target.style.opacity = '0.9';
+            if (!isLoading) {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
+              e.target.style.opacity = '0.9';
+            }
           }}
         >
-          Create Account
+          {isLoading ? (
+            <>
+              <span style={styles.loading}></span>
+              Creating Account...
+            </>
+          ) : (
+            'Create Account'
+          )}
         </button>
 
         <div style={styles.loginLink}>
           <span style={styles.loginText}>
             Already have an account? 
-            <a href="#" style={styles.loginLinkText}> Sign in</a>
+            <a href="/login" style={styles.loginLinkText}> Sign in</a>
           </span>
         </div>
       </div>

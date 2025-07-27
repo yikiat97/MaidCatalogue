@@ -1,5 +1,5 @@
 // MaidDetailModal.js (Complete version with all fields)
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Plus, Trash2, X, Camera, Save } from 'lucide-react';
 
 const MaidDetailModal = ({ maidId, onClose }) => {
@@ -7,6 +7,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
   const [formData, setFormData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
+  const imageInputRef = useRef(null);
 
   useEffect(() => {
     const fetchMaid = async () => {
@@ -19,15 +20,17 @@ const MaidDetailModal = ({ maidId, onClose }) => {
           maidDetails: data.maidDetails || {
             description: '',
             restDay: '',
-            maritalStatus: '',
+            englishRating: 0,
+            chineseRating: 0,
+            dialectRating: 0,
             highestEducation: '',
             religion: '',
             employmentHistory: ''
           },
-          employmentDetails: data.employmentDetails ,
-          skills: data.skills || [''],
-          languages: data.languages || [''],
-          type: data.type || ['']
+          employmentDetails: data.employmentDetails?.length ? data.employmentDetails : [],
+          skills: data.skills?.length ? data.skills : [''],
+          languages: data.languages?.length ? data.languages : [''],
+          type: data.type?.length ? data.type : ['']
         });
       } catch (error) {
         console.error('Error fetching maid details:', error);
@@ -53,10 +56,26 @@ const MaidDetailModal = ({ maidId, onClose }) => {
     });
   };
 
+  const handleRatingChange = (fieldName, value) => {
+    setFormData(prev => ({
+      ...prev,
+      maidDetails: {
+        ...prev.maidDetails,
+        [fieldName]: parseInt(value)
+      }
+    }));
+  };
+
   const handleArrayChange = (field, index, value) => {
     const updated = [...formData[field]];
     updated[index] = value;
     setFormData({ ...formData, [field]: updated });
+  };
+
+  const handleLanguageChange = (index, value) => {
+    const updated = [...formData.languages];
+    updated[index] = value;
+    setFormData(prev => ({ ...prev, languages: updated }));
   };
 
   const addArrayItem = (field) => {
@@ -66,11 +85,30 @@ const MaidDetailModal = ({ maidId, onClose }) => {
   const removeArrayItem = (field, index) => {
     if (formData[field].length > 1) {
       const updated = formData[field].filter((_, i) => i !== index);
-      setFormData({ ...formData, [field]: updated });
+      
+      // If removing a language, also reset its rating if applicable
+      if (field === 'languages') {
+        const removedLang = formData.languages[index];
+        let updatedMaidDetails = { ...formData.maidDetails };
+        
+        if (['English', 'Chinese', 'Dialect'].includes(removedLang)) {
+          const ratingKey = removedLang.toLowerCase() === 'chinese' 
+            ? 'chineseRating' 
+            : `${removedLang.toLowerCase()}Rating`;
+          updatedMaidDetails[ratingKey] = 0;
+        }
+        
+        setFormData({ 
+          ...formData, 
+          [field]: updated,
+          maidDetails: updatedMaidDetails
+        });
+      } else {
+        setFormData({ ...formData, [field]: updated });
+      }
     }
   };
 
-  // Handle employment details
   const handleEmploymentDetailChange = (index, field, value) => {
     const updated = [...formData.employmentDetails];
     updated[index] = { ...updated[index], [field]: value };
@@ -78,59 +116,115 @@ const MaidDetailModal = ({ maidId, onClose }) => {
   };
 
   const addEmploymentDetail = () => {
-    console.log(formData.employmentDetails.length)
     setFormData({
       ...formData,
-      employmentDetails: [...formData.employmentDetails, {
-        country: '',
-        startDate: '',
-        endDate: '',
-        employerDescription: '',
-        noOfFamilyMember: '',
-        reasonOfLeaving: '',
-        mainJobScope: ''
-      }]
+      employmentDetails: [
+        ...(formData.employmentDetails || []),
+        {
+          country: '',
+          startDate: '',
+          endDate: '',
+          employerDescription: '',
+          noOfFamilyMember: '',
+          reasonOfLeaving: '',
+          mainJobScope: ''
+        }
+      ]
     });
   };
 
   const removeEmploymentDetail = (index) => {
-    if (formData.employmentDetails.length > 1) {
-      const updated = formData.employmentDetails.filter((_, i) => i !== index);
-      setFormData({ ...formData, employmentDetails: updated });
-    }
+    const updated = formData.employmentDetails.filter((_, i) => i !== index);
+    setFormData({ ...formData, employmentDetails: updated });
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const timestamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14);
+    const extension = file.name.split('.').pop();
+    const filename = file.name.split('.')[0].replace(/\s+/g, '') + timestamp + '.' + extension;
+    const filePath = `/uploads/${filename}`;
+
+    // Store the file object and metadata in formData
+    setFormData(prev => ({
+      ...prev,
+      imageFile: file,
+      imageUrl: filePath,
+      customFilename: filename
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
     try {
-      // Filter empty values from arrays
+      let imageUrl = formData.imageUrl;
+
+      // Upload new image if provided
+      if (formData.imageFile instanceof File) {
+        const uploadData = new FormData();
+        uploadData.append('file', formData.imageFile);
+        uploadData.append('customFilename', formData.customFilename);
+
+        const uploadResponse = await fetch('http://localhost:3000/api/upload', {
+          method: 'POST',
+          body: uploadData,
+        });
+
+        if (!uploadResponse.ok) throw new Error('Image upload failed');
+
+        const uploadResult = await uploadResponse.json();
+        imageUrl = uploadResult.filePath;
+      }
+
+      // Final update data formatting
       const submitData = {
         ...formData,
-        skills: formData.skills.filter(s => s.trim() !== ''),
-        languages: formData.languages.filter(l => l.trim() !== ''),
-        type: formData.type.filter(t => t.trim() !== ''),
-        salary: parseInt(formData.salary) || 0,
-        age: parseInt(formData.age) || 0,
+        imageUrl,
+        salary: parseFloat(formData.salary) || 0,
+        loan: parseFloat(formData.loan) || 0,
+        height: parseFloat(formData.height) || 0,
+        weight: parseFloat(formData.weight) || 0,
         NumChildren: parseInt(formData.NumChildren) || 0,
-        height: parseInt(formData.height) || 0,
-        weight: parseInt(formData.weight) || 0,
+        DOB: formData.DOB,
+        skills: formData.skills.filter(skill => skill.trim() !== ''),
+        languages: formData.languages.filter(lang => lang.trim() !== ''),
+        type: formData.type.filter(t => t.trim() !== ''),
         maidDetails: {
           ...formData.maidDetails,
           restDay: parseInt(formData.maidDetails.restDay) || 0
-        }
+        },
+        employmentDetails: formData.employmentDetails.map(detail => ({
+          ...detail,
+          noOfFamilyMember: parseInt(detail.noOfFamilyMember) || 0,
+          startDate: detail.startDate || null,
+          endDate: detail.endDate || null
+        }))
       };
 
-      await fetch(`http://localhost:3000/api/maid/${maidId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch(`http://localhost:3000/api/maid/${maidId}`, {
+        method: 'PUT',              
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(submitData),
       });
-      alert('Maid details updated successfully!');
-      onClose();
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Maid updated:', result);
+        alert('Maid updated successfully!');
+        onClose();
+      } else {
+        throw new Error('Failed to update maid');
+      }
     } catch (error) {
-      console.error('Update failed:', error);
-      alert('Failed to update maid details');
+      console.error('Error updating maid:', error);
+      alert('Error updating maid. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -194,6 +288,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       />
                       <button
                         type="button"
+                        onClick={() => imageInputRef.current?.click()}
                         className="absolute bottom-2 right-2 p-1 bg-white rounded-full shadow-md hover:bg-gray-100"
                       >
                         <Camera className="w-4 h-4 text-gray-600" />
@@ -201,14 +296,24 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                    <input 
-                      name="imageUrl" 
-                      value={formData.imageUrl} 
-                      onChange={handleInputChange} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                      placeholder="/uploads/photo.jpg" 
+                    <input
+                      type="file"
+                      ref={imageInputRef}
+                      onChange={handleImageChange}
+                      accept="image/*"
+                      className="hidden"
                     />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Upload New Image</label>
+                    <button
+                      type="button"
+                      onClick={() => imageInputRef.current?.click()}
+                      className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                    >
+                      Choose File
+                    </button>
+                    {formData.imageUrl && (
+                      <p className="mt-2 text-sm text-gray-500">Current: {formData.imageUrl}</p>
+                    )}
                   </div>
                 </div>
 
@@ -242,13 +347,11 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Age *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth *</label>
                     <input 
-                      name="age" 
-                      type="number" 
-                      min="18"
-                      max="65"
-                      value={formData.age} 
+                      name="DOB" 
+                      type="date"
+                      value={formData.DOB ? formData.DOB.slice(0, 10) : ''} 
                       onChange={handleInputChange}
                       required 
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
@@ -334,6 +437,18 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                     />
                   </div>
                   <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Loan ($) *</label>
+                    <input
+                      type="number"
+                      name="loan"
+                      value={formData.loan}
+                      onChange={handleInputChange}
+                      required
+                      min="0"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Supplier ID</label>
                     <input 
                       name="supplier" 
@@ -391,10 +506,11 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       <div key={index} className="flex gap-2">
                         <input
                           type="text"
+                          list="skills-list"
                           value={skill}
                           onChange={(e) => handleArrayChange('skills', index, e.target.value)}
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="e.g., Cooking, Cleaning"
+                          placeholder="Select or type a skill"
                         />
                         {formData.skills.length > 1 && (
                           <button
@@ -408,9 +524,20 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       </div>
                     ))}
                   </div>
+                  <datalist id="skills-list">
+                    <option value="Cooking" />
+                    <option value="Housekeeping" />
+                    <option value="Childcare" />
+                    <option value="Babysitting" />
+                    <option value="Elderly Care" />
+                    <option value="Dog(s)" />
+                    <option value="Cat(s)" />
+                    <option value="Caregiving" />
+                    <option value="Cleaning" />
+                  </datalist>
                 </div>
 
-                {/* Languages */}
+                {/* Languages with Ratings */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <label className="text-sm font-medium text-gray-700">Languages</label>
@@ -422,28 +549,71 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       <Plus className="w-4 h-4" /> Add Language
                     </button>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {formData.languages.map((language, index) => (
-                      <div key={index} className="flex gap-2">
-                        <input
-                          type="text"
-                          value={language}
-                          onChange={(e) => handleArrayChange('languages', index, e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="e.g., English, Bahasa"
-                        />
-                        {formData.languages.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeArrayItem('languages', index)}
-                            className="px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                      <div key={index} className="space-y-2">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            list="languages-list"
+                            value={language}
+                            onChange={(e) => handleLanguageChange(index, e.target.value)}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Select a language"
+                          />
+                          {formData.languages.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeArrayItem('languages', index)}
+                              className="px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        
+                        {/* Show rating if language is English, Chinese or Dialect */}
+                        {['English', 'Chinese', 'Dialect'].includes(language) && (
+                          <div className="ml-4">
+                            <label className="block text-sm text-gray-600 mb-1">
+                              {language} Rating
+                            </label>
+                            <select
+                              value={formData.maidDetails[
+                                language.toLowerCase() === 'chinese'
+                                  ? 'chineseRating'
+                                  : `${language.toLowerCase()}Rating`
+                              ] || 0}
+                              onChange={(e) =>
+                                handleRatingChange(
+                                  language.toLowerCase() === 'chinese'
+                                    ? 'chineseRating'
+                                    : `${language.toLowerCase()}Rating`,
+                                  e.target.value
+                                )
+                              }
+                              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                            >
+                              <option value={0}>Select rating</option>
+                              {[1, 2, 3, 4, 5].map((r) => (
+                                <option key={r} value={r}>{r}</option>
+                              ))}
+                            </select>
+                          </div>
                         )}
                       </div>
                     ))}
                   </div>
+                  <datalist id="languages-list">
+                    <option value="English" />
+                    <option value="Chinese" />
+                    <option value="Dialect" />
+                    <option value="Malay" />
+                    <option value="Tamil" />
+                    <option value="Hindi" />
+                    <option value="Bengali" />
+                    <option value="Tagalog" />
+                  </datalist>
                 </div>
 
                 {/* Type/Category */}
@@ -533,8 +703,8 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       <option value="Bachelor's Degree">Bachelor's Degree</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Religion (Details)</label>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Religion (Additional Details)</label>
                     <input 
                       name="religion" 
                       value={formData.maidDetails.religion || ''} 
@@ -572,11 +742,16 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                   </button>
                 </div>
 
-                {formData.employmentDetails.map((employment, index) => (
-                  <div key={index} className="p-4 border border-gray-200 rounded-lg space-y-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h5 className="font-medium text-gray-700">Employment #{index + 1}</h5>
-                      {formData.employmentDetails.length > 1 && (
+                {formData.employmentDetails.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No employment history recorded.</p>
+                    <p className="text-sm mt-2">Click "Add Employment" to add employment records.</p>
+                  </div>
+                ) : (
+                  formData.employmentDetails.map((employment, index) => (
+                    <div key={index} className="p-4 border border-gray-200 rounded-lg space-y-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h5 className="font-medium text-gray-700">Employment #{index + 1}</h5>
                         <button
                           type="button"
                           onClick={() => removeEmploymentDetail(index)}
@@ -584,33 +759,81 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>
-                      )}
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                        <input
-                          type="text"
-                          value={employment.country}
-                          onChange={(e) => handleEmploymentDetailChange(index, 'reasonOfLeaving', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="e.g., Contract finished, Family reasons"
-                        />
                       </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Main Job Scope</label>
-                        <textarea
-                          value={employment.mainJobScope}
-                          onChange={(e) => handleEmploymentDetailChange(index, 'mainJobScope', e.target.value)}
-                          rows="3"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Describe main responsibilities..."
-                        />
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                          <input
+                            type="text"
+                            value={employment.country || ''}
+                            onChange={(e) => handleEmploymentDetailChange(index, 'country', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="e.g., Singapore"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Number of Family Members</label>
+                          <input
+                            type="number"
+                            value={employment.noOfFamilyMember || ''}
+                            onChange={(e) => handleEmploymentDetailChange(index, 'noOfFamilyMember', e.target.value)}
+                            min="0"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                          <input
+                            type="date"
+                            value={employment.startDate ? employment.startDate.slice(0, 10) : ''}
+                            onChange={(e) => handleEmploymentDetailChange(index, 'startDate', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                          <input
+                            type="date"
+                            value={employment.endDate ? employment.endDate.slice(0, 10) : ''}
+                            onChange={(e) => handleEmploymentDetailChange(index, 'endDate', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Employer Description</label>
+                          <input
+                            type="text"
+                            value={employment.employerDescription || ''}
+                            onChange={(e) => handleEmploymentDetailChange(index, 'employerDescription', e.target.value)}
+                            placeholder="e.g., 2 kids (ages 5 and 8), elderly parents"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Reason for Leaving</label>
+                          <input
+                            type="text"
+                            value={employment.reasonOfLeaving || ''}
+                            onChange={(e) => handleEmploymentDetailChange(index, 'reasonOfLeaving', e.target.value)}
+                            placeholder="e.g., Contract finished, Family reasons"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Main Job Scope</label>
+                          <textarea
+                            value={employment.mainJobScope || ''}
+                            onChange={(e) => handleEmploymentDetailChange(index, 'mainJobScope', e.target.value)}
+                            rows="3"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Describe main responsibilities..."
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             )}
           </div>
@@ -618,7 +841,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
           {/* Footer with Actions */}
           <div className="flex justify-between items-center p-6 border-t bg-gray-50">
             <div className="text-sm text-gray-500">
-              Last updated: {new Date().toLocaleDateString()}
+              Maid ID: {maidId}
             </div>
             <div className="flex gap-3">
               <button
@@ -653,4 +876,4 @@ const MaidDetailModal = ({ maidId, onClose }) => {
   );
 };
 
-export default MaidDetailModal
+export default MaidDetailModal;

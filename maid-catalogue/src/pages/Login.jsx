@@ -1,16 +1,20 @@
 import { useState } from 'react';
+import logoBlack from '../assets/logoBlack.png';
 
 export default function Login() {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = async () => {
     try {
       const res = await fetch('http://localhost:3000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // ✅ important!
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
@@ -20,37 +24,66 @@ export default function Login() {
       }
 
       if (res.ok) {
-          const result = await fetch('http://localhost:3000/api/user/auth/callback', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-          });
-          console.log(result)
-          const data = await result.json();
-          
-          if (data.redirectTo) {
-            //navigate();
-            window.location.href = data.redirectTo
-          }
+        const result = await fetch('http://localhost:3000/api/user/auth/callback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        });
+        console.log(result)
+        const data = await result.json();
+        
+        if (data.redirectTo) {
+          window.location.href = data.redirectTo
         }
-
-  // Redirect user to recommended page
-      // navigate('/recommended');
-
-      // const data = await res.json();
-      // localStorage.setItem('token', data.token);
-      // alert('Login successful!');
-      
-      // window.location.href = '/Catalogue'; // or wherever you want to redirect
+      }
     } catch (err) {
       console.error(err);
       alert('Login failed due to server error.');
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!forgotEmail.trim()) {
+      alert('Please enter your email address');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('http://localhost:3000/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+
+      if (res.ok) {
+        alert('Reset password link has been sent to your email');
+        setShowForgotModal(false);
+        setForgotEmail('');
+      } else {
+        const errorText = await res.text();
+        alert('Failed to send reset email: ' + errorText);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to send reset email due to server error.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const openForgotModal = (e) => {
+    e.preventDefault();
+    setShowForgotModal(true);
+  };
+
+  const closeForgotModal = () => {
+    setShowForgotModal(false);
+    setForgotEmail('');
   };
 
   const styles = {
@@ -151,25 +184,7 @@ export default function Login() {
       top: '6px',
       left: '6px',
       width: '4px',
-      height: '4px',
-      '::before': {
-        content: '""',
-        position: 'absolute',
-        top: '0',
-        left: '1.5px',
-        width: '1px',
-        height: '4px',
-        background: 'white'
-      },
-      '::after': {
-        content: '""',
-        position: 'absolute',
-        top: '1.5px',
-        left: '0',
-        width: '4px',
-        height: '1px',
-        background: 'white'
-      }
+      height: '4px'
     },
     brandText: {
       fontSize: '28px',
@@ -190,11 +205,22 @@ export default function Login() {
       fontWeight: '400'
     },
     welcome: {
-      fontSize: '24px',
+      fontSize: '28px',
       color: '#333',
-      fontWeight: '300',
+      fontWeight: '600',
       textAlign: 'center',
-      marginBottom: '30px'
+      marginBottom: '10px',
+      marginTop: '-40px'
+    },
+    description: {
+      fontSize: '14px',
+      color: '#666',
+      textAlign: 'center',
+      marginBottom: '30px',
+      lineHeight: '1.5'
+    },
+    logoImage: {
+      marginTop: '-30px'
     },
     inputGroup: {
       position: 'relative',
@@ -209,10 +235,6 @@ export default function Login() {
       outline: 'none',
       transition: 'all 0.3s ease',
       boxSizing: 'border-box'
-    },
-    inputFocus: {
-      borderColor: '#ff8c42',
-      boxShadow: '0 0 0 3px rgba(255, 140, 66, 0.1)'
     },
     inputIcon: {
       position: 'absolute',
@@ -235,10 +257,6 @@ export default function Login() {
       transition: 'all 0.3s ease',
       marginTop: '10px'
     },
-    buttonHover: {
-      transform: 'translateY(-2px)',
-      boxShadow: '0 10px 30px rgba(255, 107, 26, 0.4)'
-    },
     forgotPassword: {
       textAlign: 'center',
       marginTop: '20px'
@@ -248,90 +266,253 @@ export default function Login() {
       textDecoration: 'none',
       fontSize: '14px',
       cursor: 'pointer'
+    },
+    // Modal styles
+    modalOverlay: {
+      position: 'fixed',
+      top: '0',
+      left: '0',
+      right: '0',
+      bottom: '0',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: '1000',
+      padding: '20px'
+    },
+    modal: {
+      background: 'white',
+      borderRadius: '20px',
+      padding: '30px',
+      width: '100%',
+      maxWidth: '400px',
+      position: 'relative',
+      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
+    },
+    modalHeader: {
+      textAlign: 'center',
+      marginBottom: '20px'
+    },
+    modalTitle: {
+      fontSize: '24px',
+      fontWeight: '600',
+      color: '#333',
+      margin: '0 0 10px 0'
+    },
+    modalSubtitle: {
+      fontSize: '14px',
+      color: '#666',
+      margin: '0'
+    },
+    closeButton: {
+      position: 'absolute',
+      top: '15px',
+      right: '15px',
+      background: 'none',
+      border: 'none',
+      fontSize: '24px',
+      cursor: 'pointer',
+      color: '#999',
+      width: '30px',
+      height: '30px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: '50%',
+      transition: 'all 0.3s ease'
+    },
+    modalInput: {
+      width: '100%',
+      padding: '15px 20px',
+      border: '2px solid #e0e0e0',
+      borderRadius: '10px',
+      fontSize: '16px',
+      outline: 'none',
+      transition: 'all 0.3s ease',
+      boxSizing: 'border-box',
+      marginBottom: '20px'
+    },
+    modalButtonGroup: {
+      display: 'flex',
+      gap: '10px'
+    },
+    cancelButton: {
+      flex: '1',
+      padding: '12px 20px',
+      background: '#f5f5f5',
+      color: '#666',
+      border: 'none',
+      borderRadius: '10px',
+      fontSize: '16px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease'
+    },
+    submitButton: {
+      flex: '1',
+      padding: '12px 20px',
+      background: 'linear-gradient(135deg, #ff8c42 0%, #ff6b1a 100%)',
+      color: 'white',
+      border: 'none',
+      borderRadius: '10px',
+      fontSize: '16px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease'
+    },
+    disabledButton: {
+      opacity: '0.6',
+      cursor: 'not-allowed'
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.loginCard}>
-        <div style={styles.decorativeElement}></div>
-        
-        <div style={styles.logoContainer}>
-          <div style={styles.logo}>
-            <div style={styles.house}>
-              <div style={styles.roofOutline}></div>
-              <div style={styles.roof}></div>
-              <div style={styles.chimney}></div>
-              <div style={styles.houseBody}>
-                <div style={styles.window}>
-                  <div style={styles.windowCross}></div>
-                </div>
-              </div>
+    <>
+      <div style={styles.container}>
+        <div style={styles.loginCard}>
+          <div style={styles.decorativeElement}></div>   
+          <img
+            src={logoBlack}
+            alt="EasyHire Logo"
+            style={styles.logoImage}
+          />
+          <h2 style={styles.welcome}>Welcome Back</h2>
+          <p style={styles.description}>
+            Welcome to EasyHire. Please enter your Email and Password below. 
+          </p>
+          <div>
+            <div style={styles.inputGroup}>
+              <input
+                type="text"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={styles.input}
+                onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
+                onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+              />
+              <span style={styles.inputIcon}>👤</span>
             </div>
-          </div>
-          <h1 style={styles.brandText}>
-            <span style={styles.easyText}>EASY</span>
-            <span style={styles.hireText}>HIRE</span>
-          </h1>
-          <p style={styles.subtitle}>MAID SOLUTIONS</p>
-        </div>
 
-        <h2 style={styles.welcome}>Welcome Back</h2>
+            <div style={styles.inputGroup}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={styles.input}
+                onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
+                onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+              />
+              <span 
+                style={styles.inputIcon}
+                onClick={togglePasswordVisibility}
+              >
+                {showPassword ? '👁️' : '🔒'}
+              </span>
+            </div>
 
-        <div>
-          <div style={styles.inputGroup}>
-            <input
-              type="text"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={styles.input}
-              onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
-              onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-            />
-            <span style={styles.inputIcon}>👤</span>
-          </div>
-
-          <div style={styles.inputGroup}>
-            <input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={styles.input}
-              onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
-              onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-            />
-            <span 
-              style={styles.inputIcon}
-              onClick={togglePasswordVisibility}
+            <button
+              onClick={handleLogin}
+              style={styles.button}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 10px 30px rgba(255, 107, 26, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
+              }}
             >
-              {showPassword ? '👁️' : '🔒'}
-            </span>
+              Sign In
+            </button>
           </div>
 
-          <button
-            onClick={handleLogin}
-            style={styles.button}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 10px 30px rgba(255, 107, 26, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
-            }}
-          >
-            Sign In
-          </button>
-        </div>
-
-        <div style={styles.forgotPassword}>
-          <a href="#" style={styles.forgotLink}>
-            Forgot your password?
-          </a>
+          <div style={styles.forgotPassword}>
+            <a href="#" style={styles.forgotLink} onClick={openForgotModal}>
+              Forgot your password?
+            </a>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && ( 
+        <div style={styles.modalOverlay} onClick={closeForgotModal}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <button 
+              style={styles.closeButton}
+              onClick={closeForgotModal}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = '#f5f5f5';
+                e.target.style.color = '#333';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.color = '#999';
+              }}
+            >
+              ×
+            </button>
+            
+            <div style={styles.modalHeader}>
+              <h3 style={styles.modalTitle}>Reset Password</h3>
+              <p style={styles.modalSubtitle}>
+                Enter your email address and we'll send you a link to reset your password.
+              </p>
+            </div>
+
+            <input
+              type="email"
+              placeholder="Enter your email address"
+              value={forgotEmail}
+              onChange={(e) => setForgotEmail(e.target.value)}
+              style={styles.modalInput}
+              onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
+              onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && !isSubmitting) {
+                  handleForgotPassword();
+                }
+              }}
+            />
+
+            <div style={styles.modalButtonGroup}>
+              <button
+                style={styles.cancelButton}
+                onClick={closeForgotModal}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#e0e0e0'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+              >
+                Cancel
+              </button>
+              <button
+                style={{
+                  ...styles.submitButton,
+                  ...(isSubmitting ? styles.disabledButton : {})
+                }}
+                onClick={handleForgotPassword}
+                disabled={isSubmitting}
+                onMouseEnter={(e) => {
+                  if (!isSubmitting) {
+                    e.target.style.transform = 'translateY(-1px)';
+                    e.target.style.boxShadow = '0 5px 15px rgba(255, 107, 26, 0.4)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSubmitting) {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = 'none';
+                  }
+                }}
+              >
+                {isSubmitting ? 'Sending...' : 'Send Reset Link'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
