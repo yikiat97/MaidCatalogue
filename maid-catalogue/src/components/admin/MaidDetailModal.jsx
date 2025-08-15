@@ -1,6 +1,7 @@
 // MaidDetailModal.js (Complete version with all fields)
 import React, { useEffect, useState, useRef } from 'react';
 import { Plus, Trash2, X, Camera, Save } from 'lucide-react';
+import API_CONFIG from '../../config/api.js';
 
 const MaidDetailModal = ({ maidId, onClose }) => {
   const [maid, setMaid] = useState(null);
@@ -12,7 +13,9 @@ const MaidDetailModal = ({ maidId, onClose }) => {
   useEffect(() => {
     const fetchMaid = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/maids/${maidId}`);
+        const response = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.ADMIN.MAIDS}/${maidId}`), {
+      credentials: 'include'
+    });
         const data = await response.json();
         setMaid(data);
         setFormData({
@@ -169,9 +172,10 @@ const MaidDetailModal = ({ maidId, onClose }) => {
         uploadData.append('file', formData.imageFile);
         uploadData.append('customFilename', formData.customFilename);
 
-        const uploadResponse = await fetch('http://localhost:3000/api/upload', {
+        const uploadResponse = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.UPLOAD), {
           method: 'POST',
           body: uploadData,
+          credentials: 'include',
         });
 
         if (!uploadResponse.ok) throw new Error('Image upload failed');
@@ -205,7 +209,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
         }))
       };
 
-      const response = await fetch(`http://localhost:3000/api/maid/${maidId}`, {
+      const response = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.ADMIN.MAID}/${maidId}`), {
         method: 'PUT',              
         credentials: 'include',
         headers: {
@@ -282,7 +286,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Profile Photo</label>
                     <div className="relative">
                       <img 
-                        src={formData.imageUrl ? `http://localhost:3000${formData.imageUrl}` : '/placeholder.jpg'} 
+                        src={formData.imageUrl ? API_CONFIG.buildImageUrl(formData.imageUrl) : '/placeholder.jpg'} 
                         alt={formData.name} 
                         className="w-32 h-32 object-cover rounded-lg border-2 border-gray-200" 
                       />

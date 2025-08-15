@@ -8,7 +8,8 @@ import Recommend from './pages/Catalogue/Recommend';
 import { MaidContextProvider } from './context/maidList';
 // import { getToken } from './utils/auth';
 import HomePage from './pages/Home';
-import  Admin  from "./pages/admin/admin";
+import Admin from "./pages/admin/admin";
+import AdminLogin from "./pages/admin/AdminLogin";
 import UserManagement from "./pages/admin/userManagement";
 import AdminUserPage from './pages/admin/AdminUserPage';
 import ResetPassword from './pages/ResetPassword';
@@ -52,6 +53,12 @@ return (
           path="/Signup"
           element={
             isAuthenticated ? <Signup /> : <Navigate to="/login" replace />
+          }
+        />
+        <Route
+          path="/system-access"
+          element={
+            <AdminLogin />
           }
         />
         <Route

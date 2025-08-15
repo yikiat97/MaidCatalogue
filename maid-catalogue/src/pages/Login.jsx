@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import API_CONFIG from '../config/api.js';
 import logoBlack from '../assets/logoBlack.png';
 
 export default function Login() {
@@ -8,52 +10,99 @@ export default function Login() {
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
     try {
-      const res = await fetch('http://localhost:3000/api/auth/login', {
+      const res = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.LOGIN), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ email, password }),
+        credentials: 'include',
       });
 
-      if (!res.ok) {  
-        alert('Login failed: ' + (await res.text()));
-        return;
-      }
-
       if (res.ok) {
-        const result = await fetch('http://localhost:3000/api/user/auth/callback', {
+        const result = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.SIMPLE_CALLBACK), {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
         });
-        console.log(result)
-        const data = await result.json();
         
-        if (data.redirectTo) {
-          window.location.href = data.redirectTo
+        if (result.ok) {
+          const userData = await result.json();
+          console.log('User data:', userData);
+          
+          // Check if there's a redirect URL stored (from recommendation link)
+          const redirectUrl = localStorage.getItem('redirectAfterLogin');
+          console.log('🔍 Login: redirectUrl found:', redirectUrl);
+          
+          if (userData.role === 'admin') {
+            navigate('/admin');
+          } else if (redirectUrl) {
+            // Clear the stored URL
+            localStorage.removeItem('redirectAfterLogin');
+            
+            // Call the auth callback endpoint to associate recommendation with user
+            try {
+              const callbackRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
+                method: 'POST',
+                credentials: 'include',
+              });
+              
+              if (callbackRes.ok) {
+                const callbackData = await callbackRes.json();
+                console.log('Auth callback successful:', callbackData);
+                // Redirect back to recommendation page
+                window.location.href = redirectUrl;
+              } else {
+                console.error('Auth callback failed:', callbackRes.status);
+                // Still redirect even if callback fails
+                window.location.href = redirectUrl;
+              }
+            } catch (err) {
+              console.error('Auth callback error:', err);
+              // Still redirect even if callback fails
+              window.location.href = redirectUrl;
+            }
+          } else {
+            navigate('/catalogue');
+          }
+        } else {
+          setError('Login failed. Please try again.');
         }
+      } else {
+        const errorData = await res.json();
+        setError(errorData.message || 'Login failed. Please try again.');
       }
     } catch (err) {
-      console.error(err);
-      alert('Login failed due to server error.');
+      console.error('Login error:', err);
+      setError('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleForgotPassword = async () => {
-    if (!forgotEmail.trim()) {
-      alert('Please enter your email address');
+    if (!email) {
+      setError('Please enter your email address first.');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('http://localhost:3000/api/auth/forgot-password', {
+      const res = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.FORGOT_PASSWORD), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: forgotEmail }),
+        body: JSON.stringify({ email }),
       });
 
       if (res.ok) {
@@ -414,7 +463,7 @@ export default function Login() {
             </div>
 
             <button
-              onClick={handleLogin}
+              onClick={handleSubmit}
               style={styles.button}
               onMouseEnter={(e) => {
                 e.target.style.transform = 'translateY(-2px)';

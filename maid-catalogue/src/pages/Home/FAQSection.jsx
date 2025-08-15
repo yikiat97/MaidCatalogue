@@ -1,7 +1,12 @@
 import React from 'react';
 import Accordion from '../../components/ui/Accordion';
+import { useAnimation } from '../../hooks/useAnimation';
 
 const FAQSection = () => {
+  const { elementRef: titleRef, isVisible: isTitleVisible } = useAnimation(0.3);
+  const { elementRef: leftRef, isVisible: isLeftVisible } = useAnimation(0.2);
+  const { elementRef: rightRef, isVisible: isRightVisible } = useAnimation(0.1);
+
   const leftColumnFAQs = [
     {
       title: "Is there really no agency fee ?",
@@ -72,7 +77,14 @@ const FAQSection = () => {
     <section className="py-12 bg-white">
       <div className="max-w-6xl w-full mx-auto px-4">
         {/* Section Title */}
-        <div className="text-center mb-8">
+        <div 
+          ref={titleRef}
+          className={`text-center mb-8 transition-all duration-1000 ease-out ${
+            isTitleVisible 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-8'
+          }`}
+        >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-semibold leading-tight text-[#0e0e0e] mb-2">
             Frequently Asked Questions
           </h2>
@@ -84,12 +96,26 @@ const FAQSection = () => {
         {/* FAQ Grid */}
         <div className="flex flex-col md:flex-row md:justify-between gap-6 md:gap-8">
           {/* Left Column */}
-          <div className="w-full md:w-1/2">
+          <div 
+            ref={leftRef}
+            className={`w-full md:w-1/2 transition-all duration-1000 ease-out delay-300 ${
+              isLeftVisible 
+                ? 'opacity-100 translate-x-0' 
+                : 'opacity-0 -translate-x-8'
+            }`}
+          >
             <Accordion items={leftColumnFAQs} allowMultiple={false} />
           </div>
 
           {/* Right Column */}
-          <div className="w-full md:w-1/2">
+          <div 
+            ref={rightRef}
+            className={`w-full md:w-1/2 transition-all duration-1000 ease-out delay-500 ${
+              isRightVisible 
+                ? 'opacity-100 translate-x-0' 
+                : 'opacity-0 translate-x-8'
+            }`}
+          >
             <Accordion items={rightColumnFAQs} allowMultiple={false} />
           </div>
         </div>

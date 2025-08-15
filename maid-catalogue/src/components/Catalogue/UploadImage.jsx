@@ -1,11 +1,24 @@
-const formData = new FormData();
-formData.append('file', selectedFile);
+import React from 'react';
+import API_CONFIG from '../../config/api.js';
 
-const res = await fetch('http://localhost:3000/api/upload', {
-  method: 'POST',
-  body: formData,
-  credentials: 'include' // ✅ ensures cookies (like JWT) are sent
-});
+  const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
 
-const data = await res.json();
-console.log(data.filePath);
+    try {
+      const res = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.UPLOAD), {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await res.json();
+      return data.imageUrl;
+    } catch (error) {
+      console.error('Upload error:', error);
+      throw error;
+    }
+  };

@@ -13,18 +13,20 @@ import {
   Divider,
   Avatar,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Skeleton
 } from '@mui/material';
 import maidPic from '../../assets/maidPic.jpg';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-// import FavoriteIcon from '@mui/icons-material/Favorite';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import WorkIcon from '@mui/icons-material/Work';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import PersonIcon from '@mui/icons-material/Person';
 import HeightIcon from '@mui/icons-material/Height';
+import LockIcon from '@mui/icons-material/Lock';
+import LoginPromptModal from './LoginPromptModal';
 
 // Skill icons
 import KitchenIcon from '@mui/icons-material/Kitchen';
@@ -35,6 +37,25 @@ import ElderlyIcon from '@mui/icons-material/Elderly';
 import PetsIcon from '@mui/icons-material/Pets';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import Tooltip from '@mui/material/Tooltip';
+import API_CONFIG from '../../config/api.js';
+
+// Brand colors
+const brandColors = {
+  primary: '#ff914d',
+  secondary: '#0c191b',
+  primaryLight: '#ffa366',
+  primaryDark: '#e67e22',
+  secondaryLight: '#1a2a2d',
+  secondaryDark: '#061012',
+  background: '#fafafa',
+  surface: '#ffffff',
+  text: '#0c191b',
+  textSecondary: '#5a6c6f',
+  border: '#e0e0e0',
+  success: '#27ae60',
+  warning: '#f39c12',
+  error: '#e74c3c'
+};
 
 // Professional font imports
 const professionalFonts = {
@@ -44,7 +65,7 @@ const professionalFonts = {
   mono: "'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace"
 };
 
-export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
+export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) {
   console.log(maid)
   const navigate = useNavigate();
   const theme = useTheme();
@@ -55,51 +76,173 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
   const isDesktop = useMediaQuery(theme.breakpoints.up('md')); // 900px+
   
   const [isFavorited, setIsFavorited] = useState(
-    userFavorites.includes(maid.id)
+    Array.isArray(userFavorites) && userFavorites.includes(maid.id)
   );
+  
+  // Add image loading state
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   useEffect(() => {
-    setIsFavorited(userFavorites.includes(maid.id));
+    setIsFavorited(Array.isArray(userFavorites) && userFavorites.includes(maid.id));
   }, [userFavorites, maid.id]);
+
+  // Reset image loading state when maid changes
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageError(false);
+  }, [maid.id]);
+
+  // Secure blur protection for unauthenticated users
+  useEffect(() => {
+    const protectBlur = () => {
+      // Find all images in this specific maid card
+      const cardElement = document.querySelector(`[data-maid-id="${maid.id}"]`);
+      if (!cardElement) return;
+
+      const images = cardElement.querySelectorAll('img');
+      images.forEach(img => {
+        // Skip flag images - don't apply protection to them
+        if (img.alt && img.alt.includes('flag')) {
+          return;
+        }
+        
+        if (isAuthenticated) {
+          // Remove blur for authenticated users
+          img.style.filter = 'none';
+          img.style.transform = 'none';
+          img.style.userSelect = 'auto';
+          img.style.webkitUserSelect = 'auto';
+          img.style.mozUserSelect = 'auto';
+          img.style.msUserSelect = 'auto';
+          img.style.pointerEvents = 'auto';
+        } else {
+          // Apply blur for unauthenticated users
+          if (!img.style.filter || !img.style.filter.includes('blur')) {
+            img.style.filter = 'blur(12px)';
+            img.style.transform = 'scale(1.1)';
+          }
+
+          // Prevent context menu
+          img.addEventListener('contextmenu', (e) => e.preventDefault());
+
+          // Prevent drag and drop
+          img.addEventListener('dragstart', (e) => e.preventDefault());
+
+          // Prevent right-click save
+          img.addEventListener('mousedown', (e) => {
+            if (e.button === 2) e.preventDefault();
+          });
+
+          // Add additional CSS properties for better protection
+          img.style.userSelect = 'none';
+          img.style.webkitUserSelect = 'none';
+          img.style.mozUserSelect = 'none';
+          img.style.msUserSelect = 'none';
+          img.style.pointerEvents = 'auto';
+
+          // Prevent keyboard shortcuts
+          img.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+              e.preventDefault();
+            }
+          });
+        }
+      });
+    };
+
+    // Run protection immediately and set up interval
+    protectBlur();
+    const interval = setInterval(protectBlur, 500);
+
+    // Set up mutation observer to watch for DOM changes
+    const observer = new MutationObserver(protectBlur);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class']
+    });
+
+    return () => {
+      clearInterval(interval);
+      observer.disconnect();
+    };
+  }, [isAuthenticated, maid.id]);
+
+  // Additional effect to handle authentication changes immediately
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Immediately remove blur when user becomes authenticated
+      const cardElement = document.querySelector(`[data-maid-id="${maid.id}"]`);
+      if (cardElement) {
+        const images = cardElement.querySelectorAll('img');
+        images.forEach(img => {
+          // Skip flag images - don't apply any styling to them
+          if (img.alt && img.alt.includes('flag')) {
+            return;
+          }
+          
+          img.style.filter = 'none';
+          img.style.transform = 'none';
+          img.style.userSelect = 'auto';
+          img.style.webkitUserSelect = 'auto';
+          img.style.mozUserSelect = 'auto';
+          img.style.msUserSelect = 'auto';
+          img.style.pointerEvents = 'auto';
+        });
+      }
+    }
+  }, [isAuthenticated, maid.id]);
+
+  // Image optimization function
+  const getOptimizedImageUrl = (originalUrl) => {
+    if (!originalUrl) return maidPic;
+    
+    // If using a CDN like CloudFront, you can add optimization parameters
+    // For now, we'll use the original URL but add lazy loading
+    const finalUrl = originalUrl.startsWith('http') ? originalUrl : API_CONFIG.buildImageUrl(originalUrl);
+    console.log('Image URL for', maid.name, ':', finalUrl);
+    return finalUrl;
+  };
 
   const toggleFavorite = () => {
     if (!isAuthenticated) {
-      navigate('/signup');
+      // Show login prompt or redirect to login
       return;
     }
 
     const maidId = maid.id;
-
+    
     if (isFavorited) {
-      fetch(`http://localhost:3000/api/user/RemoveFavorites/${maidId}`, {
+      // Remove from favorites
+      fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.CATALOGUE.USER_FAVORITES}/${maidId}`), {
         method: 'DELETE',
         credentials: 'include',
       })
         .then((res) => {
-          if (!res.ok) throw new Error('Failed to remove favorite');
-          return res.json();
+          if (res.ok) {
+            setIsFavorited(false);
+          }
         })
-        .then((data) => {
-          console.log('Maid removed from favorites:', data);
-          setIsFavorited(false);
-        })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          console.error('Error removing from favorites:', err);
+        });
     } else {
-      fetch('http://localhost:3000/api/user/favorites', {
+      // Add to favorites
+      fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.CATALOGUE.USER_FAVORITES}/${maidId}`), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ maidId }),
         credentials: 'include',
       })
         .then((res) => {
-          if (!res.ok) throw new Error('Failed to add favorite');
-          return res.json();
+          if (res.ok) {
+            setIsFavorited(true);
+          }
         })
-        .then((data) => {
-          console.log('Maid added to favorites:', data);
-          setIsFavorited(true);
-        })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          console.error('Error adding to favorites:', err);
+        });
     }
   };
 
@@ -115,10 +258,10 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
 
   const getChipColor = (type) => {
     switch(type) {
-      case "Transfer": return { bg: '#FF6B6B', text: '#FFFFFF' };
-      case "New/Fresh": return { bg: '#4ECDC4', text: '#FFFFFF' };
-      case "Experienced": return { bg: '#45B7D1', text: '#FFFFFF' };
-      default: return { bg: '#95A5A6', text: '#FFFFFF' };
+      case "Transfer": return { bg: brandColors.primary, text: '#FFFFFF' };
+      case "New/Fresh": return { bg: brandColors.success, text: '#FFFFFF' };
+      case "Experienced": return { bg: brandColors.warning, text: '#FFFFFF' };
+      default: return { bg: brandColors.textSecondary, text: '#FFFFFF' };
     }
   };
 
@@ -165,7 +308,7 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
     };
     
     const countryCode = countryCodeMap[country] || 'un'; // 'un' for unknown/default
-    return `https://flagcdn.com/32x24/${countryCode}.png`;
+    return `https://flagcdn.com/${countryCode}.svg`;
   };
 
   const chipColor = getChipColor(displayLabel);
@@ -175,31 +318,27 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
   const getResponsiveStyles = () => {
     if (isMobile) {
       return {
-        cardWidth: '100%',
-        cardMaxWidth: 240, // Smaller mobile card
-        cardHeight: 380, // Reduced height after removing ID
-        imageHeight: 140, // Smaller image
-        chipFontSize: '0.6rem',
-        chipHeight: '18px',
-        nameFontSize: '0.85rem',
-        captionFontSize: '0.65rem',
-        bodyFontSize: '0.65rem',
-        salaryFontSize: '0.9rem',
-        iconSize: 11,
-        skillIconSize: 12, // Smaller skill icons
-        skillBoxSize: 20, // Smaller skill boxes
-        buttonPadding: '4px 10px',
-        contentPadding: 1.25, // Reduced padding
-        spacing: 0.75, // Tighter spacing
-        flagSize: { width: 14, height: 10 },
-        maxSkills: 3 // Show fewer skills
+        cardHeight: 380, // Reduced height for mobile
+        imageHeight: 120, // Smaller image for mobile
+        chipFontSize: '0.55rem',
+        chipHeight: '16px',
+        nameFontSize: '0.75rem',
+        captionFontSize: '0.6rem',
+        bodyFontSize: '0.6rem',
+        salaryFontSize: '0.8rem',
+        iconSize: 10,
+        skillIconSize: 10, // Smaller skill icons
+        skillBoxSize: 18, // Smaller skill boxes
+        buttonPadding: '3px 8px',
+        contentPadding: 1, // Reduced padding
+        spacing: 0.5, // Tighter spacing
+        flagSize: { width: 12, height: 8 },
+        maxSkills: 2 // Show fewer skills on mobile
       };
     } else if (isTablet) {
       return {
-        cardWidth: 320,
-        cardMaxWidth: 320,
-        cardHeight: 450, // Reduced height
-        imageHeight: 160,
+        cardHeight: 480, // Adjusted height for tablet
+        imageHeight: 180, // Adjusted image height
         chipFontSize: '0.68rem',
         chipHeight: '22px',
         nameFontSize: '0.95rem',
@@ -217,8 +356,6 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
       };
     } else {
       return {
-        cardWidth: 360, // Bigger desktop card
-        cardMaxWidth: 360,
         cardHeight: 520, // Taller for more content
         imageHeight: 200, // Larger image
         chipFontSize: '0.75rem',
@@ -242,45 +379,148 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
   const styles = getResponsiveStyles();
 
   return (
-    <Card  
-      sx={{
-        width: styles.cardWidth,
-        maxWidth: styles.cardMaxWidth,
+    <>
+      {/* Global CSS for Image Protection */}
+      {!isAuthenticated && (
+        <style>
+          {`
+            [data-maid-id="${maid.id}"] img {
+              user-select: none !important;
+              -webkit-user-select: none !important;
+              -moz-user-select: none !important;
+              -ms-user-select: none !important;
+              user-drag: none !important;
+              -webkit-user-drag: none !important;
+              -moz-user-drag: none !important;
+              -ms-user-drag: none !important;
+              pointer-events: auto !important;
+            }
+          `}
+        </style>
+      )}
+      
+             <Card  
+         data-maid-id={maid.id}
+         sx={{
+        width: '100%', // Always 100% width
+        maxWidth: '100%', // Always 100% max width
         height: styles.cardHeight,
-        borderRadius: isMobile ? '8px' : '12px',
+        borderRadius: isMobile ? '12px' : '16px',
         overflow: 'hidden',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: isMobile ? '0 1px 4px rgba(0, 0, 0, 0.1)' : '0 2px 8px rgba(0, 0, 0, 0.1)',
+        boxShadow: isMobile ? 'none' : '0 4px 16px rgba(12, 25, 27, 0.12)',
         position: 'relative',
-        background: '#FFFFFF',
-        '&:hover': {
-          transform: isMobile ? 'none' : 'translateY(-4px)',
-          boxShadow: isMobile ? '0 2px 8px rgba(0, 0, 0, 0.15)' : '0 8px 16px rgba(0, 0, 0, 0.15)',
-        },
+        background: brandColors.surface,
+        border: `1px solid ${brandColors.border}`,
+        filter: !isAuthenticated ? 'grayscale(20%)' : 'none',
+        // Responsive sizing that works with grid
+        ...(isMobile && {
+          maxWidth: '160px', // Smaller width for mobile 2-column layout
+          minWidth: '140px'  // Minimum width on mobile
+        }),
+        ...(isTablet && {
+          maxWidth: '280px', // Maximum width on tablet
+          minWidth: '250px'  // Minimum width on tablet
+        }),
+        ...(!isMobile && !isTablet && {
+          maxWidth: '320px', // Maximum width on desktop (3 columns)
+          minWidth: '280px'  // Minimum width on desktop
+        })
       }}
     >
       {/* Image Container with Overlay */}
-      <Box sx={{ position: 'relative', overflow: 'hidden', height: styles.imageHeight }}>
-        <CardMedia
-          component="img"
-          image={maid.imageUrl ? `http://localhost:3000${maid.imageUrl}` : maidPic}
-          alt={maid.name}
-          sx={{
-            width: '100%',
-            height: styles.imageHeight,
-            objectFit: 'cover',
-            filter: isAuthenticated ? 'none' : 'blur(12px)',
-            transition: 'all 0.3s ease',
-            cursor: 'pointer',
-            '&:hover': {
-              transform: isMobile ? 'none' : 'scale(1.05)',
-            }
+      <Box sx={{ 
+        position: 'relative', 
+        overflow: 'hidden', 
+        height: styles.imageHeight,
+        // Fixed dimensions for mobile consistency
+        ...(isMobile && {
+          width: '140px',
+          height: '120px',
+          flexShrink: 0
+        })
+      }}>
+        {/* Loading skeleton */}
+        {!imageLoaded && !imageError && (
+          <Skeleton 
+            variant="rectangular" 
+            width="100%" 
+            height={styles.imageHeight}
+            sx={{ bgcolor: 'grey.200' }}
+          />
+        )}
+        
+        {/* Error fallback */}
+        {imageError && (
+          <Box
+            sx={{
+              width: '100%',
+              height: styles.imageHeight,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'grey.100',
+              color: 'grey.500'
+            }}
+          >
+            <PersonIcon sx={{ fontSize: 60, color: 'grey.400' }} />
+          </Box>
+        )}
+        
+        <Tooltip
+          title={!isAuthenticated ? "Click to view details (photos will remain blurred)" : "Click to view details"}
+          arrow
+          placement="top"
+          enterTouchDelay={0}
+          leaveTouchDelay={1500}
+          disableFocusListener={isMobile}
+          disableHoverListener={isMobile}
+          PopperProps={{
+            sx: {
+              '& .MuiTooltip-tooltip': {
+                backgroundColor: brandColors.secondary,
+                color: '#FFFFFF',
+                fontSize: isMobile ? '0.75rem' : '0.875rem',
+                maxWidth: isMobile ? '200px' : '250px',
+                padding: isMobile ? '8px 12px' : '10px 16px',
+                borderRadius: '8px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                border: `1px solid ${brandColors.border}`,
+              },
+              '& .MuiTooltip-arrow': {
+                color: brandColors.secondary,
+              },
+            },
           }}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleView();
-          }}
-        />
+        >
+          <CardMedia
+            component="img"
+            image={getOptimizedImageUrl(maid.imageUrl)}
+            alt={maid.name}
+            loading="lazy" // Add lazy loading
+            className={!isAuthenticated ? 'secure-blur' : ''}
+            sx={{
+              width: '100%',
+              height: styles.imageHeight,
+              objectFit: 'cover',
+              filter: isAuthenticated ? 'none' : 'blur(12px)',
+              transform: isAuthenticated ? 'none' : 'scale(1.1)',
+              transition: 'all 0.3s ease',
+              
+              opacity: imageLoaded ? 1 : 0, // Use opacity instead of display
+              
+            }}
+
+            onLoad={() => {
+              console.log('Image loaded for:', maid.name);
+              setImageLoaded(true);
+            }}
+            onError={(e) => {
+              console.log('Image error for:', maid.name, e);
+              setImageError(true);
+              setImageLoaded(true);
+            }}
+          />
+        </Tooltip>
         
         {/* Overlay gradient */}
         <Box
@@ -290,10 +530,58 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
             left: 0,
             right: 0,
             height: '60px',
-            background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
+            background: `linear-gradient(to top, ${brandColors.secondary}80 0%, transparent 100%)`,
             pointerEvents: 'none',
           }}
         />
+
+        {/* Lock Icon Overlay for Unauthenticated Users */}
+        {!isAuthenticated && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 1,
+              pointerEvents: 'none',
+              zIndex: 1
+            }}
+          >
+            <Box
+              sx={{
+                width: 60,
+                height: 60,
+                borderRadius: '50%',
+                background: 'rgba(12, 25, 27, 0.9)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backdropFilter: 'blur(10px)',
+                border: '2px solid rgba(255, 255, 255, 0.2)'
+              }}
+            >
+              <LockIcon sx={{ fontSize: 30, color: 'white' }} />
+            </Box>
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'white',
+                fontWeight: 600,
+                textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+                textAlign: 'center',
+                fontSize: '0.8rem'
+              }}
+            >
+              Photos Blurred
+            </Typography>
+          </Box>
+        )}
+
+        
         
         {/* Status Badge - moved to left top */}
         <Chip
@@ -301,16 +589,18 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
           size="small"
           sx={{
             position: 'absolute',
-            top: isMobile ? 6 : 8,
-            left: isMobile ? 6 : 8,
-            backgroundColor: chipColor.bg,
+            top: isMobile ? 8 : 12,
+            left: isMobile ? 8 : 12,
+            background: `linear-gradient(135deg, ${chipColor.bg} 0%, ${chipColor.bg}80 100%)`,
             color: chipColor.text,
             fontFamily: professionalFonts.accent,
-            fontWeight: 600,
+            fontWeight: 700,
             fontSize: styles.chipFontSize,
             height: styles.chipHeight,
-            letterSpacing: '0.01em',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            letterSpacing: '0.02em',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            zIndex: 3
           }}
         />
         
@@ -322,67 +612,72 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
           }}
           sx={{
             position: 'absolute',
-            top: isMobile ? 6 : 8,
-            right: isMobile ? 6 : 8,
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            top: isMobile ? 8 : 12,
+            right: isMobile ? 8 : 12,
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(10px)',
-            padding: isMobile ? '4px' : '6px',
-            width: isMobile ? 28 : 32,
-            height: isMobile ? 28 : 32,
+            padding: isMobile ? '6px' : '8px',
+            width: isMobile ? 32 : 36,
+            height: isMobile ? 32 : 36,
+            border: `1px solid ${brandColors.border}`,
             '&:hover': {
               backgroundColor: 'rgba(255, 255, 255, 1)',
               transform: isMobile ? 'none' : 'scale(1.1)',
+              boxShadow: '0 4px 12px rgba(255, 145, 77, 0.3)',
             },
             transition: 'all 0.2s ease',
           }}
         >
           {isFavorited ? (
-            <FavoriteIcon sx={{ color: '#E74C3C', fontSize: isMobile ? 16 : 20 }} />
+            <FavoriteIcon sx={{ color: brandColors.error, fontSize: isMobile ? 18 : 20 }} />
           ) : (
-            <FavoriteBorderIcon sx={{ color: '#E74C3C', fontSize: isMobile ? 16 : 20 }} />
+            <FavoriteBorderIcon sx={{ color: brandColors.error, fontSize: isMobile ? 18 : 20 }} />
           )}
         </IconButton>
       </Box>
 
-      {/* Content - Made entire content area clickable */}
+      {/* Content - No longer clickable */}
       <CardContent 
         sx={{ 
           p: styles.contentPadding, 
           pb: styles.contentPadding - 0.5,
-          cursor: 'pointer',
-          '&:hover': {
-            backgroundColor: isMobile ? 'transparent' : 'rgba(52, 152, 219, 0.02)',
-          }
         }}
-        onClick={handleView}
       >
-        /* Name only */
-        <Box sx={{ mb: styles.spacing }}>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontFamily: professionalFonts.primary,
-              fontWeight: 600,
-              fontSize: styles.nameFontSize,
-              color: '#2C3E50',
-              cursor: 'pointer',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              letterSpacing: '-0.02em',
-              lineHeight: 1.3,
-              '&:hover': { 
-                color: '#3498DB',
-                transition: 'color 0.2s ease'
-              }
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleView();
-            }}
-          >
-            {maid.name}
-          </Typography>
+                  {/* Name only */}
+          <Box sx={{ mb: styles.spacing }}>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontFamily: professionalFonts.primary,
+                fontWeight: 700,
+                fontSize: styles.nameFontSize,
+                color: brandColors.text,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                letterSpacing: '-0.02em',
+                lineHeight: 1.3,
+              }}
+            >
+              {maid.name}
+            </Typography>
+            
+            {/* Login Hint for Unauthenticated Users */}
+            {/* {!isAuthenticated && (
+              <Typography
+                variant="caption"
+                sx={{
+                  color: brandColors.warning,
+                  fontStyle: 'italic',
+                  fontSize: '0.7rem',
+                  fontWeight: 500,
+                  textAlign: 'center',
+                  mt: 0.5
+                }}
+              >
+                Login to see unblurred photos
+              </Typography>
+            )} */}
         </Box>
 
         {/* Country Flag, Age, and Physical Stats */}
@@ -399,15 +694,15 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
               style={{ 
                 width: styles.flagSize.width, 
                 height: styles.flagSize.height, 
-                borderRadius: '2px',
-                objectFit: 'cover'
+                borderRadius: '3px',
+                border: `1px solid ${brandColors.border}`
               }}
             />
             <Typography variant="body2" sx={{ 
               fontFamily: professionalFonts.secondary,
-              color: '#34495E', 
+              color: brandColors.textSecondary, 
               fontSize: styles.bodyFontSize,
-              fontWeight: 500,
+              fontWeight: 600,
               letterSpacing: '0.01em'
             }}>
               {isMobile ? maid.country.substring(0, 2) : maid.country}
@@ -417,12 +712,12 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
           {/* Age */}
           {maidAge && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <PersonIcon sx={{ fontSize: styles.iconSize, color: '#9B59B6' }} />
+              <PersonIcon sx={{ fontSize: styles.iconSize, color: brandColors.primary }} />
               <Typography variant="body2" sx={{ 
                 fontFamily: professionalFonts.secondary,
-                color: '#34495E', 
+                color: brandColors.textSecondary, 
                 fontSize: styles.bodyFontSize,
-                fontWeight: 500
+                fontWeight: 600
               }}>
                 {maidAge}y
               </Typography>
@@ -434,8 +729,8 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
             <>
               {maid.height && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <HeightIcon sx={{ fontSize: styles.iconSize, color: '#F39C12' }} />
-                  <Typography variant="body2" sx={{ color: '#34495E', fontSize: styles.bodyFontSize }}>
+                  <HeightIcon sx={{ fontSize: styles.iconSize, color: brandColors.warning }} />
+                  <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: styles.bodyFontSize, fontWeight: 600 }}>
                     {maid.height}cm
                   </Typography>
                 </Box>
@@ -443,7 +738,7 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
               
               {maid.weight && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Typography variant="body2" sx={{ color: '#7F8C8D', fontSize: styles.bodyFontSize, fontWeight: 500 }}>
+                  <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: styles.bodyFontSize, fontWeight: 600 }}>
                     {maid.weight}kg
                   </Typography>
                 </Box>
@@ -457,12 +752,12 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
           <Stack direction="row" spacing={1} sx={{ mb: styles.spacing, alignItems: 'center' }}>
             {maid.height && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <HeightIcon sx={{ fontSize: styles.iconSize, color: '#F39C12' }} />
+                <HeightIcon sx={{ fontSize: styles.iconSize, color: brandColors.warning }} />
                 <Typography variant="body2" sx={{ 
                   fontFamily: professionalFonts.secondary,
-                  color: '#34495E', 
+                  color: brandColors.textSecondary, 
                   fontSize: styles.bodyFontSize,
-                  fontWeight: 500
+                  fontWeight: 600
                 }}>
                   {maid.height}cm
                 </Typography>
@@ -473,9 +768,9 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Typography variant="body2" sx={{ 
                   fontFamily: professionalFonts.secondary,
-                  color: '#7F8C8D', 
+                  color: brandColors.textSecondary, 
                   fontSize: styles.bodyFontSize, 
-                  fontWeight: 500 
+                  fontWeight: 600 
                 }}>
                   {maid.weight}kg
                 </Typography>
@@ -490,8 +785,8 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
             variant="caption" 
             sx={{ 
               fontFamily: professionalFonts.accent,
-              color: '#7F8C8D', 
-              fontWeight: 600,
+              color: brandColors.textSecondary, 
+              fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
               fontSize: isMobile ? '0.55rem' : '0.65rem',
@@ -521,17 +816,19 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      backgroundColor: '#ECF0F1',
-                      color: '#34495E',
-                      borderRadius: isMobile ? '4px' : '6px',
+                      backgroundColor: `${brandColors.primary}10`,
+                      color: brandColors.primary,
+                      borderRadius: isMobile ? '6px' : '8px',
                       width: styles.skillBoxSize,
                       height: styles.skillBoxSize,
                       flexShrink: 0, // Prevent shrinking
                       transition: 'all 0.2s ease',
+                      border: `1px solid ${brandColors.primary}20`,
                       '&:hover': {
-                        backgroundColor: '#3498DB',
+                        backgroundColor: brandColors.primary,
                         color: '#FFFFFF',
                         transform: isMobile ? 'none' : 'scale(1.1)',
+                        boxShadow: `0 4px 12px ${brandColors.primary}40`,
                       },
                     }}
                   >
@@ -547,14 +844,15 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: '#BDC3C7',
+                    backgroundColor: brandColors.textSecondary,
                     color: '#FFFFFF',
-                    borderRadius: isMobile ? '4px' : '6px',
+                    borderRadius: isMobile ? '6px' : '8px',
                     width: styles.skillBoxSize,
                     height: styles.skillBoxSize,
                     fontSize: isMobile ? '0.6rem' : '0.7rem',
-                    fontWeight: 600,
+                    fontWeight: 700,
                     flexShrink: 0, // Prevent shrinking
+                    border: `1px solid ${brandColors.textSecondary}20`,
                   }}
                 >
                   +{maid.skills.length - styles.maxSkills}
@@ -564,7 +862,11 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
           </Stack>
         </Box>
 
-        <Divider sx={{ my: styles.spacing }} />
+        <Divider sx={{ 
+          my: styles.spacing,
+          borderColor: brandColors.border,
+          opacity: 0.6
+        }} />
 
         {/* Bottom Section - Updated Layout */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 1 : 1.5 }}>
@@ -575,9 +877,9 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
               <Box>
                 <Typography variant="caption" sx={{ 
                   fontFamily: professionalFonts.accent,
-                  color: '#7F8C8D', 
+                  color: brandColors.textSecondary, 
                   fontSize: styles.captionFontSize,
-                  fontWeight: 500,
+                  fontWeight: 600,
                   letterSpacing: '0.02em'
                 }}>
                   Monthly Salary
@@ -587,8 +889,8 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
                     variant="h6"
                     sx={{ 
                       fontFamily: professionalFonts.primary,
-                      fontWeight: 700,
-                      color: '#27AE60',
+                      fontWeight: 800,
+                      color: brandColors.success,
                       fontSize: styles.salaryFontSize,
                       lineHeight: 1.2,
                       letterSpacing: '-0.01em'
@@ -596,18 +898,39 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
                   >
                     ${maid.salary}
                   </Typography>
-                  <Tooltip 
-                    title={`Salary + Loan = Full Salary: $${maid.salary} + $${maid.loan || 0} = $${(maid.salary || 0) + (maid.loan || 0)}`} 
+                                     <Tooltip 
+                     title="Total salary = Basic salary + off day compensation"
                     arrow
                     placement="top"
+                    enterTouchDelay={0}
+                    leaveTouchDelay={1500}
+                    disableFocusListener={isMobile}
+                    disableHoverListener={isMobile}
+                    PopperProps={{
+                      sx: {
+                        '& .MuiTooltip-tooltip': {
+                          backgroundColor: brandColors.secondary,
+                          color: '#FFFFFF',
+                          fontSize: isMobile ? '0.75rem' : '0.875rem',
+                          maxWidth: isMobile ? '260px' : '320px',
+                          padding: isMobile ? '8px' : '12px',
+                          borderRadius: '8px',
+                          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                          border: `1px solid ${brandColors.border}`,
+                        },
+                        '& .MuiTooltip-arrow': {
+                          color: brandColors.secondary,
+                        },
+                      },
+                    }}
                   >
                     <InfoOutlinedIcon 
                       sx={{ 
                         fontSize: isMobile ? 14 : 16, 
-                        color: '#7F8C8D',
+                        color: brandColors.textSecondary,
                         cursor: 'help',
                         '&:hover': {
-                          color: '#3498DB',
+                          color: brandColors.primary,
                         }
                       }} 
                     />
@@ -617,64 +940,160 @@ export default function MaidCard({ userFavorites, maid, isAuthenticated }) {
             </Box>
 
             {/* Compare Button */}
-            <Tooltip title="Add to Compare" arrow>
+            {/* <Tooltip 
+              title={
+                <Box sx={{ p: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    Add to Compare
+                  </Typography>
+                  <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                    Compare this maid with others
+                  </Typography>
+                </Box>
+              }
+              arrow
+              enterTouchDelay={0}
+              leaveTouchDelay={1500}
+              disableFocusListener={isMobile}
+              disableHoverListener={isMobile}
+              PopperProps={{
+                sx: {
+                  '& .MuiTooltip-tooltip': {
+                    backgroundColor: brandColors.secondary,
+                    color: '#FFFFFF',
+                    fontSize: isMobile ? '0.75rem' : '0.875rem',
+                    maxWidth: isMobile ? '180px' : '240px',
+                    padding: isMobile ? '6px 8px' : '8px 12px',
+                    borderRadius: '6px',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                    border: `1px solid ${brandColors.border}`,
+                  },
+                  '& .MuiTooltip-arrow': {
+                    color: brandColors.secondary,
+                  },
+                },
+              }}
+            >
               <IconButton
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
-                  console.log('Added to compare:', maid.id);
+                  if (!isAuthenticated) {
+                    setShowLoginPrompt(true);
+                  } else {
+                    console.log('Added to compare:', maid.id);
+                  }
                 }}
                 size="small"
                 sx={{
-                  backgroundColor: '#F39C12',
+                  backgroundColor: brandColors.warning,
                   color: '#FFFFFF',
-                  width: isMobile ? 28 : 32,
-                  height: isMobile ? 28 : 32,
+                  width: isMobile ? 32 : 36,
+                  height: isMobile ? 32 : 36,
+                  border: `1px solid ${brandColors.warning}20`,
                   '&:hover': {
-                    backgroundColor: '#E67E22',
+                    backgroundColor: brandColors.warning,
                     transform: isMobile ? 'none' : 'scale(1.05)',
+                    boxShadow: `0 4px 12px ${brandColors.warning}40`,
                   },
                   transition: 'all 0.2s ease',
                 }}
               >
-                <CompareArrowsIcon sx={{ fontSize: isMobile ? 14 : 16 }} />
+                <CompareArrowsIcon sx={{ fontSize: isMobile ? 16 : 18 }} />
               </IconButton>
-            </Tooltip>
+            </Tooltip> */}
           </Box>
 
-          {/* WhatsApp Button at Bottom with Rounded Border */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 0.5 }}>
+          {/* Action Buttons Row */}
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 1, 
+            mt: 0.5,
+            flexDirection: isMobile ? 'column' : 'row'
+          }}>
+            {/* WhatsApp Button - Left/Top */}
             <Button
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
-                const message = `Hi, I'm interested in maid ID ${maid.id}.`;
-                window.open(`https://wa.me/88270086?text=${encodeURIComponent(message)}`, '_blank');
+                if (!isAuthenticated) {
+                  setShowLoginPrompt(true);
+                } else {
+                  const message = `Hi, I'm interested in maid ID ${maid.id}.`;
+                  window.open(`https://wa.me/88270086?text=${encodeURIComponent(message)}`, '_blank');
+                }
               }}
-              startIcon={<WhatsAppIcon sx={{ fontSize: isMobile ? 16 : 18 }} />}
+              startIcon={<WhatsAppIcon sx={{ fontSize: isMobile ? 12 : 16 }} />}
               variant="contained"
-              fullWidth={isMobile}
+              size="small"
               sx={{
                 fontFamily: professionalFonts.accent,
-                backgroundColor: '#25D366',
+                background: `linear-gradient(135deg, #25D366 0%, #128C7E 100%)`,
                 color: '#FFFFFF',
-                borderRadius: isMobile ? '16px' : '20px',
-                fontSize: isMobile ? '0.7rem' : '0.75rem',
+                borderRadius: isMobile ? '12px' : '20px',
+                fontSize: isMobile ? '0.65rem' : '0.75rem',
                 fontWeight: 600,
                 textTransform: 'none',
-                padding: styles.buttonPadding,
-                minWidth: isMobile ? 'auto' : 'auto',
+                padding: isMobile ? '4px 8px' : '8px 16px',
+                minHeight: isMobile ? '32px' : 'auto',
+                flex: isMobile ? 'none' : 1,
                 width: isMobile ? '100%' : 'auto',
                 letterSpacing: '0.02em',
+                boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)',
                 '&:hover': {
-                  backgroundColor: '#128C7E',
+                  background: `linear-gradient(135deg, #128C7E 0%, #075E54 100%)`,
+                  boxShadow: '0 6px 16px rgba(37, 211, 102, 0.4)',
+                  transform: 'translateY(-1px)',
                 },
                 transition: 'all 0.2s ease',
               }}
             >
               Contact
             </Button>
+
+            {/* View Details Button - Right/Bottom */}
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleView(); // Allow all users to view details
+              }}
+              variant="outlined"
+              size="small"
+              sx={{
+                fontFamily: professionalFonts.accent,
+                color: brandColors.primary,
+                borderColor: brandColors.primary,
+                borderRadius: isMobile ? '12px' : '20px',
+                fontSize: isMobile ? '0.65rem' : '0.75rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                padding: isMobile ? '4px 8px' : '8px 16px',
+                minHeight: isMobile ? '32px' : 'auto',
+                flex: isMobile ? 'none' : 1,
+                width: isMobile ? '100%' : 'auto',
+                '&:hover': {
+                  backgroundColor: brandColors.primary,
+                  color: '#FFFFFF',
+                  borderColor: brandColors.primary,
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(255, 145, 77, 0.3)',
+                },
+                transition: 'all 0.2s ease',
+              }}
+            >
+              View Details
+            </Button>
           </Box>
         </Box>
       </CardContent>
+      
+      {/* Login Prompt Modal */}
+      <LoginPromptModal
+        open={showLoginPrompt}
+        onClose={() => setShowLoginPrompt(false)}
+      />
     </Card>
+    </>
   );
 }

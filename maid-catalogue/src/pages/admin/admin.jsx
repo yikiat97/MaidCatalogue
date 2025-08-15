@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import API_CONFIG from '../../config/api.js';
 
-import { Search, Home, Package, Users, UserCheck, ShoppingCart, Store, Settings, LogOut, Bell, X, Plus, Trash2, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Home, Package, Users, UserCheck, ShoppingCart, Store, Settings, LogOut, Bell, X, Plus, Trash2, Filter, ChevronDown, ChevronUp, Menu } from 'lucide-react';
 import AddMaidModal from '../../components/admin/AddMaidModal';
 import MaidDetailModal from '../../components/admin/MaidDetailModal';
 import LinkGeneratorModal from '../../components/admin/LinkGeneratorModal';
+import AdminLogo from '../../components/admin/AdminLogo';
 
 
 const Dashboard = () => {
@@ -17,6 +19,7 @@ const Dashboard = () => {
   const [selectedMaid, setSelectedMaid] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 const { userId: userIdParam } = useParams(); // ✅ use clearer alias
 const [userId, setUserId] = useState(null);
   const [recommendedIds, setRecommendedIds] = useState([]);
@@ -77,50 +80,113 @@ const [userId, setUserId] = useState(null);
   const availabilityOptions = ['Available', 'Employed'];
 
   const [maids, setMaids] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
+  const fetchMaids = async () => {
+    try {
+      const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.MAIDS), {
+        credentials: 'include'
+      });
+      const data = await response.json();
 
-    useEffect(() => {
-    const fetchMaids = async () => {
-      try {
-        const response = await fetch('http://localhost:3000/api/maids');
-        const data = await response.json();
+      const formatted = data.map((maid) => ({
+        id: maid.id,
+        supplier: maid.supplier,
+        photo: '👩', 
+        name: maid.name,
+        nationality: maid.country,
+        religion: maid.Religion,
+        ageWeightHeight: `${calculateAge(maid.DOB)}yo/${maid.height}cm/${maid.weight}kg`,
+        maritalStatus: `${maid.maritalStatus}/${maid.NumChildren}`,
+        availability: maid.isEmployed ? 'Employed' : 'Available',
+        // Add raw values for filtering
+        age: calculateAge(maid.DOB),
+        height: maid.height,
+        weight: maid.weight,
+        salary: maid.salary,
+        loan: maid.loan,
+        numChildren: maid.NumChildren,
+        skills: maid.skills || [],
+        languages: maid.languages || [],
+        type: maid.type || []
+      }));
+
+      setMaids(formatted);
+    } catch (err) {
+      console.error('Failed to fetch maids:', err);
+    }
+  };
+
+  // Search function
+  const handleSearch = async (query) => {
+    if (!query || query.trim() === '') {
+      // If search is empty, fetch all maids
+      fetchMaids();
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await fetch(API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.ADMIN.SEARCH_MAIDS, { query }), {
+        credentials: 'include'
+      });
+      const data = await response.json();
+
+      const formatted = data.map((maid) => ({
+        id: maid.id,
+        supplier: maid.supplier,
+        photo: '👩', 
+        name: maid.name,
+        nationality: maid.country,
+        religion: maid.Religion,
+        ageWeightHeight: `${calculateAge(maid.DOB)}yo/${maid.height}cm/${maid.weight}kg`,
+        maritalStatus: `${maid.maritalStatus}/${maid.NumChildren}`,
+        availability: maid.isEmployed ? 'Employed' : 'Available',
+        // Add raw values for filtering
+        age: calculateAge(maid.DOB),
+        height: maid.height,
+        weight: maid.weight,
+        salary: maid.salary,
+        loan: maid.loan,
+        numChildren: maid.NumChildren,
+        skills: maid.skills || [],
+        languages: maid.languages || [],
+        type: maid.type || []
+      }));
+
+      setMaids(formatted);
+    } catch (err) {
+      console.error('Failed to search maids:', err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Debounced search function
+  const debouncedSearch = useRef(null);
   
-        const formatted = data.map((maid) => ({
-          id:maid.id,
-          supplier: maid.supplier,
-          photo: '👩', 
-          name: maid.name,
-          nationality: maid.country,
-          //salary: maid.salary,// `$${maid.salary} + ${maid.maidDetails?.restDay ?? 0} OFF`,
-          religion: maid.Religion,
-          ageWeightHeight: `${calculateAge(maid.DOB)}yo/${maid.height}cm/${maid.weight}kg`,
-          maritalStatus: `${maid.maritalStatus}/${maid.NumChildren}`,
-          availability: maid.isEmployed ? 'Employed' : 'Available',
-          // Add raw values for filtering
-          age: calculateAge(maid.DOB),
-          height: maid.height,
-          weight: maid.weight,
-          salary: maid.salary,
-          loan: maid.loan,
-          numChildren: maid.NumChildren,
-          skills: maid.skills || [],
-          languages: maid.languages || [],
-          type: maid.type || []
-        }));
-  
-        setMaids(formatted);
-        // console.log(data)
-        console.log(formatted)
-      } catch (err) {
-        console.error('Failed to fetch maids:', err);
+  useEffect(() => {
+    if (debouncedSearch.current) {
+      clearTimeout(debouncedSearch.current);
+    }
+    
+    debouncedSearch.current = setTimeout(() => {
+      handleSearch(searchQuery);
+    }, 300); // 300ms delay
+
+    return () => {
+      if (debouncedSearch.current) {
+        clearTimeout(debouncedSearch.current);
       }
     };
-  
+  }, [searchQuery]);
+
+  useEffect(() => {
     fetchMaids();
   }, []);
 
-
-    useEffect(() => {
+  useEffect(() => {
     if (userIdParam) {
       setUserId(Number(userIdParam));
     } else {
@@ -129,21 +195,34 @@ const [userId, setUserId] = useState(null);
     }
 
     // Load recommended maids for that user
-    fetch(`http://localhost:3000/api/user/recommendation/user/${userIdParam}`)
-      .then(res => res.json())
-      .then(data => {
-        // setRecommendedIds(data.map(m => m.id));
-        setSelectedItems(data.map(m => m.id))
-        console.log(data)
-      });
+    if (userIdParam) {
+      fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.USER.RECOMMENDATIONS}/user/${userIdParam}`), {
+        credentials: 'include'
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setSelectedItems(data.map(m => m.id))
+            console.log(data)
+          } else {
+            setSelectedItems([])
+            console.log('No recommendations found or invalid data format')
+          }
+        })
+        .catch(err => {
+          console.error('Failed to fetch recommendations:', err);
+          setSelectedItems([])
+        });
+    }
       
   }, [userIdParam]);
 
   const toggleRecommendation = async (maidId) => {
     if (!userId) return;
 
-    await fetch(`http://localhost:3000/api/user/recommendation/${userId}/${maidId}`, {
+    await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.USER.RECOMMENDATIONS}/${userId}/${maidId}`), {
       method: 'POST',
+      credentials: 'include'
     });
 
     setRecommendedIds(prev =>
@@ -180,9 +259,9 @@ const [userId, setUserId] = useState(null);
   console.log(generateLinkBody)
 
   try {
-    const response = await fetch(`http://localhost:3000/api/user/generate-link`, {
-      method: 'POST',
-      credentials: 'include',
+          const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.GENERATE_LINK), {
+        method: 'POST',
+        credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -212,7 +291,7 @@ const [userId, setUserId] = useState(null);
     if (!confirm) return;
   
     try {
-      const response = await fetch(`http://localhost:3000/api/maids/${maidId}`, {
+      const response = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.ADMIN.MAIDS}/${maidId}`), {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -383,8 +462,9 @@ const [userId, setUserId] = useState(null);
         uploadData.append('file', formData.imageFile);
         uploadData.append('customFilename', formData.customFilename); // pass renamed filename
   
-        const uploadResponse = await fetch('http://localhost:3000/api/upload', {
+        const uploadResponse = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.UPLOAD), {
           method: 'POST',
+          credentials: 'include',
           body: uploadData,
         });
   
@@ -423,7 +503,7 @@ const [userId, setUserId] = useState(null);
       };
   
       // 📨 Submit maid record
-      const response = await fetch('http://localhost:3000/api/maid', {
+      const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.MAID), {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -516,44 +596,148 @@ const [userId, setUserId] = useState(null);
   };
 
   // Custom Range Slider Component
+  // Improved range slider with touch support for mobile
   const RangeSlider = ({ label, range, min, max, step = 1, unit = '', onChange }) => {
+    const [localRange, setLocalRange] = useState(range);
+    const [isDragging, setIsDragging] = useState(false);
+    const [activeThumb, setActiveThumb] = useState(null);
+    const sliderRef = useRef(null);
+
+    useEffect(() => {
+      if (!isDragging) setLocalRange(range);
+    }, [range, isDragging]);
+
+    const percent = (v) => ((v - min) / (max - min)) * 100;
+    
+    const getValue = (clientX) => {
+      if (!sliderRef.current) return min;
+      const { left, width } = sliderRef.current.getBoundingClientRect();
+      let pct = (clientX - left) / width;
+      pct = Math.max(0, Math.min(1, pct));
+      const raw = min + pct * (max - min);
+      return Math.round(raw / step) * step;
+    };
+
+    const updateValue = (clientX, thumb) => {
+      const val = getValue(clientX);
+      const next = [...localRange];
+      if (thumb === 0) {
+        next[0] = Math.min(val, localRange[1] - step);
+      } else {
+        next[1] = Math.max(val, localRange[0] + step);
+      }
+      setLocalRange(next);
+    };
+
+    const handleStart = (e, thumb) => {
+      e.preventDefault();
+      setIsDragging(true);
+      setActiveThumb(thumb);
+      
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      updateValue(clientX, thumb);
+    };
+
+    const handleMove = (e) => {
+      if (!isDragging || activeThumb === null) return;
+      e.preventDefault();
+      
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      updateValue(clientX, activeThumb);
+    };
+
+    const handleEnd = () => {
+      if (isDragging) {
+        setIsDragging(false);
+        setActiveThumb(null);
+        onChange(0, localRange[0]);
+        onChange(1, localRange[1]);
+      }
+    };
+
+    // Add event listeners
+    useEffect(() => {
+      if (isDragging) {
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('mouseup', handleEnd);
+        document.addEventListener('touchmove', handleMove, { passive: false });
+        document.addEventListener('touchend', handleEnd);
+        
+        return () => {
+          document.removeEventListener('mousemove', handleMove);
+          document.removeEventListener('mouseup', handleEnd);
+          document.removeEventListener('touchmove', handleMove);
+          document.removeEventListener('touchend', handleEnd);
+        };
+      }
+    }, [isDragging, handleMove, handleEnd]);
+
+    const onTrackClick = (e) => {
+      if (isDragging) return;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const val = getValue(clientX);
+      const next = [...localRange];
+      const d0 = Math.abs(val - localRange[0]);
+      const d1 = Math.abs(val - localRange[1]);
+      if (d0 < d1) {
+        next[0] = Math.min(val, localRange[1] - step);
+      } else {
+        next[1] = Math.max(val, localRange[0] + step);
+      }
+      setLocalRange(next);
+      onChange(0, next[0]);
+      onChange(1, next[1]);
+    };
+
+    const leftPct = percent(localRange[0]);
+    const rightPct = percent(localRange[1]);
+
     return (
-      <div className="space-y-2">
+      <div className="space-y-2 lg:space-y-3">
         <div className="flex justify-between items-center">
-          <label className="text-sm font-medium text-gray-700">{label}</label>
-          <span className="text-sm text-gray-500">
-            {range[0]}{unit} - {range[1]}{unit}
+          <label className="text-xs lg:text-sm font-medium text-gray-700">{label}</label>
+          <span className="text-xs lg:text-sm font-semibold text-gray-600">
+            {localRange[0]}{unit} - {localRange[1]}{unit}
           </span>
         </div>
-        <div className="relative">
-          <input
-            type="range"
-            min={min}
-            max={max}
-            step={step}
-            value={range[0]}
-            onChange={(e) => onChange(0, e.target.value)}
-            className="absolute w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb"
+        
+        <div
+          ref={sliderRef}
+          onClick={onTrackClick}
+          onTouchStart={onTrackClick}
+          className="relative h-8 lg:h-10 flex items-center cursor-pointer select-none"
+          style={{ touchAction: 'none' }}
+        >
+          {/* Background track */}
+          <div className="absolute w-full h-2 lg:h-3 bg-gray-200 rounded-full" />
+          
+          {/* Active track */}
+          <div 
+            className="absolute h-2 lg:h-3 bg-blue-500 rounded-full transition-all duration-150"
+            style={{
+              left: `${leftPct}%`,
+              width: `${rightPct - leftPct}%`,
+              transition: isDragging ? 'none' : 'all 0.15s ease'
+            }}
           />
-          <input
-            type="range"
-            min={min}
-            max={max}
-            step={step}
-            value={range[1]}
-            onChange={(e) => onChange(1, e.target.value)}
-            className="absolute w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb"
-          />
-          <div className="relative h-2 bg-gray-200 rounded-lg">
-            <div 
-              className="absolute h-2 bg-blue-500 rounded-lg"
+          
+          {/* Thumbs */}
+          {[0, 1].map(idx => (
+            <div
+              key={idx}
+              onMouseDown={e => handleStart(e, idx)}
+              onTouchStart={e => handleStart(e, idx)}
+              className="absolute w-6 h-6 lg:w-7 lg:h-7 bg-blue-500 rounded-full border-3 border-white shadow-lg cursor-grab transition-all duration-150 hover:scale-110 active:cursor-grabbing active:scale-105"
               style={{
-                left: `${((range[0] - min) / (max - min)) * 100}%`,
-                width: `${((range[1] - range[0]) / (max - min)) * 100}%`
+                left: `${idx === 0 ? leftPct : rightPct}%`,
+                transform: 'translateX(-50%)',
+                zIndex: activeThumb === idx ? 3 : 2,
+                touchAction: 'none'
               }}
             />
-          </div>
+          ))}
         </div>
+        
         <div className="flex justify-between text-xs text-gray-400">
           <span>{min}{unit}</span>
           <span>{max}{unit}</span>
@@ -567,16 +751,16 @@ const [userId, setUserId] = useState(null);
     return (
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">{label}</label>
-        <div className="max-h-32 overflow-y-auto space-y-1 border border-gray-200 rounded-md p-2">
+        <div className="max-h-20 lg:max-h-32 overflow-y-auto space-y-1 border border-gray-200 rounded-md p-2">
           {options.map((option) => (
             <label key={option} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
               <input
                 type="checkbox"
                 checked={selected.includes(option)}
                 onChange={() => onChange(option)}
-                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                className="h-3 w-3 lg:h-4 lg:w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">{option}</span>
+              <span className="text-xs lg:text-sm text-gray-700">{option}</span>
             </label>
           ))}
         </div>
@@ -721,16 +905,24 @@ const [userId, setUserId] = useState(null);
         }
       `}</style>
       
+      {/* Mobile Menu Button */}
+      <div className="lg:hidden fixed top-4 left-4 z-50">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 bg-white rounded-lg shadow-lg text-gray-600 hover:text-gray-800"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+      </div>
+      
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-sm">
+      <div className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white shadow-sm transform transition-transform duration-300 ease-in-out lg:transition-none`}>
         <div className="p-6">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center">
-              <Home className="w-5 h-5 text-white" />
-            </div>
+            <AdminLogo size="medium" />
             <div>
-              <h1 className="text-xl font-bold text-gray-800">EASY<span className="text-gray-600">HIRE</span></h1>
-              <p className="text-xs text-gray-500">MAID SOLUTIONS 女佣介</p>
+              <h1 className="text-xl font-bold text-gray-800">SYSTEM<span className="text-gray-600">ADMIN</span></h1>
+              <p className="text-xs text-gray-500">MANAGEMENT PORTAL</p>
             </div>
           </div>
         </div>
@@ -753,14 +945,6 @@ const [userId, setUserId] = useState(null);
               <UserCheck className="w-5 h-5" />
               <span>Suppliers</span>
             </a>
-            <a href="#" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
-              <ShoppingCart className="w-5 h-5" />
-              <span>Orders</span>
-            </a>
-            <a href="#" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
-              <Store className="w-5 h-5" />
-              <span>Manage Store</span>
-            </a>
           </div>
 
           <div className="mt-12 px-6 space-y-2">
@@ -768,7 +952,7 @@ const [userId, setUserId] = useState(null);
               <Settings className="w-5 h-5" />
               <span>Settings</span>
             </a>
-            <a href="#" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+            <a href="/system-access" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
               <LogOut className="w-5 h-5" />
               <span>Log Out</span>
             </a>
@@ -776,36 +960,59 @@ const [userId, setUserId] = useState(null);
         </nav>
       </div>
 
+      {/* Overlay for mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
         {/* Header */}
-        <div className="bg-white border-b px-6 py-4">
+        <div className="bg-white border-b px-4 lg:px-6 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex-1 max-w-lg">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Search supplier, maid"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Search maid name or ID..."
+                  className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
+                {isSearching && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                  </div>
+                )}
+                {searchQuery && !isSearching && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <Bell className="w-6 h-6 text-gray-600" />
-              <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+            <div className="flex items-center space-x-2 lg:space-x-4">
+              <Bell className="w-5 h-5 lg:w-6 lg:h-6 text-gray-600" />
+              <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gray-300 rounded-full"></div>
             </div>
           </div>
         </div>
 
         {/* Enhanced Filters */}
-        <div className="bg-white border-b">
+        <div className="bg-white border-b flex-shrink-0">
           {/* Filter Header */}
-          <div className="px-6 py-4 border-b">
-            <div className="flex items-center justify-between">
+          <div className="px-4 lg:px-6 py-3 lg:py-4 border-b">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-2 lg:space-y-0">
               <div className="flex items-center space-x-3">
                 <Filter className="w-5 h-5 text-gray-500" />
-                <h3 className="text-lg font-semibold text-gray-800">Filters</h3>
+                <h3 className="text-base lg:text-lg font-semibold text-gray-800">Filters</h3>
                 {getActiveFilterCount() > 0 && (
                   <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
                     {getActiveFilterCount()} active
@@ -815,24 +1022,24 @@ const [userId, setUserId] = useState(null);
               <div className="flex items-center space-x-2">
                 <button
                   onClick={clearAllFilters}
-                  className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="px-2 lg:px-3 py-1 lg:py-1 text-xs lg:text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50"
                 >
                   Clear All
                 </button>
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="flex items-center space-x-1 px-3 py-1 text-sm text-blue-600 hover:text-blue-800"
+                  className="flex items-center space-x-1 px-2 lg:px-3 py-1 lg:py-1 text-xs lg:text-sm text-blue-600 hover:text-blue-800"
                 >
                   <span>{isExpanded ? 'Collapse' : 'Expand'}</span>
-                  {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  {isExpanded ? <ChevronUp className="w-3 h-3 lg:w-4 lg:h-4" /> : <ChevronDown className="w-3 h-3 lg:w-4 lg:h-4" />}
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Quick Filters (Always Visible) */}
-          <div className="px-6 py-4">
-            <div className="grid grid-cols-4 gap-4">
+          {/* Quick Filters (Always Visible) - More Compact on Mobile */}
+          <div className="px-4 lg:px-6 py-3 lg:py-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
               <CheckboxGroup
                 label="Nationality"
                 options={countryOptions}
@@ -865,12 +1072,12 @@ const [userId, setUserId] = useState(null);
             </div>
           </div>
 
-          {/* Expanded Filters */}
+          {/* Expanded Filters - More Compact on Mobile */}
           {isExpanded && (
-            <div className="px-6 py-4 border-t bg-gray-50">
-              <div className="grid grid-cols-3 gap-6">
+            <div className="px-4 lg:px-6 py-3 lg:py-4 border-t bg-gray-50 max-h-96 lg:max-h-none overflow-y-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
                 {/* Left Column */}
-                <div className="space-y-4">
+                <div className="space-y-3 lg:space-y-4">
                   <CheckboxGroup
                     label="Skills"
                     options={skillsetOptions}
@@ -886,7 +1093,7 @@ const [userId, setUserId] = useState(null);
                 </div>
 
                 {/* Middle Column */}
-                <div className="space-y-4">
+                <div className="space-y-3 lg:space-y-4">
                   <CheckboxGroup
                     label="Type"
                     options={typeOptions}
@@ -908,7 +1115,7 @@ const [userId, setUserId] = useState(null);
                 </div>
 
                 {/* Right Column - Range Sliders */}
-                <div className="space-y-6">
+                <div className="space-y-4 lg:space-y-6">
                   <RangeSlider
                     label="Height"
                     range={filters.heightRange}
@@ -947,104 +1154,189 @@ const [userId, setUserId] = useState(null);
           )}
         </div>
 
-        {/* Products Section */}
-        <div className="p-6">
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="flex items-center justify-between p-6 border-b">
-              <div className="flex items-center space-x-4">
-                <h2 className="text-xl font-semibold text-gray-800">
-                  Products ({filteredMaids.length})
-                </h2>
-                <button className="px-4 py-2 text-sm text-red-600 border border-red-300 rounded-md hover:bg-red-50">
-                  Delete
-                </button>
+        {/* Products Section - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-4 lg:p-6">
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 lg:p-6 border-b space-y-3 lg:space-y-0">
+                <div className="flex items-center space-x-4">
+                  <h2 className="text-lg lg:text-xl font-semibold text-gray-800">
+                    Maids Count: ({filteredMaids.length})
+                  </h2>
+                  <button className="px-3 lg:px-4 py-2 text-sm text-red-600 border border-red-300 rounded-md hover:bg-red-50">
+                    Delete
+                  </button>
+                </div>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                  <button 
+                    onClick={() => setIsModalOpen(true)}
+                    className="px-3 lg:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center space-x-2 text-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Maid</span>
+                  </button>
+                  <button className="px-3 lg:px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 text-sm" onClick={handleGenerateLink}>
+                    Select to recommend
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center space-x-3">
-                <button 
-                  onClick={() => setIsModalOpen(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center space-x-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Maid</span>
-                </button>
-                <button className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50" onClick={handleGenerateLink}>
-                  Select to recommend
-                </button>
+
+              {/* Mobile Cards View */}
+              <div className="lg:hidden p-4 space-y-4">
+                {filteredMaids.map((maid, index) => (
+                  <div key={index} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm">
+                          {maid.photo}
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{maid.name}</p>
+                          <p className="text-sm text-gray-500">#{maid.id}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          checked={selectedItems.includes(maid.id)}
+                          onChange={() => handleSelectItem(maid.id)}
+                        />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteConfirmId({id: maid.id, name: maid.name});
+                          }}
+                          className="text-red-500 hover:text-red-700 text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-gray-500">Nationality</p>
+                        <p className="font-medium">{maid.nationality}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Salary</p>
+                        <p className="font-medium">${maid.salary}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Religion</p>
+                        <p className="font-medium">{maid.religion}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Age/W/H</p>
+                        <p className="font-medium">{maid.ageWeightHeight}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Marital/Children</p>
+                        <p className="font-medium">{maid.maritalStatus}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Availability</p>
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAvailabilityColor(maid.availability)}`}>
+                          {maid.availability}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-2 border-t">
+                      <button
+                        onClick={() => setSelectedMaid(maid.id)}
+                        className="w-full text-center text-blue-600 hover:text-blue-800 text-sm font-medium py-2"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
 
-            {/* Table */}
-            <div className="overflow-hidden table-fixed">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Photo</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nationality</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salary</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Religion</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age/Weight/Height</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marital Status/Children</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Availability</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recommend</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delete</th>
-                  </tr>
-                </thead>
-              </table>
-
-              {/* Scrollable Tbody */}
-              <div className="overflow-y-auto max-h-[400px]">
-                <table className="w-full">
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredMaids.map((maid, index) => (
-                      <tr key={index} className="hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedMaid(maid.id)}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{maid.supplier}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-lg">
-                            {maid.photo}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{maid.name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{maid.nationality}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{maid.salary}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{maid.religion}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{maid.ageWeightHeight}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{maid.maritalStatus}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAvailabilityColor(maid.availability)}`}>
-                            {maid.availability}
-                          </span>
-                        </td>
-<td className="px-6 py-4 whitespace-nowrap">
-  <input
-    type="checkbox"
-    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-    checked={selectedItems.includes(maid.id)}
-    onChange={() => handleSelectItem(maid.id)}
-    onClick={(e) => e.stopPropagation()} // Prevents triggering row click
-  />
-</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteConfirmId({id: maid.id, name: maid.name});
-                            }}
-                            className="text-red-500 hover:text-red-700 font-medium text-sm"
-                          >
-                            Delete
-                          </button>
-                        </td>
+              {/* Desktop Table View */}
+              <div className="hidden lg:block overflow-hidden">
+                <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                  <table className="w-full table-fixed">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="w-24 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
+                        <th className="w-16 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Photo</th>
+                        <th className="w-32 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th className="w-24 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nationality</th>
+                        <th className="w-20 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salary</th>
+                        <th className="w-20 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Religion</th>
+                        <th className="w-32 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age/W/H</th>
+                        <th className="w-32 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marital/Children</th>
+                        <th className="w-24 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Availability</th>
+                        <th className="w-20 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recommend</th>
+                        <th className="w-20 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delete</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredMaids.map((maid, index) => (
+                        <tr key={index} className="hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedMaid(maid.id)}>
+                          <td className="px-3 py-4 text-sm text-gray-900 truncate" title={maid.supplier}>
+                            {maid.supplier}
+                          </td>
+                          <td className="px-3 py-4">
+                            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-sm">
+                              {maid.photo}
+                            </div>
+                          </td>
+                          <td className="px-3 py-4 text-sm font-medium text-gray-900 truncate" title={maid.name}>
+                            {maid.name}
+                          </td>
+                          <td className="px-3 py-4 text-sm text-gray-900 truncate" title={maid.nationality}>
+                            {maid.nationality}
+                          </td>
+                          <td className="px-3 py-4 text-sm text-gray-900 truncate" title={`$${maid.salary}`}>
+                            ${maid.salary}
+                          </td>
+                          <td className="px-3 py-4 text-sm text-gray-900 truncate" title={maid.religion}>
+                            {maid.religion}
+                          </td>
+                          <td className="px-3 py-4 text-sm text-gray-900 truncate" title={maid.ageWeightHeight}>
+                            {maid.ageWeightHeight}
+                          </td>
+                          <td className="px-3 py-4 text-sm text-gray-900 truncate" title={maid.maritalStatus}>
+                            {maid.maritalStatus}
+                          </td>
+                          <td className="px-3 py-4">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAvailabilityColor(maid.availability)}`}>
+                              {maid.availability}
+                            </span>
+                          </td>
+                          <td className="px-3 py-4">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                              checked={selectedItems.includes(maid.id)}
+                              onChange={() => handleSelectItem(maid.id)}
+                              onClick={(e) => e.stopPropagation()} // Prevents triggering row click
+                            />
+                          </td>
+                          <td className="px-3 py-4">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteConfirmId({id: maid.id, name: maid.name});
+                              }}
+                              className="text-red-500 hover:text-red-700 font-medium text-sm"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
         </div>
-
 
         {/* Add Maid Modal */}
         {isModalOpen && (
@@ -1073,8 +1365,8 @@ const [userId, setUserId] = useState(null);
 
         {/* Link Generator Modal */}
         {showLinkModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-4 lg:p-6 max-w-md w-full mx-4 shadow-xl">
               <div className="text-center">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
                   Generated Link
@@ -1082,7 +1374,7 @@ const [userId, setUserId] = useState(null);
                 <div className="bg-gray-100 p-3 rounded-md mb-4">
                   <p className="text-sm text-gray-700 break-all">{generatedLink}</p>
                 </div>
-                <div className="flex justify-center space-x-3">
+                <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-3">
                   <button
                     onClick={() => navigator.clipboard.writeText(generatedLink)}
                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -1106,8 +1398,8 @@ const [userId, setUserId] = useState(null);
 
         {/* Delete Confirmation Modal */}
         {deleteConfirmId && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-4 lg:p-6 max-w-md w-full mx-4 shadow-xl">
               <div className="text-center">
                 <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
                   <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1126,7 +1418,7 @@ const [userId, setUserId] = useState(null);
                   This action cannot be undone.
                 </p>
                 
-                <div className="flex justify-center space-x-3">
+                <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-3">
                   <button
                     onClick={() => setDeleteConfirmId(null)}
                     disabled={isDeleting}

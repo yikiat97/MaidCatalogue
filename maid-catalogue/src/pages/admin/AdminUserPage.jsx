@@ -1,6 +1,24 @@
 // src/pages/AdminUserRecommendationPage.jsx
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { 
+  Container, 
+  Typography, 
+  Grid, 
+  Card, 
+  CardContent, 
+  Box, 
+  Button, 
+  Chip,
+  useTheme,
+  useMediaQuery
+} from '@mui/material';
+import { 
+  ArrowBack as ArrowBackIcon,
+  Favorite as FavoriteIcon,
+  Recommend as RecommendIcon
+} from '@mui/icons-material';
+import { useParams, useNavigate } from 'react-router-dom';
+import API_CONFIG from '../../config/api.js';
 
 const AdminUserRecommendationPage = () => {
   const { userId } = useParams();
@@ -13,10 +31,12 @@ useEffect(() => {
 
   const fetchData = async () => {
     try {
-      const resMaids = await fetch(`http://localhost:3000/api/maids`);
+      const resMaids = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.MAIDS), {
+      credentials: 'include'
+    });
       const allMaids = await resMaids.json(); // ✅ parse JSON
 
-      const resRecommendations = await fetch(`http://localhost:3000/api/user/recommendation/user/${userId}`);
+      const resRecommendations = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.USER.RECOMMENDATIONS}/user/${userId}`));
       const recommendations = await resRecommendations.json(); // ✅ parse JSON
 
       setMaids(allMaids);
@@ -31,7 +51,7 @@ useEffect(() => {
 
   const toggleRecommendation = async (maidId) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/user/recommendation/${userId}/${maidId}`, {
+      const res = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.USER.RECOMMENDATIONS}/${userId}/${maidId}`), {
         method: 'POST',
       });
 

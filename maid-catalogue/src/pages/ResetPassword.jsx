@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import API_CONFIG from '../config/api.js';
 import logoBlack from '../assets/logoBlack.png';
 
 export default function ResetPassword() {
@@ -70,7 +72,7 @@ export default function ResetPassword() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('http://localhost:3000/api/auth/reset-password', {
+      const res = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.RESET_PASSWORD), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

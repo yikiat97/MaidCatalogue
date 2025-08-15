@@ -76,7 +76,7 @@ export default function Catalogue() {
 
         if (res.ok) {
           setIsAuthenticated(true);
-          fetch('http://localhost:3000/api/user/GetUserfavorites', {
+          fetch('http://localhost:3000/api/catalogue/user/favorites', {
             credentials: 'include',
           })
             .then((res) => res.json())
@@ -96,7 +96,7 @@ export default function Catalogue() {
     const fetchMaids = async () => {
       try {
         setLoading(true);
-        const res = await fetch('http://localhost:3000/api/maids', {
+        const res = await fetch('http://localhost:3000/api/catalogue/maids', {
           credentials: 'include',
         });
         if (!res.ok) throw new Error('Failed to fetch maids');

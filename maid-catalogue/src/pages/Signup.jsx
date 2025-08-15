@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API_CONFIG from '../config/api.js';
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -47,18 +48,18 @@ export default function SignUp() {
 
     try {
       // Step 1: Sign up the user
-      const signupResponse = await fetch('http://localhost:3000/api/auth/signup', {
+      const signupResponse = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.SIGNUP), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Important for cookies/sessions
         body: JSON.stringify({
           email: formData.email,
           name: formData.name,
           password: formData.password,
           role: formData.role
         }),
+        credentials: 'include', // Important for cookies/sessions
       });
 
       const signupData = await signupResponse.json();
@@ -76,7 +77,7 @@ export default function SignUp() {
       console.log('Signup successful:', signupData);
 
       // Step 2: Automatically log in the user after successful signup
-      const loginResponse = await fetch('http://localhost:3000/api/auth/login', {
+      const loginResponse = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.LOGIN), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // ✅ important for cookies!
@@ -96,23 +97,55 @@ export default function SignUp() {
         return;
       }
 
-      // Step 3: Handle the auth callback (same as your login flow)
-      const callbackResponse = await fetch('http://localhost:3000/api/user/auth/callback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
+      // Step 3: Check if there's a redirect URL stored (from recommendation link)
+      const redirectUrl = localStorage.getItem('redirectAfterLogin');
+      console.log('🔍 Signup: redirectUrl found:', redirectUrl);
       
-      console.log('Auth callback response:', callbackResponse);
-      const callbackData = await callbackResponse.json();
-      
-      if (callbackData.redirectTo) {
-        // Success - redirect to the specified URL (likely /catalogue)
-        console.log('Login successful, redirecting to:', callbackData.redirectTo);
-        window.location.href = callbackData.redirectTo;
+      if (redirectUrl) {
+        // Clear the stored URL
+        localStorage.removeItem('redirectAfterLogin');
+        
+        // Call the auth callback endpoint to associate recommendation with user
+        try {
+          const callbackRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
+            method: 'POST',
+            credentials: 'include',
+          });
+          
+          if (callbackRes.ok) {
+            const callbackData = await callbackRes.json();
+            console.log('Auth callback successful:', callbackData);
+            // Redirect back to recommendation page
+            window.location.href = redirectUrl;
+          } else {
+            console.error('Auth callback failed:', callbackRes.status);
+            // Still redirect even if callback fails
+            window.location.href = redirectUrl;
+          }
+        } catch (err) {
+          console.error('Auth callback error:', err);
+          // Still redirect even if callback fails
+          window.location.href = redirectUrl;
+        }
       } else {
-        // Fallback redirect if no redirectTo is provided
-        navigate('/catalogue');
+        // No redirect URL, use default behavior
+        const callbackResponse = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        });
+        
+        console.log('Auth callback response:', callbackResponse);
+        const callbackData = await callbackResponse.json();
+        
+        if (callbackData.redirectTo) {
+          // Success - redirect to the specified URL (likely /catalogue)
+          console.log('Login successful, redirecting to:', callbackData.redirectTo);
+          window.location.href = callbackData.redirectTo;
+        } else {
+          // Fallback redirect if no redirectTo is provided
+          navigate('/catalogue');
+        }
       }
 
     } catch (error) {
@@ -398,7 +431,7 @@ export default function SignUp() {
           <button
             style={{
               ...styles.userTypeButton,
-              ...(formData.role === 'employer' ? styles.userTypeButtonActive : {})
+              ...(formData.role === 131 ? styles.userTypeButtonActive : {})
             }}
             onClick={() => handleInputChange('role', 131)}
             disabled={isLoading}
