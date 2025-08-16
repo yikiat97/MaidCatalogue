@@ -7,14 +7,14 @@ const ENVIRONMENTS = {
   },
   
   staging: {
-    API_BASE_URL: 'https://staging.yourapi.com',
-    API_PORT: 443,
+    API_BASE_URL: 'http://52.74.200.108:3000',
+    API_PORT: 3000,
     NODE_ENV: 'staging',
   },
   
   production: {
-    API_BASE_URL: 'https://yourapi.com',
-    API_PORT: 443,
+    API_BASE_URL: 'http://52.74.200.108:3000',
+    API_PORT: 3000,
     NODE_ENV: 'production',
   },
 };
