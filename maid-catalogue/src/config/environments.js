@@ -7,13 +7,13 @@ const ENVIRONMENTS = {
   },
   
   staging: {
-    API_BASE_URL: 'http://yikiat.com',
+    API_BASE_URL: 'https://yikiat.com',
     API_PORT: 3000,
     NODE_ENV: 'staging',
   },
   
   production: {
-    API_BASE_URL: 'http://yikiat.com',
+    API_BASE_URL: 'https://yikiat.com',
     API_PORT: 3000,
     NODE_ENV: 'production',
   },
