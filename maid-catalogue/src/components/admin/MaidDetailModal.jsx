@@ -141,21 +141,18 @@ const MaidDetailModal = ({ maidId, onClose }) => {
     setFormData({ ...formData, employmentDetails: updated });
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleImageChange = (file) => {
     if (!file) return;
 
-    const timestamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14);
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '').slice(0, -5);
     const extension = file.name.split('.').pop();
     const filename = file.name.split('.')[0].replace(/\s+/g, '') + timestamp + '.' + extension;
-    const filePath = `/uploads/${filename}`;
 
     // Store the file object and metadata in formData
     setFormData(prev => ({
       ...prev,
       imageFile: file,
-      imageUrl: filePath,
-      customFilename: filename
+      imageUrl: filename // Just store the filename for display purposes
     }));
   };
 
@@ -166,65 +163,99 @@ const MaidDetailModal = ({ maidId, onClose }) => {
     try {
       let imageUrl = formData.imageUrl;
 
-      // Upload new image if provided
+      // Handle image upload if there's a new image file
       if (formData.imageFile instanceof File) {
-        const uploadData = new FormData();
-        uploadData.append('file', formData.imageFile);
-        uploadData.append('customFilename', formData.customFilename);
+        // Create FormData for the maid update with image
+        const maidFormData = new FormData();
+        
+        // Add the image file
+        maidFormData.append('image', formData.imageFile);
+        
+        // Prepare maid data
+        const maidData = {
+          ...formData,
+          salary: parseFloat(formData.salary) || 0,
+          loan: parseFloat(formData.loan) || 0,
+          height: parseFloat(formData.height) || 0,
+          weight: parseFloat(formData.weight) || 0,
+          NumChildren: parseInt(formData.NumChildren) || 0,
+          DOB: formData.DOB,
+          skills: formData.skills.filter(skill => skill.trim() !== ''),
+          languages: formData.languages.filter(lang => lang.trim() !== ''),
+          type: formData.type.filter(t => t.trim() !== ''),
+          maidDetails: {
+            ...formData.maidDetails,
+            restDay: parseInt(formData.maidDetails.restDay) || 0
+          },
+          employmentDetails: formData.employmentDetails.map(detail => ({
+            ...detail,
+            noOfFamilyMember: parseInt(detail.noOfFamilyMember) || 0,
+            startDate: detail.startDate || null,
+            endDate: detail.endDate || null
+          }))
+        };
 
-        const uploadResponse = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.UPLOAD), {
-          method: 'POST',
-          body: uploadData,
+        // Add all form data as JSON string (except image which is handled separately)
+        maidFormData.append('data', JSON.stringify(maidData));
+
+        // Send directly to maid update endpoint
+        const response = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.ADMIN.MAID}/${maidId}`), {
+          method: 'PUT',
           credentials: 'include',
+          body: maidFormData,
         });
 
-        if (!uploadResponse.ok) throw new Error('Image upload failed');
-
-        const uploadResult = await uploadResponse.json();
-        imageUrl = uploadResult.filePath;
-      }
-
-      // Final update data formatting
-      const submitData = {
-        ...formData,
-        imageUrl,
-        salary: parseFloat(formData.salary) || 0,
-        loan: parseFloat(formData.loan) || 0,
-        height: parseFloat(formData.height) || 0,
-        weight: parseFloat(formData.weight) || 0,
-        NumChildren: parseInt(formData.NumChildren) || 0,
-        DOB: formData.DOB,
-        skills: formData.skills.filter(skill => skill.trim() !== ''),
-        languages: formData.languages.filter(lang => lang.trim() !== ''),
-        type: formData.type.filter(t => t.trim() !== ''),
-        maidDetails: {
-          ...formData.maidDetails,
-          restDay: parseInt(formData.maidDetails.restDay) || 0
-        },
-        employmentDetails: formData.employmentDetails.map(detail => ({
-          ...detail,
-          noOfFamilyMember: parseInt(detail.noOfFamilyMember) || 0,
-          startDate: detail.startDate || null,
-          endDate: detail.endDate || null
-        }))
-      };
-
-      const response = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.ADMIN.MAID}/${maidId}`), {
-        method: 'PUT',              
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submitData),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Maid updated:', result);
-        alert('Maid updated successfully!');
-        onClose();
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Maid updated:', result);
+          alert('Maid updated successfully!');
+          onClose();
+        } else {
+          throw new Error('Failed to update maid');
+        }
       } else {
-        throw new Error('Failed to update maid');
+        // No new image file, send as JSON without image
+        const submitData = {
+          ...formData,
+          imageUrl,
+          salary: parseFloat(formData.salary) || 0,
+          loan: parseFloat(formData.loan) || 0,
+          height: parseFloat(formData.height) || 0,
+          weight: parseFloat(formData.weight) || 0,
+          NumChildren: parseInt(formData.NumChildren) || 0,
+          DOB: formData.DOB,
+          skills: formData.skills.filter(skill => skill.trim() !== ''),
+          languages: formData.languages.filter(lang => lang.trim() !== ''),
+          type: formData.type.filter(t => t.trim() !== ''),
+          maidDetails: {
+            ...formData.maidDetails,
+            restDay: parseInt(formData.maidDetails.restDay) || 0
+          },
+          employmentDetails: formData.employmentDetails.map(detail => ({
+            ...detail,
+            noOfFamilyMember: parseInt(detail.noOfFamilyMember) || 0,
+            startDate: detail.startDate || null,
+            endDate: detail.endDate || null
+          }))
+        };
+
+        const response = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.ADMIN.MAID}/${maidId}`), {
+          method: 'PUT',              
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(submitData),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Maid updated:', result);
+          alert('Maid updated successfully!');
+          onClose();
+        } else {
+          throw new Error('Failed to update maid');
+        }
       }
     } catch (error) {
       console.error('Error updating maid:', error);
@@ -303,7 +334,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                     <input
                       type="file"
                       ref={imageInputRef}
-                      onChange={handleImageChange}
+                      onChange={(e) => handleImageChange(e.target.files[0])}
                       accept="image/*"
                       className="hidden"
                     />

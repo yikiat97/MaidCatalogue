@@ -1,32 +1,89 @@
-// AddMaidModal.js - Complete version with S3 image upload support
-import React, { useRef, useState } from 'react';
-import { X, Plus, Trash2, Camera, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Plus, Trash2, Camera, ChevronDown, ChevronUp, Edit, Save } from 'lucide-react';
 import ImageUpload from './ImageUpload.jsx';
 
-const AddMaidModal = ({
-  formData,
-  handleInputChange,
-  handleArrayFieldChange,
-  handleLanguageChange,
-  handleRatingChange,
-  addArrayField,
-  removeArrayField,
-  handleEmploymentDetailChange,
-  addEmploymentDetail,
-  removeEmploymentDetail,
-  isSubmitting,
-  handleSubmit,
-  resetForm,
-  setIsModalOpen,
-  handleDetailChange // Add this prop for maidDetails
+const EditMaidModal = ({
+  maid,
+  isOpen,
+  onClose,
+  onSave,
+  isSubmitting = false
 }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    imageUrl: '',
+    country: '',
+    salary: '',
+    loan: '',
+    Religion: '',
+    height: '',
+    weight: '',
+    DOB: '',
+    maritalStatus: '',
+    NumChildren: '',
+    skills: [],
+    languages: [],
+    type: [],
+    isActive: true,
+    isEmployed: false,
+    supplier: '',
+    maidDetails: {
+      description: '',
+      restDay: '',
+      englishRating: 0,
+      chineseRating: 0,
+      dialectRating: 0,
+      highestEducation: '',
+      religion: '',
+      employmentHistory: ''
+    },
+    employmentDetails: []
+  });
+
   const [expandedSections, setExpandedSections] = useState({
+    photo: true,
     basic: true,
     physical: true,
     skills: true,
     maidDetails: true,
     employment: true
   });
+
+  // Initialize form data when maid changes
+  useEffect(() => {
+    if (maid) {
+      setFormData({
+        name: maid.name || '',
+        imageUrl: maid.imageUrl || '',
+        country: maid.country || '',
+        salary: maid.salary || '',
+        loan: maid.loan || '',
+        Religion: maid.Religion || '',
+        height: maid.height || '',
+        weight: maid.weight || '',
+        DOB: maid.DOB ? new Date(maid.DOB).toISOString().split('T')[0] : '',
+        maritalStatus: maid.maritalStatus || '',
+        NumChildren: maid.NumChildren || '',
+        skills: maid.skills || [],
+        languages: maid.languages || [],
+        type: maid.type || [],
+        isActive: maid.isActive ?? true,
+        isEmployed: maid.isEmployed ?? false,
+        supplier: maid.supplier || '',
+        maidDetails: {
+          description: maid.maidDetails?.description || '',
+          restDay: maid.maidDetails?.restDay || '',
+          englishRating: maid.maidDetails?.englishRating || 0,
+          chineseRating: maid.maidDetails?.chineseRating || 0,
+          dialectRating: maid.maidDetails?.dialectRating || 0,
+          highestEducation: maid.maidDetails?.highestEducation || '',
+          religion: maid.maidDetails?.religion || '',
+          employmentHistory: maid.maidDetails?.employmentHistory || ''
+        },
+        employmentDetails: maid.employmentDetails || []
+      });
+    }
+  }, [maid]);
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -35,40 +92,123 @@ const AddMaidModal = ({
     }));
   };
 
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    
+    if (type === 'checkbox') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: checked
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  const handleArrayFieldChange = (field, newValue) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: newValue
+    }));
+  };
+
+  const handleMaidDetailChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      maidDetails: {
+        ...prev.maidDetails,
+        [name]: value
+      }
+    }));
+  };
+
+  const handleEmploymentDetailChange = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      employmentDetails: prev.employmentDetails.map((detail, i) =>
+        i === index ? { ...detail, [field]: value } : detail
+      )
+    }));
+  };
+
+  const addEmploymentDetail = () => {
+    setFormData(prev => ({
+      ...prev,
+      employmentDetails: [
+        ...prev.employmentDetails,
+        {
+          country: '',
+          startDate: '',
+          endDate: '',
+          employerDescription: '',
+          noOfFamilyMember: '',
+          reasonOfLeaving: '',
+          mainJobScope: ''
+        }
+      ]
+    }));
+  };
+
+  const removeEmploymentDetail = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      employmentDetails: prev.employmentDetails.filter((_, i) => i !== index)
+    }));
+  };
+
   // Handle image file selection
   const handleImageChange = (file) => {
     if (!file) return;
     
     // Store the file object for form submission
-    handleInputChange({ target: { name: 'imageFile', value: file } });
-    
-    // Clear the old imageUrl since we have a new file
-    handleInputChange({ target: { name: 'imageUrl', value: '' } });
+    setFormData(prev => ({
+      ...prev,
+      imageFile: file,
+      imageUrl: '' // Clear the old imageUrl since we have a new file
+    }));
   };
 
   // Handle image removal
   const handleImageRemove = () => {
-    handleInputChange({ target: { name: 'imageFile', value: null } });
-    handleInputChange({ target: { name: 'imageUrl', value: '' } });
+    setFormData(prev => ({
+      ...prev,
+      imageFile: null,
+      imageUrl: ''
+    }));
   };
 
-  // If handleDetailChange is not provided, create it
-  const handleMaidDetailChange = handleDetailChange || ((e) => {
-    const { name, value } = e.target;
-    const newFormData = {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Prepare data for submission
+    const submitData = {
       ...formData,
+      salary: Number(formData.salary),
+      loan: Number(formData.loan),
+      height: Number(formData.height),
+      weight: Number(formData.weight),
+      NumChildren: Number(formData.NumChildren),
       maidDetails: {
         ...formData.maidDetails,
-        [name]: value
-      }
+        englishRating: Number(formData.maidDetails.englishRating),
+        chineseRating: Number(formData.maidDetails.chineseRating),
+        dialectRating: Number(formData.maidDetails.dialectRating),
+        restDay: Number(formData.maidDetails.restDay)
+      },
+      employmentDetails: formData.employmentDetails.map(detail => ({
+        ...detail,
+        noOfFamilyMember: Number(detail.noOfFamilyMember)
+      }))
     };
-    handleInputChange({ 
-      target: { 
-        name: 'maidDetails', 
-        value: newFormData.maidDetails 
-      } 
-    });
-  });
+
+    await onSave(maid.id, submitData);
+  };
+
+  if (!isOpen || !maid) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -76,12 +216,9 @@ const AddMaidModal = ({
         {/* Header */}
         <div className="sticky top-0 z-10 bg-white border-b">
           <div className="flex items-center justify-between p-6">
-            <h3 className="text-xl font-semibold text-gray-900">Add New Maid</h3>
+            <h3 className="text-xl font-semibold text-gray-900">Edit Maid: {maid.name}</h3>
             <button 
-              onClick={() => {
-                setIsModalOpen(false);
-                resetForm();
-              }}
+              onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
               <X className="w-6 h-6" />
@@ -89,48 +226,19 @@ const AddMaidModal = ({
           </div>
         </div>
 
-        <form onSubmit={(e) => {
-          e.preventDefault(); // Prevent default form submission
-          console.log('Form submit event triggered');
-          console.log('Form data before submit:', formData);
-          handleSubmit(e);
-        }} className="p-6 space-y-6">
-          {/* Debug Section */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <h4 className="text-lg font-medium text-yellow-800 mb-2">Debug Info</h4>
-            <div className="text-sm text-yellow-700 space-y-1">
-              <p>Name: {formData.name || 'EMPTY'}</p>
-              <p>Country: {formData.country || 'EMPTY'}</p>
-              <p>Supplier: {formData.supplier || 'EMPTY'}</p>
-              <p>DOB: {formData.DOB || 'EMPTY'}</p>
-              <p>Skills: {JSON.stringify(formData.skills)}</p>
-              <p>Languages: {JSON.stringify(formData.languages)}</p>
-              <p>Type: {JSON.stringify(formData.type)}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                console.log('Current formData:', formData);
-                console.log('handleInputChange function:', handleInputChange);
-              }}
-              className="mt-2 px-3 py-1 bg-yellow-500 text-white rounded text-sm"
-            >
-              Log Form State
-            </button>
-          </div>
-
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Image Upload Section */}
           <div className="bg-gray-50 rounded-lg p-4">
             <button
               type="button"
-              onClick={() => toggleSection('basic')}
+              onClick={() => toggleSection('photo')}
               className="flex items-center justify-between w-full mb-4"
             >
               <h4 className="text-lg font-medium text-gray-900">Photo Upload</h4>
-              {expandedSections.basic ? <ChevronUp /> : <ChevronDown />}
+              {expandedSections.photo ? <ChevronUp /> : <ChevronDown />}
             </button>
             
-            {expandedSections.basic && (
+            {expandedSections.photo && (
               <div className="space-y-4">
                 <ImageUpload
                   currentImageUrl={formData.imageUrl}
@@ -139,7 +247,7 @@ const AddMaidModal = ({
                   disabled={isSubmitting}
                 />
                 <p className="text-sm text-gray-500 text-center">
-                  Upload a clear, professional photo of the maid. Images will be stored securely in the cloud.
+                  Upload a new photo to replace the current one, or keep the existing photo.
                 </p>
               </div>
             )}
@@ -742,7 +850,7 @@ const AddMaidModal = ({
                   type="checkbox"
                   name="isActive"
                   checked={formData.isActive}
-                  onChange={(e) => handleInputChange({ target: { name: 'isActive', value: e.target.checked } })}
+                  onChange={handleInputChange}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="text-sm font-medium text-gray-700">Active</span>
@@ -753,7 +861,7 @@ const AddMaidModal = ({
                   type="checkbox"
                   name="isEmployed"
                   checked={formData.isEmployed}
-                  onChange={(e) => handleInputChange({ target: { name: 'isEmployed', value: e.target.checked } })}
+                  onChange={handleInputChange}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="text-sm font-medium text-gray-700">Currently Employed</span>
@@ -765,10 +873,7 @@ const AddMaidModal = ({
           <div className="flex items-center justify-end space-x-4 pt-6 border-t">
             <button
               type="button"
-              onClick={() => {
-                setIsModalOpen(false);
-                resetForm();
-              }}
+              onClick={onClose}
               disabled={isSubmitting}
               className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50"
             >
@@ -783,12 +888,12 @@ const AddMaidModal = ({
               {isSubmitting ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Creating...</span>
+                  <span>Saving...</span>
                 </>
               ) : (
                 <>
-                  <Plus className="w-4 h-4" />
-                  <span>Create Maid</span>
+                  <Save className="w-4 h-4" />
+                  <span>Save Changes</span>
                 </>
               )}
             </button>
@@ -799,4 +904,4 @@ const AddMaidModal = ({
   );
 };
 
-export default AddMaidModal;
+export default EditMaidModal;

@@ -27,7 +27,6 @@ const API_CONFIG = {
       MAID: '/api/admin/maid',
       USERS: '/api/user/users',
       GENERATE_LINK: '/api/admin/generate-link',
-      UPLOAD: '/api/admin/upload',
       SEARCH_MAIDS: '/api/admin/maids/search',
     },
     

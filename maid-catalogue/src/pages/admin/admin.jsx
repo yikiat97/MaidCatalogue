@@ -327,11 +327,20 @@ const [userId, setUserId] = useState(null);
   };
   
     // Handle array field changes (skills, languages, type)
-    const handleArrayFieldChange = (fieldName, index, value) => {
-      setFormData(prev => ({
-        ...prev,
-        [fieldName]: prev[fieldName].map((item, i) => i === index ? value : item)
-      }));
+    const handleArrayFieldChange = (fieldName, indexOrValue, value) => {
+      // If only 2 parameters are passed, treat as array replacement
+      if (value === undefined) {
+        setFormData(prev => ({
+          ...prev,
+          [fieldName]: indexOrValue
+        }));
+      } else {
+        // If 3 parameters are passed, treat as single field update
+        setFormData(prev => ({
+          ...prev,
+          [fieldName]: prev[fieldName].map((item, i) => i === indexOrValue ? value : item)
+        }));
+      }
     };
   
     const handleLanguageChange = (index, value) => {
@@ -428,6 +437,8 @@ const [userId, setUserId] = useState(null);
     const handleInputChange = (e) => {
       const { name, value, type, checked } = e.target;
       
+      console.log('handleInputChange called:', { name, value, type, checked });
+      
       if (name.startsWith('maidDetails.')) {
         const field = name.replace('maidDetails.', '');
         setFormData(prev => ({
@@ -443,87 +454,160 @@ const [userId, setUserId] = useState(null);
           [name]: type === 'checkbox' ? checked : value
         }));
       }
+      
+      // Debug: log the updated formData after state update
+      setTimeout(() => {
+        console.log('formData after update:', formData);
+      }, 0);
     };
   
   const handleSubmit = async (e) => {
-    console.log(formData)
     e.preventDefault();
     setIsSubmitting(true);
-  
+
+    // Debug: log the current formData state right before submission
+    console.log('=== FORM SUBMISSION DEBUG ===');
+    console.log('Current formData state:', formData);
+    console.log('formData.name:', formData.name);
+    console.log('formData.country:', formData.country);
+    console.log('formData.supplier:', formData.supplier);
+    console.log('formData.DOB:', formData.DOB);
+    console.log('formData.skills:', formData.skills);
+    console.log('formData.languages:', formData.languages);
+    console.log('formData.type:', formData.type);
+    console.log('=== END DEBUG ===');
+
     try {
-      let imageUrl = formData.imageUrl;
-  
-      // 🖼 Upload image if it's a File object
-      if (formData.imageFile instanceof File) {
-        // const uploadData = new FormData();
-        // uploadData.append('file', formData.imageFile);
-  
-        const uploadData = new FormData();
-        uploadData.append('file', formData.imageFile);
-        uploadData.append('customFilename', formData.customFilename); // pass renamed filename
-  
-        const uploadResponse = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.UPLOAD), {
+      // 🖼️ Handle image upload if there's a new image file
+      let imageUrl = formData.imageUrl; // Default to existing URL if no new file
+
+      // Prepare maid data with proper formatting
+      const maidData = {
+        ...formData,
+        NumChildren: parseInt(formData.NumChildren) || 0,
+        salary: parseInt(formData.salary) || 500, // Default to minimum required salary
+        DOB: formData.DOB,
+        maritalStatus: formData.maritalStatus || 'Single',
+        loan: parseInt(formData.loan) || 0,
+        height: parseInt(formData.height) || 160, // Default to valid height
+        weight: parseInt(formData.weight) || 55, // Default to valid weight
+        skills: formData.skills && formData.skills.length > 0 && formData.skills.some(skill => skill.trim() !== '')
+          ? formData.skills.filter(skill => skill.trim() !== '')
+          : ['Cooking'], // Default skill if none provided
+        languages: formData.languages && formData.languages.length > 0 && formData.languages.some(lang => lang.trim() !== '')
+          ? formData.languages.filter(lang => lang.trim() !== '')
+          : ['English'], // Default language if none provided
+        type: formData.type && formData.type.length > 0 && formData.type.some(t => t.trim() !== '')
+          ? formData.type.filter(t => t.trim() !== '')
+          : ['New/Fresh'], // Default type if none provided
+        isActive: formData.isActive ?? false,
+        isEmployed: formData.isEmployed ?? false,
+        supplier: formData.supplier || 'Default Supplier',
+        maidDetails: {
+          description: formData.maidDetails?.description || '',
+          restDay: parseInt(formData.maidDetails?.restDay) || 0,
+          highestEducation: formData.maidDetails?.highestEducation || '',
+          englishRating: parseInt(formData.maidDetails?.englishRating) || 0,
+          chineseRating: parseInt(formData.maidDetails?.chineseRating) || 0,
+          dialectRating: parseInt(formData.maidDetails?.dialectRating) || 0,
+          religion: formData.maidDetails?.religion || '',
+          employmentHistory: formData.maidDetails?.employmentHistory || ''
+        },
+        employmentDetails: formData.employmentDetails && formData.employmentDetails.length > 0
+          ? formData.employmentDetails.map(detail => ({
+              country: detail.country || 'Singapore',
+              startDate: detail.startDate || null,
+              endDate: detail.endDate || null,
+              employerDescription: detail.employerDescription || 'Default description',
+              noOfFamilyMember: parseInt(detail.noOfFamilyMember) || 1,
+              reasonOfLeaving: detail.reasonOfLeaving || 'Contract finished',
+              mainJobScope: detail.mainJobScope || 'General housekeeping'
+            }))
+          : []
+      };
+
+      // Debug logging - show what we're working with
+      console.log('Original formData:', formData);
+      console.log('Processed maidData:', maidData);
+      console.log('Key fields check:');
+      console.log('- name:', maidData.name);
+      console.log('- country:', maidData.country);
+      console.log('- supplier:', maidData.supplier);
+      console.log('- DOB:', maidData.DOB);
+      console.log('- skills:', maidData.skills);
+      console.log('- languages:', maidData.languages);
+      console.log('- type:', maidData.type);
+
+      if (formData.imageFile) {
+        // Create FormData for the maid creation with image
+        const maidFormData = new FormData();
+        
+        // Add the image file
+        maidFormData.append('image', formData.imageFile);
+        
+        // Add all form data as JSON string (except image which is handled separately)
+        maidFormData.append('data', JSON.stringify(maidData));
+
+        // Debug logging
+        console.log('Sending maid data with image:', maidData);
+        console.log('FormData contents:');
+        for (let [key, value] of maidFormData.entries()) {
+          console.log(`${key}:`, value);
+        }
+
+        // Send directly to maid creation endpoint
+        const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.MAID), {
           method: 'POST',
           credentials: 'include',
-          body: uploadData,
+          body: maidFormData,
         });
-  
-        if (!uploadResponse.ok) {
-          throw new Error('Image upload failed');
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Maid added successfully:', result);
+          resetForm();
+          setIsModalOpen(false);
+          alert('Maid added successfully!');
+        } else {
+          const errorData = await response.json();
+          console.error('Server error:', errorData);
+          throw new Error(errorData.message || 'Failed to add maid');
         }
-  
-        const uploadResult = await uploadResponse.json();
-        console.log(uploadResult)
-        imageUrl = uploadResult.filePath; // assume backend returns { url: "/uploads/image.jpg" }
-      }
-  
-      // 🧹 Clean & prepare final maid data
-      const submitData = {
-        ...formData,
-        imageUrl,
-        NumChildren:  parseInt(formData.NumChildren),
-        salary: parseInt(formData.salary),
-        DOB: formData.DOB,
-        maritalStatus:formData.maritalStatus,
-        loan: parseInt(formData.loan),
-        skills: formData.skills.filter(skill => skill.trim() !== ''),
-        languages: formData.languages.filter(lang => lang.trim() !== ''),
-        type: formData.type.filter(t => t.trim() !== ''),
-        maidDetails: {
-          ...formData.maidDetails,
-          restDay: parseInt(formData.maidDetails.restDay)
-        },
-        employmentDetails: formData.employmentDetails
-        // .map(detail => ({
-        //   ...detail,
-        //   noOfFamilyMember: parseInt(detail.noOfFamilyMember),
-        //   startDate: detail.startDate ? new Date(detail.startDate).toISOString() : null,
-        //   endDate: detail.endDate ? new Date(detail.endDate).toISOString() : null
-        // }))
-      };
-  
-      // 📨 Submit maid record
-      const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.MAID), {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submitData),
-      });
-  
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Maid added successfully:', result);
-        resetForm();
-        setIsModalOpen(false);
-        alert('Maid added successfully!');
       } else {
-        throw new Error('Failed to add maid');
+        // No new image file, send as JSON without image
+        const submitData = {
+          ...maidData,
+          imageUrl
+        };
+
+        // Debug logging
+        console.log('Sending maid data without image:', submitData);
+
+        // Submit maid record without image
+        const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.MAID), {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(submitData),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Maid added successfully:', result);
+          resetForm();
+          setIsModalOpen(false);
+          alert('Maid added successfully!');
+        } else {
+          const errorData = await response.json();
+          console.error('Server error:', errorData);
+          throw new Error(errorData.message || 'Failed to add maid');
+        }
       }
     } catch (error) {
       console.error('Error adding maid:', error);
-      alert('Error adding maid. Please try again.');
+      alert(`Error adding maid: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -538,9 +622,14 @@ const [userId, setUserId] = useState(null);
         salary: '',
         loan:'',
         DOB: '',
-        skills: [''],
-        languages: [''],
-        type: [''],
+        height: '',
+        weight: '',
+        Religion: '',
+        maritalStatus: 'Single',
+        NumChildren: '',
+        skills: ['Cooking'], // Default skill
+        languages: ['English'], // Default language
+        type: ['New/Fresh'], // Default type
         isActive: true,
         isEmployed: false,
         supplier: '',
@@ -554,17 +643,7 @@ const [userId, setUserId] = useState(null);
           religion: '',
           employmentHistory: ''
         },
-        employmentDetails: [
-        //   {
-        //   country: '',
-        //   startDate: null,
-        //   endDate: null,
-        //   employerDescription: '',
-        //   noOfFamilyMember: '',
-        //   reasonOfLeaving: '',
-        //   mainJobScope: ''
-        // }
-      ]
+        employmentDetails: []
       });
     };
   
