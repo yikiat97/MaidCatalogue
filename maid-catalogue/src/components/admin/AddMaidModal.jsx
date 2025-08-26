@@ -70,6 +70,28 @@ const AddMaidModal = ({
     });
   });
 
+  // Validate age (must be at least 18 years old)
+  const validateAge = (dateOfBirth) => {
+    if (!dateOfBirth) return true; // Allow empty for now, will be required on submit
+    
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age >= 18;
+  };
+
+  // Get age validation message
+  const getAgeValidationMessage = () => {
+    if (!formData.DOB) return '';
+    return validateAge(formData.DOB) ? '' : 'Maid must be at least 18 years old';
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -91,12 +113,19 @@ const AddMaidModal = ({
 
         <form onSubmit={(e) => {
           e.preventDefault(); // Prevent default form submission
+          
+          // Client-side validation
+          if (formData.DOB && !validateAge(formData.DOB)) {
+            alert('Maid must be at least 18 years old. Please select a valid date of birth.');
+            return;
+          }
+          
           console.log('Form submit event triggered');
           console.log('Form data before submit:', formData);
           handleSubmit(e);
         }} className="p-6 space-y-6">
           {/* Debug Section */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          {/* <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <h4 className="text-lg font-medium text-yellow-800 mb-2">Debug Info</h4>
             <div className="text-sm text-yellow-700 space-y-1">
               <p>Name: {formData.name || 'EMPTY'}</p>
@@ -117,7 +146,7 @@ const AddMaidModal = ({
             >
               Log Form State
             </button>
-          </div>
+          </div> */}
 
           {/* Image Upload Section */}
           <div className="bg-gray-50 rounded-lg p-4">
@@ -143,6 +172,44 @@ const AddMaidModal = ({
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Status Section */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <div className="flex items-center space-x-6">
+              <label className="flex items-center space-x-2">
+                <div className="relative inline-block w-12 h-6 transition-colors duration-200 ease-in-out">
+                  <input
+                    type="checkbox"
+                    name="isActive"
+                    checked={formData.isActive}
+                    onChange={(e) => handleInputChange({ target: { name: 'isActive', value: e.target.checked } })}
+                    className="sr-only"
+                  />
+                                     <div className={`w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${
+                     formData.isActive ? 'bg-blue-600' : 'bg-gray-300'
+                   }`}>
+                     <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200 ease-in-out ${
+                       formData.isActive ? 'translate-x-6' : 'translate-x-1'
+                     }`} style={{ marginTop: '2px' }} />
+                   </div>
+                </div>
+                <span className="text-sm font-medium text-gray-700">
+                  {formData.isActive ? 'Published' : 'Draft'}
+                </span>
+              </label>
+              
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  name="isEmployed"
+                  checked={formData.isEmployed}
+                  onChange={(e) => handleInputChange({ target: { name: 'isEmployed', value: e.target.checked } })}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-gray-700">Currently Employed</span>
+              </label>
+            </div>
           </div>
 
           {/* Basic Information Section */}
@@ -198,19 +265,29 @@ const AddMaidModal = ({
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Date of Birth *
-                  </label>
-                  <input
-                    type="date"
-                    name="DOB"
-                    value={formData.DOB}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+                                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">
+                     Date of Birth *
+                   </label>
+                   <input
+                     type="date"
+                     name="DOB"
+                     value={formData.DOB}
+                     onChange={handleInputChange}
+                     required
+                     max={new Date().toISOString().split('T')[0]} // Prevent future dates
+                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                       formData.DOB && !validateAge(formData.DOB) 
+                         ? 'border-red-300 focus:ring-red-500' 
+                         : 'border-gray-300 focus:ring-blue-500'
+                     }`}
+                   />
+                   {formData.DOB && !validateAge(formData.DOB) && (
+                     <p className="mt-1 text-sm text-red-600">
+                       {getAgeValidationMessage()}
+                     </p>
+                   )}
+                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -407,7 +484,7 @@ const AddMaidModal = ({
                   </div>
                 </div>
 
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Languages *
                   </label>
@@ -430,7 +507,7 @@ const AddMaidModal = ({
                       </label>
                     ))}
                   </div>
-                </div>
+                </div> */}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -521,7 +598,7 @@ const AddMaidModal = ({
                   </div>
                 </div>
 
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Employment History
                   </label>
@@ -534,7 +611,7 @@ const AddMaidModal = ({
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Previous work experience..."
                   />
-                </div>
+                </div> */}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -734,32 +811,7 @@ const AddMaidModal = ({
             )}
           </div>
 
-          {/* Status Section */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex items-center space-x-6">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="isActive"
-                  checked={formData.isActive}
-                  onChange={(e) => handleInputChange({ target: { name: 'isActive', value: e.target.checked } })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm font-medium text-gray-700">Active</span>
-              </label>
-              
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="isEmployed"
-                  checked={formData.isEmployed}
-                  onChange={(e) => handleInputChange({ target: { name: 'isEmployed', value: e.target.checked } })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm font-medium text-gray-700">Currently Employed</span>
-              </label>
-            </div>
-          </div>
+
 
           {/* Form Actions */}
           <div className="flex items-center justify-end space-x-4 pt-6 border-t">

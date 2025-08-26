@@ -202,7 +202,8 @@ export default function Catalogue() {
           <Box sx={{ 
             flexShrink: 0, 
             width: { xs: '100%', lg: 320 },
-            mb: { xs: 3, lg: 0 }
+            mb: { xs: 3, lg: 0 },
+            mt: { xs: '20px', lg: '20px'},
           }}>
             <Paper sx={{ 
               borderRadius: 3,
@@ -215,6 +216,7 @@ export default function Catalogue() {
                 p: 3,
                 background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryLight} 100%)`,
                 color: 'white'
+                
               }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
                   Refine Search
@@ -321,7 +323,7 @@ export default function Catalogue() {
 
               {/* Maid Cards Grid */}
               {filteredMaids.length > 0 ? (
-                <Grid container spacing={2} justifyContent="center">
+                <Grid container spacing={4} justifyContent="center">
                   {filteredMaids.map((maid) => (
                     <Grid 
                       item 

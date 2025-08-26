@@ -846,14 +846,25 @@ const EditMaidModal = ({
           <div className="bg-gray-50 rounded-lg p-4">
             <div className="flex items-center space-x-6">
               <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="isActive"
-                  checked={formData.isActive}
-                  onChange={handleInputChange}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm font-medium text-gray-700">Active</span>
+                <div className="relative inline-block w-12 h-6 transition-colors duration-200 ease-in-out">
+                  <input
+                    type="checkbox"
+                    name="isActive"
+                    checked={formData.isActive}
+                    onChange={handleInputChange}
+                    className="sr-only"
+                  />
+                                     <div className={`w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${
+                     formData.isActive ? 'bg-blue-600' : 'bg-gray-300'
+                   }`}>
+                     <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200 ease-in-out ${
+                       formData.isActive ? 'translate-x-6' : 'translate-x-1'
+                     }`} style={{ marginTop: '2px' }} />
+                   </div>
+                </div>
+                <span className="text-sm font-medium text-gray-700">
+                  {formData.isActive ? 'Published' : 'Draft'}
+                </span>
               </label>
               
               <label className="flex items-center space-x-2">

@@ -48,19 +48,19 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   flexShrink: 0,
   backgroundColor: brandColors.surface,
   borderBottom: `1px solid ${brandColors.border}`,
-  boxShadow: '0 2px 8px rgba(12, 25, 27, 0.1)',
-  padding: '0 24px',
-  minHeight: '70px',
+  boxShadow: '0 4px 20px rgba(12, 25, 27, 0.15)',
+  padding: '0 32px',
+  minHeight: '100px', // Much bigger height
 }));
 
 const NavButton = styled(Button)(({ theme, active }) => ({
   color: active ? brandColors.primary : brandColors.text,
   backgroundColor: active ? alpha(brandColors.primary, 0.1) : 'transparent',
   borderRadius: '8px',
-  fontWeight: 600,
-  fontSize: '0.95rem',
-  padding: '10px 20px',
-  margin: '0 4px',
+  fontWeight: 700, // Bolder font weight
+  fontSize: '1.1rem', // Bigger font size
+  padding: '16px 24px', // Bigger padding
+  margin: '0 8px',
   textTransform: 'none',
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   border: active ? `2px solid ${brandColors.primary}` : '2px solid transparent',
@@ -69,8 +69,8 @@ const NavButton = styled(Button)(({ theme, active }) => ({
   '&:hover': {
     backgroundColor: alpha(brandColors.primary, 0.08),
     color: brandColors.primary,
-    transform: 'translateY(-1px)',
-    boxShadow: `0 2px 8px ${alpha(brandColors.primary, 0.2)}`,
+    transform: 'translateY(-2px)',
+    boxShadow: `0 4px 12px ${alpha(brandColors.primary, 0.2)}`,
   },
   '&::before': {
     content: '""',
@@ -89,19 +89,19 @@ const NavButton = styled(Button)(({ theme, active }) => ({
 
 const AuthButton = styled(Button)(({ variant }) => ({
   borderRadius: '8px',
-  fontWeight: 600,
-  fontSize: '0.95rem',
-  padding: variant === 'contained' ? '10px 20px' : '8px 16px',
+  fontWeight: 700, // Bolder font weight
+  fontSize: '1.1rem', // Bigger font size
+  padding: variant === 'contained' ? '16px 32px' : '14px 28px', // Bigger padding
   textTransform: 'none',
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   ...(variant === 'contained' ? {
     background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryLight} 100%)`,
     color: 'white',
-    boxShadow: `0 2px 8px ${alpha(brandColors.primary, 0.3)}`,
+    boxShadow: `0 4px 15px ${alpha(brandColors.primary, 0.4)}`,
     '&:hover': {
       background: `linear-gradient(135deg, ${brandColors.primaryDark} 0%, ${brandColors.primary} 100%)`,
-      boxShadow: `0 4px 12px ${alpha(brandColors.primary, 0.4)}`,
-      transform: 'translateY(-1px)',
+      boxShadow: `0 6px 20px ${alpha(brandColors.primary, 0.5)}`,
+      transform: 'translateY(-2px)',
     }
   } : {
     color: brandColors.text,
@@ -110,7 +110,7 @@ const AuthButton = styled(Button)(({ variant }) => ({
       backgroundColor: alpha(brandColors.primary, 0.08),
       borderColor: brandColors.primary,
       color: brandColors.primary,
-      transform: 'translateY(-1px)',
+      transform: 'translateY(-2px)',
     }
   })
 }));
@@ -118,14 +118,14 @@ const AuthButton = styled(Button)(({ variant }) => ({
 const LogoContainer = styled(Box)({
   display: 'flex',
   alignItems: 'center',
-  gap: '12px',
+  gap: '16px',
   '& img': {
-    height: '40px',
-    filter: 'drop-shadow(0 1px 4px rgba(255, 145, 77, 0.2))',
+    height: '100px', 
+    filter: 'drop-shadow(0 2px 8px rgba(255, 145, 77, 0.3))',
     transition: 'all 0.3s ease',
     '&:hover': {
       transform: 'scale(1.05)',
-      filter: 'drop-shadow(0 2px 8px rgba(255, 145, 77, 0.3))',
+      filter: 'drop-shadow(0 4px 12px rgba(255, 145, 77, 0.4))',
     }
   }
 });
@@ -134,8 +134,8 @@ const NavIcon = styled(Box)({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  width: '18px',
-  height: '18px',
+  width: '20px', // Bigger icon size
+  height: '20px',
   marginRight: '8px',
   transition: 'all 0.3s ease',
 });
@@ -190,7 +190,7 @@ return (
     <AppBar
       position="fixed"
       sx={{
-        boxShadow: '0 2px 8px rgba(12, 25, 27, 0.1)',
+        boxShadow: '0 4px 20px rgba(12, 25, 27, 0.15)',
         bgcolor: brandColors.surface,
         borderBottom: `1px solid ${brandColors.border}`,
         zIndex: 1200,
@@ -224,7 +224,7 @@ return (
                   <NavIcon>
                     {React.cloneElement(item.icon, {
                       sx: { 
-                        fontSize: '16px',
+                        fontSize: '18px', // Bigger icon size
                         color: isActive(item.path) ? brandColors.primary : brandColors.textSecondary
                       }
                     })}
@@ -249,18 +249,18 @@ return (
                   sx={{
                     color: brandColors.primary,
                     backgroundColor: alpha(brandColors.primary, 0.1),
-                    width: 40,
-                    height: 40,
+                    width: 48, // Bigger button
+                    height: 48,
                     border: `1px solid ${alpha(brandColors.primary, 0.2)}`,
                     transition: 'all 0.3s ease',
                     '&:hover': {
                       backgroundColor: alpha(brandColors.primary, 0.2),
                       transform: 'scale(1.05)',
-                      boxShadow: `0 2px 8px ${alpha(brandColors.primary, 0.2)}`,
+                      boxShadow: `0 4px 12px ${alpha(brandColors.primary, 0.3)}`,
                     }
                   }}
                 >
-                  <AccountCircleRoundedIcon sx={{ fontSize: 20 }} />
+                  <AccountCircleRoundedIcon sx={{ fontSize: 24 }} /> {/* Bigger icon */}
                 </IconButton>
                 <AuthButton 
                   variant="outlined" 
@@ -298,8 +298,8 @@ return (
                 sx={{
                   color: brandColors.primary,
                   backgroundColor: alpha(brandColors.primary, 0.1),
-                  width: 40,
-                  height: 40,
+                  width: 48, // Bigger button
+                  height: 48,
                   border: `1px solid ${alpha(brandColors.primary, 0.2)}`,
                   '&:hover': {
                     backgroundColor: alpha(brandColors.primary, 0.2),
@@ -307,7 +307,7 @@ return (
                   }
                 }}
               >
-                <AccountCircleRoundedIcon sx={{ fontSize: 20 }} />
+                <AccountCircleRoundedIcon sx={{ fontSize: 24 }} /> {/* Bigger icon */}
               </IconButton>
             )}
             <IconButton 
@@ -315,8 +315,8 @@ return (
               sx={{
                 color: brandColors.text,
                 backgroundColor: alpha(brandColors.text, 0.05),
-                width: 40,
-                height: 40,
+                width: 48, // Bigger button
+                height: 48,
                 border: `1px solid ${alpha(brandColors.border, 0.3)}`,
                 '&:hover': {
                   backgroundColor: alpha(brandColors.primary, 0.1),
@@ -325,7 +325,7 @@ return (
                 }
               }}
             >
-              <MenuIcon />
+              <MenuIcon sx={{ fontSize: 24 }} /> {/* Bigger icon */}
             </IconButton>
           </Box>
 
@@ -336,10 +336,10 @@ return (
             onClose={toggleDrawer(false)}
             PaperProps={{
               sx: {
-                top: '70px', // Fixed navbar height
+                top: '100px', // Updated navbar height
                 background: brandColors.surface,
                 borderBottom: `1px solid ${brandColors.border}`,
-                boxShadow: '0 4px 16px rgba(12, 25, 27, 0.15)',
+                boxShadow: '0 4px 20px rgba(12, 25, 27, 0.15)',
               },
             }}
           >
@@ -352,6 +352,8 @@ return (
                     color: brandColors.text,
                     backgroundColor: alpha(brandColors.text, 0.05),
                     border: `1px solid ${alpha(brandColors.border, 0.3)}`,
+                    width: 48, // Bigger button
+                    height: 48,
                     '&:hover': {
                       backgroundColor: alpha(brandColors.primary, 0.1),
                       color: brandColors.primary,
@@ -359,7 +361,7 @@ return (
                     }
                   }}
                 >
-                  <CloseRoundedIcon />
+                  <CloseRoundedIcon sx={{ fontSize: 24 }} /> {/* Bigger icon */}
                 </IconButton>
               </Box>
 
@@ -376,7 +378,7 @@ return (
                       <NavIcon>
                         {React.cloneElement(item.icon, {
                           sx: { 
-                            fontSize: '18px',
+                            fontSize: '20px', // Bigger icon size
                             color: isActive(item.path) ? brandColors.primary : brandColors.textSecondary
                           }
                         })}
@@ -387,9 +389,9 @@ return (
                       color: isActive(item.path) ? brandColors.primary : brandColors.text,
                       backgroundColor: isActive(item.path) ? alpha(brandColors.primary, 0.1) : 'transparent',
                       borderRadius: '8px',
-                      fontWeight: 600,
-                      fontSize: '1rem',
-                      py: 2,
+                      fontWeight: 700, // Bolder font weight
+                      fontSize: '1.1rem', // Bigger font size
+                      py: 2.5, // Bigger padding
                       px: 3,
                       textTransform: 'none',
                       border: isActive(item.path) ? `2px solid ${brandColors.primary}` : '2px solid transparent',

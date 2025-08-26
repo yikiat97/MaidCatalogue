@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import API_CONFIG from '../../config/api.js';
 
 import { Search, Home, Package, Users, UserCheck, ShoppingCart, Store, Settings, LogOut, Bell, X, Plus, Trash2, Filter, ChevronDown, ChevronUp, Menu } from 'lucide-react';
@@ -10,6 +10,7 @@ import AdminLogo from '../../components/admin/AdminLogo';
 
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [generatedLink, setGeneratedLink] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
@@ -20,11 +21,65 @@ const Dashboard = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-const { userId: userIdParam } = useParams(); // ✅ use clearer alias
-const [userId, setUserId] = useState(null);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const { userId: userIdParam } = useParams(); // ✅ use clearer alias
+  const [userId, setUserId] = useState(null);
   const [recommendedIds, setRecommendedIds] = useState([]);
   
+  // Handle unauthorized access by redirecting to login
+  const handleUnauthorizedAccess = (action = 'perform this action') => {
+    // Clear any stored data
+    localStorage.removeItem('adminToken');
+    sessionStorage.clear();
+    
+    // Show error message briefly
+    setError(`Access denied or session expired. You cannot ${action}. Redirecting to login...`);
+    
+    // Redirect to admin login after a short delay
+    setTimeout(() => {
+      navigate('/system-access');
+    }, 2000);
+  };
 
+  // Check if response indicates unauthorized access
+  const checkAuthStatus = (response, action = 'perform this action') => {
+    if (response.status === 401 || response.status === 403) {
+      handleUnauthorizedAccess(action);
+      return true; // Indicates unauthorized
+    }
+    return false; // Authorized
+  };
+
+  // Manual logout function that redirects to login
+  const handleLogout = async () => {
+    try {
+      // Call logout endpoint
+      const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.LOGOUT), {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        console.log('Logout successful');
+        setSuccess('You have been logged out successfully. Redirecting to login...');
+      } else {
+        console.error('Logout failed');
+        setError('Logout failed. Redirecting to login...');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      setError('Logout failed due to network error. Redirecting to login...');
+    }
+    
+    // Always clear local data and redirect after a short delay
+    setTimeout(() => {
+      // Clear any stored data
+      localStorage.removeItem('adminToken');
+      sessionStorage.clear();
+      navigate('/system-access');
+    }, 2000);
+  };
 
   const [formData, setFormData] = useState({
     name: '',
@@ -33,19 +88,23 @@ const [userId, setUserId] = useState(null);
     salary: '',
     loan: '',
     DOB: '',
+    height: '',
+    weight: '',
+    Religion: '',
     maritalStatus: '',
-    skills: [''],
-    languages: [''],
-    type: [''],
+    NumChildren: '',
+    skills: [],
+    languages: [],
+    type: [],
     isActive: true,
     isEmployed: false,
     supplier: '',
     maidDetails: {
       description: '',
       restDay: '',
-      englishRating: 0,
-      chineseRating: 0,
-      dialectRating: 0,
+      englishRating: '',
+      chineseRating: '',
+      dialectRating: '',
       highestEducation: '',
       religion: '',
       employmentHistory: ''
@@ -77,7 +136,7 @@ const [userId, setUserId] = useState(null);
   const countryOptions = ['Philippines', 'Indonesia', 'Myanmar'];
   const maritalStatusOptions = ['Single', 'Married', 'Widowed', 'Divorced'];
   const religionOptions = ['Christian', 'Muslim', 'Buddhist', 'Hindu', 'Catholic', 'Others'];
-  const availabilityOptions = ['Available', 'Employed'];
+  const availabilityOptions = ['Available', 'Employed', 'Draft'];
 
   const [maids, setMaids] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -88,18 +147,24 @@ const [userId, setUserId] = useState(null);
       const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.MAIDS), {
         credentials: 'include'
       });
+      
+      // Check if response indicates unauthorized access
+      if (checkAuthStatus(response, 'view maids')) {
+        return; // Exit early if unauthorized
+      }
+      
       const data = await response.json();
 
       const formatted = data.map((maid) => ({
         id: maid.id,
         supplier: maid.supplier,
-        photo: '👩', 
+        imageUrl: maid.imageUrl,
         name: maid.name,
         nationality: maid.country,
         religion: maid.Religion,
         ageWeightHeight: `${calculateAge(maid.DOB)}yo/${maid.height}cm/${maid.weight}kg`,
         maritalStatus: `${maid.maritalStatus}/${maid.NumChildren}`,
-        availability: maid.isEmployed ? 'Employed' : 'Available',
+        availability: maid.isEmployed ? 'Employed' : (maid.isActive ? 'Available' : 'Draft'),
         // Add raw values for filtering
         age: calculateAge(maid.DOB),
         height: maid.height,
@@ -115,6 +180,10 @@ const [userId, setUserId] = useState(null);
       setMaids(formatted);
     } catch (err) {
       console.error('Failed to fetch maids:', err);
+      // Check if it's an auth error
+      if (err.message && (err.message.includes('401') || err.message.includes('403'))) {
+        handleUnauthorizedAccess('view maids');
+      }
     }
   };
 
@@ -131,18 +200,25 @@ const [userId, setUserId] = useState(null);
       const response = await fetch(API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.ADMIN.SEARCH_MAIDS, { query }), {
         credentials: 'include'
       });
+      
+      // Check if response indicates unauthorized access
+      if (checkAuthStatus(response, 'search maids')) {
+        setIsSearching(false);
+        return; // Exit early if unauthorized
+      }
+      
       const data = await response.json();
 
       const formatted = data.map((maid) => ({
         id: maid.id,
         supplier: maid.supplier,
-        photo: '👩', 
+        imageUrl: maid.imageUrl,
         name: maid.name,
         nationality: maid.country,
         religion: maid.Religion,
         ageWeightHeight: `${calculateAge(maid.DOB)}yo/${maid.height}cm/${maid.weight}kg`,
         maritalStatus: `${maid.maritalStatus}/${maid.NumChildren}`,
-        availability: maid.isEmployed ? 'Employed' : 'Available',
+        availability: maid.isEmployed ? 'Employed' : (maid.isActive ? 'Available' : 'Draft'),
         // Add raw values for filtering
         age: calculateAge(maid.DOB),
         height: maid.height,
@@ -158,6 +234,10 @@ const [userId, setUserId] = useState(null);
       setMaids(formatted);
     } catch (err) {
       console.error('Failed to search maids:', err);
+      // Check if it's an auth error
+      if (err.message && (err.message.includes('401') || err.message.includes('403'))) {
+        handleUnauthorizedAccess('search maids');
+      }
     } finally {
       setIsSearching(false);
     }
@@ -183,7 +263,31 @@ const [userId, setUserId] = useState(null);
   }, [searchQuery]);
 
   useEffect(() => {
-    fetchMaids();
+    // Check session validity on page load
+    const checkInitialSession = async () => {
+      try {
+        const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.MAIDS), {
+          method: 'HEAD', // Lightweight check
+          credentials: 'include'
+        });
+        
+        if (response.status === 401 || response.status === 403) {
+          handleUnauthorizedAccess('access the admin page');
+          return; // Don't fetch maids if unauthorized
+        }
+        
+        // If authorized, proceed with normal operations
+        fetchMaids();
+      } catch (error) {
+        console.error('Initial session check failed:', error);
+        // If we can't even check, assume unauthorized
+        handleUnauthorizedAccess('access the admin page');
+        return;
+      }
+    };
+    
+    checkInitialSession();
+    clearMessages(); // Clear any existing messages when component mounts
   }, []);
 
   useEffect(() => {
@@ -484,7 +588,7 @@ const [userId, setUserId] = useState(null);
       // Prepare maid data with proper formatting
       const maidData = {
         ...formData,
-        NumChildren: parseInt(formData.NumChildren) || 0,
+        NumChildren: formData.NumChildren !== null && formData.NumChildren !== undefined && formData.NumChildren !== '' ? parseInt(formData.NumChildren) : 0,
         salary: parseInt(formData.salary) || 500, // Default to minimum required salary
         DOB: formData.DOB,
         maritalStatus: formData.maritalStatus || 'Single',
@@ -562,12 +666,21 @@ const [userId, setUserId] = useState(null);
           body: maidFormData,
         });
 
+        // Check if response indicates unauthorized access
+        if (checkAuthStatus(response, 'add maids')) {
+          return; // Exit early if unauthorized
+        }
+
         if (response.ok) {
           const result = await response.json();
           console.log('Maid added successfully:', result);
+          setSuccess('Maid added successfully!');
           resetForm();
           setIsModalOpen(false);
-          alert('Maid added successfully!');
+          // Refresh the maid list to show the newly added maid
+          fetchMaids();
+          // Clear success message after 3 seconds
+          setTimeout(() => setSuccess(null), 3000);
         } else {
           const errorData = await response.json();
           console.error('Server error:', errorData);
@@ -593,43 +706,70 @@ const [userId, setUserId] = useState(null);
           body: JSON.stringify(submitData),
         });
 
+        // Check if response indicates unauthorized access
+        if (checkAuthStatus(response, 'add maids')) {
+          return; // Exit early if unauthorized
+        }
+
         if (response.ok) {
           const result = await response.json();
           console.log('Maid added successfully:', result);
+          setSuccess('Maid added successfully!');
           resetForm();
           setIsModalOpen(false);
-          alert('Maid added successfully!');
+          // Refresh the maid list to show the newly added maid
+          fetchMaids();
+          // Clear success message after 3 seconds
+          setTimeout(() => setSuccess(null), 3000);
         } else {
           const errorData = await response.json();
           console.error('Server error:', errorData);
-          throw new Error(errorData.message || 'Failed to add maid');
+          
+          // Handle different error message formats
+          let errorMessage = 'Failed to add maid';
+          if (errorData.errors && Array.isArray(errorData.errors)) {
+            // Format: { message: "Validation failed", errors: ["error1", "error2"] }
+            errorMessage = errorData.errors.join(', ');
+          } else if (errorData.message) {
+            // Format: { message: "error message" }
+            errorMessage = errorData.message;
+          }
+          
+          throw new Error(errorMessage);
         }
       }
     } catch (error) {
       console.error('Error adding maid:', error);
-      alert(`Error adding maid: ${error.message}`);
+      setError(`Error adding maid: ${error.message}`);
+      // Clear error message after 5 seconds
+      setTimeout(() => setError(null), 5000);
     } finally {
       setIsSubmitting(false);
     }
   };
   
   
-    const resetForm = () => {
-      setFormData({
+      const clearMessages = () => {
+    setError(null);
+    setSuccess(null);
+  };
+
+  const resetForm = () => {
+    setFormData({
         name: '',
         imageUrl: '',
         country: '',
         salary: '',
-        loan:'',
+        loan: '',
         DOB: '',
         height: '',
         weight: '',
         Religion: '',
-        maritalStatus: 'Single',
+        maritalStatus: '',
         NumChildren: '',
-        skills: ['Cooking'], // Default skill
-        languages: ['English'], // Default language
-        type: ['New/Fresh'], // Default type
+        skills: [], // Empty skills array
+        languages: [], // Empty languages array
+        type: [], // Empty type array
         isActive: true,
         isEmployed: false,
         supplier: '',
@@ -637,14 +777,15 @@ const [userId, setUserId] = useState(null);
           description: '',
           restDay: '',
           highestEducation: '',
-          englishRating: 0,
-          chineseRating: 0,
-          dialectRating: 0,
+          englishRating: '',
+          chineseRating: '',
+          dialectRating: '',
           religion: '',
           employmentHistory: ''
         },
         employmentDetails: []
       });
+      clearMessages(); // Clear any existing error/success messages
     };
   
     const getAvailabilityColor = (status) => {
@@ -1031,10 +1172,13 @@ const [userId, setUserId] = useState(null);
               <Settings className="w-5 h-5" />
               <span>Settings</span>
             </a>
-            <a href="/system-access" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+            <button 
+              onClick={handleLogout}
+              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100 w-full text-left"
+            >
               <LogOut className="w-5 h-5" />
               <span>Log Out</span>
-            </a>
+            </button>
           </div>
         </nav>
       </div>
@@ -1083,6 +1227,63 @@ const [userId, setUserId] = useState(null);
             </div>
           </div>
         </div>
+
+        {/* Error and Success Messages */}
+        {error && (
+          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-[60] bg-red-50 border-l-4 border-red-400 p-4 mx-4 rounded-md shadow-lg max-w-md">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+              <div className="ml-auto pl-3">
+                <div className="-mx-1.5 -my-1.5">
+                  <button
+                    onClick={() => setError(null)}
+                    className="inline-flex bg-red-50 rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
+                  >
+                    <span className="sr-only">Dismiss</span>
+                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M3.293 3.293a1 1 0 011.414 0L10 8.586l5.293-5.293a1 1 0 111.414 1.414L11.414 10l5.293 5.293a1 1 0 01-1.414 1.414L10 11.414l-5.293 5.293a1 1 0 01-1.414-1.414L8.586 10 3.293 4.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {success && (
+          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-[60] bg-green-50 border-l-4 border-green-400 p-4 mx-4 rounded-md shadow-lg max-w-md">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-green-700">{success}</p>
+              </div>
+              <div className="ml-auto pl-3">
+                <div className="-mx-1.5 -my-1.5">
+                  <button
+                    onClick={() => setSuccess(null)}
+                    className="inline-flex bg-green-50 rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50"
+                  >
+                    <span className="sr-only">Dismiss</span>
+                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M3.293 3.293a1 1 0 011.414 0L10 8.586l5.293-5.293a1 1 0 111.414 1.414L11.414 10l5.293 5.293a1 1 0 01-1.414 1.414L10 11.414l-5.293 5.293a1 1 0 01-1.414-1.414L8.586 10 3.293 4.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Enhanced Filters */}
         <div className="bg-white border-b flex-shrink-0">
@@ -1266,8 +1467,21 @@ const [userId, setUserId] = useState(null);
                   <div key={index} className="border rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm">
-                          {maid.photo}
+                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                          {maid.imageUrl ? (
+                            <img 
+                              src={API_CONFIG.buildImageUrl(maid.imageUrl)} 
+                              alt={maid.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div className={`w-full h-full flex items-center justify-center text-sm ${maid.imageUrl ? 'hidden' : ''}`}>
+                            👩
+                          </div>
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">{maid.name}</p>
@@ -1360,8 +1574,21 @@ const [userId, setUserId] = useState(null);
                             {maid.supplier}
                           </td>
                           <td className="px-3 py-4">
-                            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-sm">
-                              {maid.photo}
+                            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                              {maid.imageUrl ? (
+                                <img 
+                                  src={API_CONFIG.buildImageUrl(maid.imageUrl)} 
+                                  alt={maid.name}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div className={`w-full h-full flex items-center justify-center text-sm ${maid.imageUrl ? 'hidden' : ''}`}>
+                                👩
+                              </div>
                             </div>
                           </td>
                           <td className="px-3 py-4 text-sm font-medium text-gray-900 truncate" title={maid.name}>
@@ -1433,13 +1660,34 @@ const [userId, setUserId] = useState(null);
           isSubmitting={isSubmitting}
           handleSubmit={handleSubmit}
           resetForm={resetForm}
-          setIsModalOpen={setIsModalOpen}
+          setIsModalOpen={(open) => {
+            setIsModalOpen(open);
+            if (!open) {
+              clearMessages(); // Clear messages when modal is closed
+              resetForm(); // Reset form data when modal is closed
+            }
+          }}
           />
         )}
 
         {/* update Maid Modal */}
         {selectedMaid && (
-          <MaidDetailModal maidId={selectedMaid} onClose={() => setSelectedMaid(null)} />
+          <MaidDetailModal 
+            maidId={selectedMaid} 
+            onClose={() => {
+              setSelectedMaid(null);
+              clearMessages(); // Clear messages when modal is closed
+            }}
+            onError={(errorMessage) => {
+              setError(errorMessage);
+              setTimeout(() => setError(null), 5000);
+            }}
+            onSuccess={(successMessage) => {
+              setSuccess(successMessage);
+              setTimeout(() => setSuccess(null), 3000);
+            }}
+            onRefresh={fetchMaids}
+          />
         )}
 
         {/* Link Generator Modal */}

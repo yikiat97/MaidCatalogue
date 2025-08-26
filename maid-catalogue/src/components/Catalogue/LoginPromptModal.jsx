@@ -133,7 +133,7 @@ export default function LoginPromptModal({ open, onClose }) {
       {/* Content */}
       <DialogContent sx={{ p: 3, pt: 1 }}>
         <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Typography variant="body1" sx={{ 
+          {/* <Typography variant="body1" sx={{ 
             color: brandColors.textSecondary,
             fontSize: isMobile ? '0.9rem' : '1rem',
             lineHeight: 1.6,
@@ -141,7 +141,7 @@ export default function LoginPromptModal({ open, onClose }) {
           }}>
             To view clear, unblurred maid photos and access full profiles, 
             please create an account or sign in to your existing account.
-          </Typography>
+          </Typography> */}
           
           <Box sx={{ 
             display: 'flex', 
@@ -165,14 +165,14 @@ export default function LoginPromptModal({ open, onClose }) {
                 gap: 1
               }}>
                 <PersonAddIcon fontSize="small" />
-                New Users
+                New Users / Existing Users
               </Typography>
               <Typography variant="body2" sx={{ color: brandColors.textSecondary }}>
-                Create a free account to browse maid profiles, save favorites, and contact helpers directly.
+              Please login/sign up to see our helper's information,  browse maid profiles and save to your favorites.
               </Typography>
             </Box>
             
-            <Box sx={{
+            {/* <Box sx={{
               p: 2,
               borderRadius: 2,
               background: `linear-gradient(135deg, ${brandColors.secondary}10 0%, ${brandColors.secondaryLight}10 100%)`,
@@ -193,7 +193,7 @@ export default function LoginPromptModal({ open, onClose }) {
               <Typography variant="body2" sx={{ color: brandColors.textSecondary }}>
                 Sign in to access your saved favorites and continue browsing with full access.
               </Typography>
-            </Box>
+            </Box> */}
           </Box>
         </Box>
       </DialogContent>

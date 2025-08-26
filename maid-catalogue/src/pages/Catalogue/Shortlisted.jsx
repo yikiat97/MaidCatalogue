@@ -199,7 +199,7 @@ export default function Favorites() {
 
             {/* Maid Cards Grid */}
             {favoriteMaids.length > 0 ? (
-              <Grid container spacing={3} justifyContent="flex-start">
+              <Grid container spacing={4} justifyContent="flex-start">
                 {favoriteMaids.map((maid) => (
                   <Grid item xs={5} md={3} key={maid.id}>
                     <MaidCard 

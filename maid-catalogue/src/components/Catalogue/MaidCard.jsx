@@ -39,6 +39,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import Tooltip from '@mui/material/Tooltip';
 import API_CONFIG from '../../config/api.js';
 
+
 // Brand colors
 const brandColors = {
   primary: '#ff914d',
@@ -318,60 +319,60 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
   const getResponsiveStyles = () => {
     if (isMobile) {
       return {
-        cardHeight: 380, // Reduced height for mobile
-        imageHeight: 120, // Smaller image for mobile
-        chipFontSize: '0.55rem',
-        chipHeight: '16px',
-        nameFontSize: '0.75rem',
-        captionFontSize: '0.6rem',
-        bodyFontSize: '0.6rem',
-        salaryFontSize: '0.8rem',
-        iconSize: 10,
-        skillIconSize: 10, // Smaller skill icons
-        skillBoxSize: 18, // Smaller skill boxes
-        buttonPadding: '3px 8px',
-        contentPadding: 1, // Reduced padding
-        spacing: 0.5, // Tighter spacing
-        flagSize: { width: 12, height: 8 },
+        cardHeight: 320, // Reduced height for mobile
+        imageHeight: 140, // Increased image height for more portrait look
+        chipFontSize: '0.5rem',
+        chipHeight: '14px',
+        nameFontSize: '0.7rem',
+        captionFontSize: '0.55rem',
+        bodyFontSize: '0.55rem',
+        salaryFontSize: '0.75rem',
+        iconSize: 9,
+        skillIconSize: 9, // Smaller skill icons
+        skillBoxSize: 16, // Smaller skill boxes
+        buttonPadding: '2px 6px',
+        contentPadding: 0.75, // Reduced padding
+        spacing: 0.4, // Tighter spacing
+        flagSize: { width: 10, height: 7 },
         maxSkills: 2 // Show fewer skills on mobile
       };
     } else if (isTablet) {
       return {
-        cardHeight: 480, // Adjusted height for tablet
-        imageHeight: 180, // Adjusted image height
-        chipFontSize: '0.68rem',
-        chipHeight: '22px',
-        nameFontSize: '0.95rem',
-        captionFontSize: '0.72rem',
-        bodyFontSize: '0.73rem',
-        salaryFontSize: '1.05rem',
-        iconSize: 13,
-        skillIconSize: 15,
-        skillBoxSize: 26,
-        buttonPadding: '5px 14px',
-        contentPadding: 1.75,
-        spacing: 1.25,
-        flagSize: { width: 18, height: 13 },
+        cardHeight: 420, // Reduced height for tablet
+        imageHeight: 220, // Increased image height for more portrait look
+        chipFontSize: '0.65rem',
+        chipHeight: '20px',
+        nameFontSize: '0.9rem',
+        captionFontSize: '0.68rem',
+        bodyFontSize: '0.68rem',
+        salaryFontSize: '1rem',
+        iconSize: 12,
+        skillIconSize: 14,
+        skillBoxSize: 24,
+        buttonPadding: '4px 12px',
+        contentPadding: 1.5,
+        spacing: 1,
+        flagSize: { width: 16, height: 12 },
         maxSkills: 4
       };
     } else {
       return {
-        cardHeight: 520, // Taller for more content
-        imageHeight: 200, // Larger image
-        chipFontSize: '0.75rem',
-        chipHeight: '26px',
-        nameFontSize: '1.1rem', // Larger name
-        captionFontSize: '0.8rem',
-        bodyFontSize: '0.8rem',
-        salaryFontSize: '1.2rem', // Larger salary
-        iconSize: 15,
-        skillIconSize: 18, // Larger skill icons
-        skillBoxSize: 32, // Larger skill boxes
-        buttonPadding: '8px 20px', // Larger button
-        contentPadding: 2.25, // More padding
-        spacing: 1.75, // More spacing
-        flagSize: { width: 22, height: 16 },
-        maxSkills: 6 // Show more skills
+        cardHeight: 500, // Reduced height for more compact layout
+        imageHeight: 260, // Increased image height for more portrait look
+        chipFontSize: '0.7rem',
+        chipHeight: '24px',
+        nameFontSize: '1rem', // Slightly smaller name
+        captionFontSize: '0.75rem',
+        bodyFontSize: '0.75rem',
+        salaryFontSize: '1.1rem', // Slightly smaller salary
+        iconSize: 14,
+        skillIconSize: 16, // Smaller skill icons
+        skillBoxSize: 28, // Smaller skill boxes
+        buttonPadding: '6px 16px', // Smaller button
+        contentPadding: 2, // Reduced padding
+        spacing: 1.5, // Reduced spacing
+        flagSize: { width: 20, height: 15 },
+        maxSkills: 5 // Show fewer skills
       };
     }
   };
@@ -639,12 +640,12 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
       {/* Content - No longer clickable */}
       <CardContent 
         sx={{ 
-          p: styles.contentPadding, 
-          pb: styles.contentPadding - 0.5,
+          p: styles.contentPadding * 0.8, 
+          pb: styles.contentPadding * 0.6,
         }}
       >
                   {/* Name only */}
-          <Box sx={{ mb: styles.spacing }}>
+          <Box sx={{ mb: styles.spacing * 0.6 }}>
             <Typography 
               variant="h6" 
               sx={{ 
@@ -656,7 +657,7 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
                 letterSpacing: '-0.02em',
-                lineHeight: 1.3,
+                lineHeight: 1.2,
               }}
             >
               {maid.name}
@@ -683,8 +684,8 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
         {/* Country Flag, Age, and Physical Stats */}
         <Stack 
           direction="row" 
-          spacing={isMobile ? 1 : 1.5} 
-          sx={{ mb: styles.spacing, alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}
+          spacing={isMobile ? 0.5 : 1} 
+          sx={{ mb: styles.spacing * 0.7, alignItems: 'center', flexWrap: 'wrap', gap: 0.3 }}
         >
           {/* Country with Flag */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -749,7 +750,7 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
 
         {/* Mobile Height/Weight Row - Only show if space allows */}
         {isMobile && (maid.height || maid.weight) && (
-          <Stack direction="row" spacing={1} sx={{ mb: styles.spacing, alignItems: 'center' }}>
+          <Stack direction="row" spacing={0.5} sx={{ mb: styles.spacing * 0.7, alignItems: 'center' }}>
             {maid.height && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <HeightIcon sx={{ fontSize: styles.iconSize, color: brandColors.warning }} />
@@ -780,7 +781,7 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
         )}
 
         {/* Skills Section */}
-        <Box sx={{ mb: styles.spacing }}>
+        <Box sx={{ mb: styles.spacing * 0.8 }}>
           <Typography 
             variant="caption" 
             sx={{ 
@@ -789,8 +790,8 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
-              fontSize: isMobile ? '0.55rem' : '0.65rem',
-              mb: 0.5,
+              fontSize: isMobile ? '0.5rem' : '0.6rem',
+              mb: 0.3,
               display: 'block'
             }}
           >
@@ -800,7 +801,7 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
             direction="row" 
             sx={{ 
               flexWrap: 'wrap', 
-              gap: isMobile ? 0.25 : 0.5, // Tighter gap on mobile
+              gap: isMobile ? 0.2 : 0.4, // Even tighter gap
               minHeight: styles.skillBoxSize,
               overflow: 'hidden', // Prevent overflow
             }}
@@ -863,13 +864,13 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
         </Box>
 
         <Divider sx={{ 
-          my: styles.spacing,
+          my: styles.spacing * 0.6,
           borderColor: brandColors.border,
           opacity: 0.6
         }} />
 
         {/* Bottom Section - Updated Layout */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 1 : 1.5 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 0.7 : 1.2 }}>
           {/* Salary and Compare Row */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             {/* Salary with Info Tooltip */}
@@ -1007,8 +1008,8 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
           {/* Action Buttons Row */}
           <Box sx={{ 
             display: 'flex', 
-            gap: 1, 
-            mt: 0.5,
+            gap: 0.7, 
+            mt: 0.3,
             flexDirection: isMobile ? 'column' : 'row'
           }}>
             {/* WhatsApp Button - Left/Top */}
@@ -1019,23 +1020,23 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
                 if (!isAuthenticated) {
                   setShowLoginPrompt(true);
                 } else {
-                  const message = `Hi, I'm interested in maid ID ${maid.id}.`;
+                  const message = `Hi, I'm interested in maid ${maid.name} (ID: ${maid.id}) Link: ${API_CONFIG.BASE_URL}/maid/${maid.id}.`;
                   window.open(`https://wa.me/88270086?text=${encodeURIComponent(message)}`, '_blank');
                 }
               }}
-              startIcon={<WhatsAppIcon sx={{ fontSize: isMobile ? 12 : 16 }} />}
+              startIcon={<WhatsAppIcon sx={{ fontSize: isMobile ? 10 : 14 }} />}
               variant="contained"
               size="small"
               sx={{
                 fontFamily: professionalFonts.accent,
                 background: `linear-gradient(135deg, #25D366 0%, #128C7E 100%)`,
                 color: '#FFFFFF',
-                borderRadius: isMobile ? '12px' : '20px',
-                fontSize: isMobile ? '0.65rem' : '0.75rem',
+                borderRadius: isMobile ? '10px' : '16px',
+                fontSize: isMobile ? '0.6rem' : '0.7rem',
                 fontWeight: 600,
                 textTransform: 'none',
-                padding: isMobile ? '4px 8px' : '8px 16px',
-                minHeight: isMobile ? '32px' : 'auto',
+                padding: isMobile ? '3px 6px' : '6px 12px',
+                minHeight: isMobile ? '28px' : '32px',
                 flex: isMobile ? 'none' : 1,
                 width: isMobile ? '100%' : 'auto',
                 letterSpacing: '0.02em',
@@ -1064,12 +1065,12 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
                 fontFamily: professionalFonts.accent,
                 color: brandColors.primary,
                 borderColor: brandColors.primary,
-                borderRadius: isMobile ? '12px' : '20px',
-                fontSize: isMobile ? '0.65rem' : '0.75rem',
+                borderRadius: isMobile ? '10px' : '16px',
+                fontSize: isMobile ? '0.6rem' : '0.7rem',
                 fontWeight: 600,
                 textTransform: 'none',
-                padding: isMobile ? '4px 8px' : '8px 16px',
-                minHeight: isMobile ? '32px' : 'auto',
+                padding: isMobile ? '3px 6px' : '6px 12px',
+                minHeight: isMobile ? '28px' : '32px',
                 flex: isMobile ? 'none' : 1,
                 width: isMobile ? '100%' : 'auto',
                 '&:hover': {

@@ -81,7 +81,19 @@ export default function Login() {
         }
       } else {
         const errorData = await res.json();
-        setError(errorData.message || 'Login failed. Please try again.');
+        if (res.status === 401) {
+          setError('Invalid email or password. Please check your credentials and try again.');
+        } else if (res.status === 403) {
+          setError('Account is locked or suspended. Please contact support.');
+        } else if (res.status === 404) {
+          setError('Account not found. Please check your email or sign up.');
+        } else if (res.status === 429) {
+          setError('Too many login attempts. Please wait a few minutes before trying again.');
+        } else if (res.status >= 500) {
+          setError('Server error. Please try again later or contact support.');
+        } else {
+          setError(errorData.message || 'Login failed. Please check your credentials and try again.');
+        }
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -464,18 +476,46 @@ export default function Login() {
 
             <button
               onClick={handleSubmit}
-              style={styles.button}
+              disabled={loading}
+              style={{
+                ...styles.button,
+                ...(loading ? styles.disabledButton : {})
+              }}
               onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 10px 30px rgba(255, 107, 26, 0.4)';
+                if (!loading) {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 10px 30px rgba(255, 107, 26, 0.4)';
+                }
               }}
               onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = 'none';
+                if (!loading) {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = 'none';
+                }
               }}
             >
-              Sign In
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
+            
+            {error && (
+              <div style={{
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                borderRadius: '10px',
+                padding: '12px',
+                marginTop: '15px',
+                textAlign: 'center'
+              }}>
+                <p style={{ 
+                  color: '#dc2626', 
+                  margin: '0',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
+                  ⚠️ {error}
+                </p>
+              </div>
+            )}
           </div>
 
           <div style={styles.forgotPassword}>

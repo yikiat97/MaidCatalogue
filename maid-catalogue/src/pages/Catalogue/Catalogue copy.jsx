@@ -471,7 +471,7 @@ export default function Catalogue() {
               <Fade in timeout={500}>
                 <Grid 
                   container 
-                  spacing={2} 
+                  spacing={4} 
                   sx={{ 
                     display: gridView ? 'grid' : 'flex',
                     gridTemplateColumns: gridView ? {
