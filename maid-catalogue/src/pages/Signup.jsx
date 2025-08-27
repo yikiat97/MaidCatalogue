@@ -144,7 +144,7 @@ export default function SignUp() {
           window.location.href = callbackData.redirectTo;
         } else {
           // Fallback redirect if no redirectTo is provided
-          navigate('/catalogue');
+          navigate('/MaidBio');
         }
       }
 

@@ -26,7 +26,7 @@ return (
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route
-          path="/Catalogue"
+          path="/MaidBio"
           element={
             isAuthenticated ? <Catalogue /> : <Navigate to="/login" replace />
           }

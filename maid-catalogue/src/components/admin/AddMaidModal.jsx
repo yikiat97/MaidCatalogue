@@ -429,13 +429,14 @@ const AddMaidModal = ({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Loan Amount (SGD)
+                    Loan Amount (SGD) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
                     name="loan"
                     value={formData.loan}
                     onChange={handleInputChange}
+                    required
                     min="0"
                     max="50000"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -568,7 +569,7 @@ const AddMaidModal = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Rest Days
+                      Rest Days <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="number"
@@ -577,6 +578,7 @@ const AddMaidModal = ({
                       onChange={handleMaidDetailChange}
                       min="0"
                       max="31"
+                      required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="4"
                     />

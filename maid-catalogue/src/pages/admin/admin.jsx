@@ -569,6 +569,85 @@ const Dashboard = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Validate required fields
+    if (!formData.name || formData.name.trim() === '') {
+      setError('Full Name is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.country || formData.country.trim() === '') {
+      setError('Country is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.supplier || formData.supplier.trim() === '') {
+      setError('Supplier is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.DOB || formData.DOB.trim() === '') {
+      setError('Date of Birth is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.Religion || formData.Religion.trim() === '') {
+      setError('Religion is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.maritalStatus || formData.maritalStatus.trim() === '') {
+      setError('Marital Status is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.salary || formData.salary === null || formData.salary === undefined || formData.salary === '') {
+      setError('Monthly Salary is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.loan || formData.loan === null || formData.loan === undefined || formData.loan === '') {
+      setError('Loan Amount is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.height || formData.height === null || formData.height === undefined || formData.height === '') {
+      setError('Height is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.weight || formData.weight === null || formData.weight === undefined || formData.weight === '') {
+      setError('Weight is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.maidDetails?.restDay || formData.maidDetails.restDay === null || formData.maidDetails.restDay === undefined || formData.maidDetails.restDay === '') {
+      setError('Rest Days is required. Please specify the number of rest days per month.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.skills || formData.skills.length === 0 || !formData.skills.some(skill => skill.trim() !== '')) {
+      setError('At least one skill is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.type || formData.type.length === 0 || !formData.type.some(t => t.trim() !== '')) {
+      setError('At least one type/category is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
     // Debug: log the current formData state right before submission
     console.log('=== FORM SUBMISSION DEBUG ===');
     console.log('Current formData state:', formData);
@@ -1443,9 +1522,9 @@ const Dashboard = () => {
                   <h2 className="text-lg lg:text-xl font-semibold text-gray-800">
                     Maids Count: ({filteredMaids.length})
                   </h2>
-                  <button className="px-3 lg:px-4 py-2 text-sm text-red-600 border border-red-300 rounded-md hover:bg-red-50">
+                  {/* <button className="px-3 lg:px-4 py-2 text-sm text-red-600 border border-red-300 rounded-md hover:bg-red-50">
                     Delete
-                  </button>
+                  </button> */}
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
                   <button 

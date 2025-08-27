@@ -40,10 +40,10 @@ const API_CONFIG = {
     
     // User endpoints
     USER: {
-      RECOMMENDATIONS: '/api/user/recommendation',
-      RECOMMENDED: '/api/user/recommended',
+      RECOMMENDATIONS: '/api/user/recommendation', // load recommendations on admin page 
+      RECOMMENDED: '/api/user/recommended',  //verify recommendations token and link to user
       FAVORITES: '/api/user/favorites',
-      GENERATE_LINK: '/api/user/generate-link',
+      // GENERATE_LINK: '/api/user/generate-link',
     },
   },
   

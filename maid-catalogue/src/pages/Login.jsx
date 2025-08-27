@@ -45,37 +45,54 @@ export default function Login() {
           const redirectUrl = localStorage.getItem('redirectAfterLogin');
           console.log('🔍 Login: redirectUrl found:', redirectUrl);
           
-          if (userData.role === 'admin') {
-            navigate('/admin');
-          } else if (redirectUrl) {
-            // Clear the stored URL
-            localStorage.removeItem('redirectAfterLogin');
+        // Always call the auth callback to check for recommend_token cookie
+        try {
+          console.log('🔍 Calling auth callback to check for recommend_token cookie...');
+          const callbackRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
+            method: 'POST',
+            credentials: 'include',
+          });
+          
+          if (callbackRes.ok) {
+            const callbackData = await callbackRes.json();
+            console.log('Auth callback successful:', callbackData);
             
-            // Call the auth callback endpoint to associate recommendation with user
-            try {
-              const callbackRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
-                method: 'POST',
-                credentials: 'include',
-              });
-              
-              if (callbackRes.ok) {
-                const callbackData = await callbackRes.json();
-                console.log('Auth callback successful:', callbackData);
-                // Redirect back to recommendation page
-                window.location.href = redirectUrl;
-              } else {
-                console.error('Auth callback failed:', callbackRes.status);
-                // Still redirect even if callback fails
-                window.location.href = redirectUrl;
-              }
-            } catch (err) {
-              console.error('Auth callback error:', err);
-              // Still redirect even if callback fails
+            // If there's a redirect URL, use it; otherwise go to recommendations
+            if (redirectUrl) {
+              // Clear the stored URL
+              localStorage.removeItem('redirectAfterLogin');
+              console.log('🔄 Redirecting back to recommendation page:', redirectUrl);
               window.location.href = redirectUrl;
+            } else {
+              console.log('🔄 No redirect URL, going to recommendations page');
+              navigate('/Recommend');
             }
           } else {
-            navigate('/catalogue');
+            console.log('No recommend_token cookie found');
+            
+            // If there's a redirect URL, still use it (fallback)
+            if (redirectUrl) {
+              localStorage.removeItem('redirectAfterLogin');
+              console.log('🔄 Auth callback failed but redirecting to stored URL:', redirectUrl);
+              window.location.href = redirectUrl;
+            } else {
+              console.log('🔄 No recommendations, going to catalogue');
+              navigate('/MaidBio');
+            }
           }
+        } catch (err) {
+          console.error('Auth callback error:', err);
+          
+          // If there's a redirect URL, still use it (fallback)
+          if (redirectUrl) {
+            localStorage.removeItem('redirectAfterLogin');
+            console.log('🔄 Auth callback error but redirecting to stored URL:', redirectUrl);
+            window.location.href = redirectUrl;
+          } else {
+            console.log('🔄 No recommendations, going to catalogue');
+            navigate('/MaidBio');
+          }
+        }
         } else {
           setError('Login failed. Please try again.');
         }

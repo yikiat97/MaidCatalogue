@@ -46,6 +46,7 @@ import {
   Search as SearchIcon
 } from '@mui/icons-material';
 import API_CONFIG from '../../config/api.js';
+import ViewMaidModal from '../../components/admin/ViewMaidModal';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -59,6 +60,8 @@ const UserManagement = () => {
   const [deletingRecommendation, setDeletingRecommendation] = useState(null);
   const [activeTab, setActiveTab] = useState('favorites');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedMaidId, setSelectedMaidId] = useState(null);
+  const [showMaidModal, setShowMaidModal] = useState(false);
   const navigate = useNavigate();
 
      useEffect(() => {
@@ -237,6 +240,16 @@ const UserManagement = () => {
         recommendations: [...updatedUser.recommendations, maid]
       });
     }
+  };
+
+  const handleViewMaid = (maidId) => {
+    setSelectedMaidId(maidId);
+    setShowMaidModal(true);
+  };
+
+  const handleCloseMaidModal = () => {
+    setShowMaidModal(false);
+    setSelectedMaidId(null);
   };
 
   const handleRemoveRecommendation = async (maidId) => {
@@ -692,24 +705,28 @@ const UserManagement = () => {
                   ) : (
                     <div className="grid grid-cols-1 gap-4">
                       {selectedUser.favorites.map((favorite) => (
-                        <div key={favorite.maidId} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div 
+                          key={favorite.maidId} 
+                          className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                          onClick={() => handleViewMaid(favorite.maidId)}
+                        >
                           <div className="flex items-center space-x-3">
-                                                      <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center overflow-hidden">
-                            {favorite.maid?.imageUrl ? (
-                              <img 
-                                src={API_CONFIG.buildImageUrl(favorite.maid.imageUrl)} 
-                                alt={favorite.maid.name || 'Maid'}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                  e.target.nextSibling.style.display = 'flex';
-                                }}
-                              />
-                            ) : null}
-                            <div className={`w-full h-full flex items-center justify-center text-xl ${favorite.maid?.imageUrl ? 'hidden' : ''}`}>
-                              😊
+                            <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center overflow-hidden">
+                              {favorite.maid?.imageUrl ? (
+                                <img 
+                                  src={API_CONFIG.buildImageUrl(favorite.maid.imageUrl)} 
+                                  alt={favorite.maid.name || 'Maid'}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div className={`w-full h-full flex items-center justify-center text-xl ${favorite.maid?.imageUrl ? 'hidden' : ''}`}>
+                                😊
+                              </div>
                             </div>
-                          </div>
                             <div className="flex-1">
                               <p className="font-medium text-gray-900">{favorite.maid?.name || 'Unknown'}</p>
                               <p className="text-sm text-gray-500">{favorite.maid?.country || 'Unknown'}</p>
@@ -745,44 +762,51 @@ const UserManagement = () => {
                   ) : (
                     <div className="grid grid-cols-1 gap-4">
                       {selectedUser.recommendations[0].recommendationMaids.map((recommendation) => (
-                        <div key={recommendation.maidId} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div 
+                          key={recommendation.maidId} 
+                          className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                          onClick={() => handleViewMaid(recommendation.maidId)}
+                        >
                           <div className="flex items-center space-x-3">
                             <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center overflow-hidden">
-                            {recommendation.maid?.imageUrl ? (
-                              <img 
-                                src={API_CONFIG.buildImageUrl(recommendation.maid.imageUrl)} 
-                                alt={recommendation.maid?.name || 'Maid'}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                  e.target.nextSibling.style.display = 'flex';
-                                }}
-                              />
-                            ) : null}
-                            <div className={`w-full h-full flex items-center justify-center text-xl ${recommendation.maid?.imageUrl ? 'hidden' : ''}`}>
-                              😊
+                              {recommendation.maid?.imageUrl ? (
+                                <img 
+                                  src={API_CONFIG.buildImageUrl(recommendation.maid.imageUrl)} 
+                                  alt={recommendation.maid?.name || 'Maid'}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div className={`w-full h-full flex items-center justify-center text-xl ${recommendation.maid?.imageUrl ? 'hidden' : ''}`}>
+                                😊
+                              </div>
                             </div>
-                          </div>
                             <div className="flex-1">
                               <p className="font-medium text-gray-900">{recommendation.maid?.name || 'Unknown'}</p>
                               <p className="text-sm text-gray-500">{recommendation.maid?.country || 'Unknown'}</p>
                               <p className="text-xs text-gray-400">ID: {recommendation.maidId}</p>
                             </div>
-                                                         <button
-                               onClick={() => handleRemoveRecommendation(recommendation.maidId)}
-                               disabled={deletingRecommendation === recommendation.maidId}
-                               className={`p-1 ${
-                                 deletingRecommendation === recommendation.maidId
-                                   ? 'text-gray-400 cursor-not-allowed'
-                                   : 'text-red-500 hover:text-red-700'
-                               }`}
-                             >
-                               {deletingRecommendation === recommendation.maidId ? (
-                                 <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                               ) : (
-                                 <Trash2 className="w-4 h-4" />
-                               )}
-                             </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent modal from opening
+                                handleRemoveRecommendation(recommendation.maidId);
+                              }}
+                              disabled={deletingRecommendation === recommendation.maidId}
+                              className={`p-1 ${
+                                deletingRecommendation === recommendation.maidId
+                                  ? 'text-gray-400 cursor-not-allowed'
+                                  : 'text-red-500 hover:text-red-700'
+                              }`}
+                            >
+                              {deletingRecommendation === recommendation.maidId ? (
+                                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -793,6 +817,14 @@ const UserManagement = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* View Maid Modal */}
+      {showMaidModal && selectedMaidId && (
+        <ViewMaidModal
+          maidId={selectedMaidId}
+          onClose={handleCloseMaidModal}
+        />
       )}
     </div>
   );

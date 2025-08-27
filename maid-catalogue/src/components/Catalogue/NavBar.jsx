@@ -180,7 +180,7 @@ export default function NavBar({ isAuthenticated, onLogout }) {
   };
 
   const navItems = [
-    { path: '/catalogue', label: 'Search', icon: <SearchIcon /> },
+    { path: '/MaidBio', label: 'Search', icon: <SearchIcon /> },
     { path: '/shortlisted', label: 'Shortlisted', icon: <FavoriteIcon /> },
     { path: '/', label: 'Pricing', icon: <HomeIcon /> },
     { path: '/Recommend', label: 'Recommendation', icon: <RecommendIcon /> },
@@ -203,7 +203,7 @@ return (
             <img 
               src={logoBlack} 
               alt="MaidCatalogue Logo" 
-              onClick={() => navigate('/catalogue')}
+              onClick={() => navigate('/')}
               style={{ cursor: 'pointer' }}
             />
           </LogoContainer>

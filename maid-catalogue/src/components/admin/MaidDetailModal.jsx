@@ -41,6 +41,13 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
     };
 
     if (maidId) fetchMaid();
+
+    // Cleanup function to revoke any preview URLs when component unmounts
+    return () => {
+      if (formData?.imagePreviewUrl) {
+        URL.revokeObjectURL(formData.imagePreviewUrl);
+      }
+    };
   }, [maidId]);
 
   const handleInputChange = (e) => {
@@ -148,11 +155,20 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
     const extension = file.name.split('.').pop();
     const filename = file.name.split('.')[0].replace(/\s+/g, '') + timestamp + '.' + extension;
 
-    // Store the file object and metadata in formData
+    // Clean up previous preview URL if it exists
+    if (formData.imagePreviewUrl) {
+      URL.revokeObjectURL(formData.imagePreviewUrl);
+    }
+
+    // Create a preview URL for the selected file
+    const previewUrl = URL.createObjectURL(file);
+
+    // Store the file object, metadata, and preview URL in formData
     setFormData(prev => ({
       ...prev,
       imageFile: file,
-      imageUrl: filename // Just store the filename for display purposes
+      imageUrl: filename, // Store the filename for backend
+      imagePreviewUrl: previewUrl // Store the preview URL for display
     }));
   };
 
@@ -161,21 +177,131 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
     setIsSubmitting(true);
 
     // Validate required fields
-    if (!formData.Religion || formData.Religion.trim() === '') {
+    if (!formData.name || formData.name.trim() === '') {
       if (onError) {
-        onError('Religion is required');
+        onError('Full Name is required.');
       } else {
-        alert('Religion is required');
+        alert('Full Name is required.');
       }
       setIsSubmitting(false);
       return;
     }
 
-    if (formData.maidDetails.restDay === null || formData.maidDetails.restDay === undefined || formData.maidDetails.restDay === '') {
+    if (!formData.country || formData.country.trim() === '') {
       if (onError) {
-        onError('Rest days is required');
+        onError('Country is required.');
       } else {
-        alert('Rest days is required');
+        alert('Country is required.');
+      }
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.supplier || formData.supplier.trim() === '') {
+      if (onError) {
+        onError('Supplier is required.');
+      } else {
+        alert('Supplier is required.');
+      }
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.DOB || formData.DOB.trim() === '') {
+      if (onError) {
+        onError('Date of Birth is required.');
+      } else {
+        alert('Date of Birth is required.');
+      }
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.Religion || formData.Religion.trim() === '') {
+      if (onError) {
+        onError('Religion is required.');
+      } else {
+        alert('Religion is required.');
+      }
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.maritalStatus || formData.maritalStatus.trim() === '') {
+      if (onError) {
+        onError('Marital Status is required.');
+      } else {
+        alert('Marital Status is required.');
+      }
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.salary || formData.salary === null || formData.salary === undefined || formData.salary === '') {
+      if (onError) {
+        onError('Salary is required.');
+      } else {
+        alert('Salary is required.');
+      }
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.loan || formData.loan === null || formData.loan === undefined || formData.loan === '') {
+      if (onError) {
+        onError('Loan Amount is required.');
+      } else {
+        alert('Loan Amount is required.');
+      }
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.height || formData.height === null || formData.height === undefined || formData.height === '') {
+      if (onError) {
+        onError('Height is required.');
+      } else {
+        alert('Height is required.');
+      }
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.weight || formData.weight === null || formData.weight === undefined || formData.weight === '') {
+      if (onError) {
+        onError('Weight is required.');
+      } else {
+        alert('Weight is required.');
+      }
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.maidDetails?.restDay || formData.maidDetails.restDay === null || formData.maidDetails.restDay === undefined || formData.maidDetails.restDay === '') {
+      if (onError) {
+        onError('Rest Days is required. Please specify the number of rest days per month.');
+      } else {
+        alert('Rest Days is required. Please specify the number of rest days per month.');
+      }
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.skills || formData.skills.length === 0 || !formData.skills.some(skill => skill.trim() !== '')) {
+      if (onError) {
+        onError('At least one skill is required.');
+      } else {
+        alert('At least one skill is required.');
+      }
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.type || formData.type.length === 0 || !formData.type.some(type => type.trim() !== '')) {
+      if (onError) {
+        onError('At least one type is required.');
+      } else {
+        alert('At least one type is required.');
       }
       setIsSubmitting(false);
       return;
@@ -382,7 +508,7 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                     <label className="block text-sm font-medium text-gray-700 mb-2">Profile Photo</label>
                     <div className="relative">
                       <img 
-                        src={formData.imageUrl ? API_CONFIG.buildImageUrl(formData.imageUrl) : '/placeholder.jpg'} 
+                        src={formData.imagePreviewUrl || (formData.imageUrl ? API_CONFIG.buildImageUrl(formData.imageUrl) : '/placeholder.jpg')} 
                         alt={formData.name} 
                         className="w-32 h-32 object-cover rounded-lg border-2 border-gray-200" 
                       />
@@ -411,7 +537,33 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                     >
                       Choose File
                     </button>
-                    {formData.imageUrl && (
+                    {formData.imageFile && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // Clean up preview URL
+                          if (formData.imagePreviewUrl) {
+                            URL.revokeObjectURL(formData.imagePreviewUrl);
+                          }
+                          // Clear the selected file
+                          setFormData(prev => ({
+                            ...prev,
+                            imageFile: null,
+                            imagePreviewUrl: null
+                          }));
+                        }}
+                        className="ml-2 px-3 py-2 text-sm text-red-600 border border-red-300 rounded-md hover:bg-red-50"
+                      >
+                        Remove
+                      </button>
+                    )}
+                    {formData.imageFile && (
+                      <div className="mt-2">
+                        <p className="text-sm text-blue-600 font-medium">New image selected (not saved yet)</p>
+                        <p className="text-xs text-gray-500 mt-1">File: {formData.imageFile.name}</p>
+                      </div>
+                    )}
+                    {formData.imageUrl && !formData.imageFile && (
                       <p className="mt-2 text-sm text-gray-500">Current: {formData.imageUrl}</p>
                     )}
                   </div>
@@ -458,7 +610,7 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Height (cm)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Height (cm) *</label>
                     <input 
                       name="height" 
                       type="number" 
@@ -466,11 +618,12 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                       max="200"
                       value={formData.height} 
                       onChange={handleInputChange} 
+                      required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Weight (kg) *</label>
                     <input 
                       name="weight" 
                       type="number"
@@ -478,6 +631,7 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                       max="150" 
                       value={formData.weight} 
                       onChange={handleInputChange} 
+                      required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
                     />
                   </div>
@@ -499,11 +653,12 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                      </select>
                    </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Marital Status</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Marital Status *</label>
                     <select 
                       name="maritalStatus" 
                       value={formData.maritalStatus} 
                       onChange={handleInputChange} 
+                      required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">Select Status</option>
@@ -550,11 +705,12 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Supplier ID</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Supplier ID *</label>
                     <input 
                       name="supplier" 
                       value={formData.supplier || ''} 
                       onChange={handleInputChange} 
+                      required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
                       placeholder="e.g., ID-2"
                     />
@@ -604,7 +760,7 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                 {/* Skills */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-medium text-gray-700">Skills</label>
+                    <label className="text-sm font-medium text-gray-700">Skills *</label>
                     <button
                       type="button"
                       onClick={() => addArrayItem('skills')}
@@ -731,7 +887,7 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                 {/* Type/Category */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-medium text-gray-700">Type/Category</label>
+                    <label className="text-sm font-medium text-gray-700">Type/Category *</label>
                     <button
                       type="button"
                       onClick={() => addArrayItem('type')}

@@ -26,7 +26,7 @@ const maidsUrl = API_CONFIG.buildUrlWithParams(
   API_CONFIG.ENDPOINTS.CATALOGUE.MAIDS, 
   { page: 1, limit: 20 }
 );
-// Result: http://localhost:3000/api/catalogue/maids?page=1&limit=20
+// Result: http://localhost:3000/api/MaidBio/maids?page=1&limit=20
 
 // Build image URL
 const imageUrl = API_CONFIG.buildImageUrl('/uploads/maid.jpg');
