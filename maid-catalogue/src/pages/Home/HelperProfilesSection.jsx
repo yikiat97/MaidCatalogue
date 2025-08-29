@@ -1,314 +1,276 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '../../components/ui/Button';
-import { useAnimation, useStaggeredAnimation } from '../../hooks/useAnimation';
-import API_CONFIG from '../../config/api.js';
+import Card from '../../components/ui/Card';
+import { Badge } from '../../components/ui/badge';
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '../../components/ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
+import { MapPin, Calendar, Briefcase, Star, Heart } from 'lucide-react';
+import { useAnimation } from '../../hooks/useAnimation';
 
 const HelperProfilesSection = () => {
-  const [maids, setMaids] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
-  const maidsPerPage = 3;
   const navigate = useNavigate();
+  const [favorites, setFavorites] = useState(new Set());
   
   const { elementRef: titleRef, isVisible: isTitleVisible } = useAnimation(0.3);
-  const { elementRef: navRef, isVisible: isNavVisible } = useAnimation(0.2);
+  
+  // Hardcoded helper data
+  const helpers = [
+    {
+      id: 1,
+      name: 'Maria Santos',
+      country: 'Philippines',
+      salary: 680,
+      skills: ['Cooking', 'Child Care', 'Elderly Care'],
+      imageUrl: '/images/img_frame_4_309x253.png',
+      rating: 4.8,
+      experience: '8 years',
+      availability: 'Available',
+      age: 32,
+      languages: ['English', 'Filipino', 'Mandarin']
+    },
+    {
+      id: 2,
+      name: 'Siti Rahman',
+      country: 'Indonesia',
+      salary: 650,
+      skills: ['Housekeeping', 'Cooking', 'Pet Care'],
+      imageUrl: '/images/img_frame_4_309x253.png',
+      rating: 4.9,
+      experience: '6 years',
+      availability: 'Available',
+      age: 28,
+      languages: ['English', 'Indonesian', 'Malay']
+    },
+    {
+      id: 3,
+      name: 'Chen Wei Lin',
+      country: 'Taiwan',
+      salary: 720,
+      skills: ['Child Care', 'Tutoring', 'Housekeeping'],
+      imageUrl: '/images/img_frame_4_309x253.png',
+      rating: 4.7,
+      experience: '10 years',
+      availability: 'Available',
+      age: 35,
+      languages: ['Mandarin', 'English', 'Taiwanese']
+    },
+    {
+      id: 4,
+      name: 'Priya Sharma',
+      country: 'India',
+      salary: 600,
+      skills: ['Cooking', 'Housekeeping', 'Elderly Care'],
+      imageUrl: '/images/img_frame_4_309x253.png',
+      rating: 4.6,
+      experience: '5 years',
+      availability: 'Available',
+      age: 30,
+      languages: ['English', 'Hindi', 'Tamil']
+    },
+    {
+      id: 5,
+      name: 'Fatima Al-Zahra',
+      country: 'Myanmar',
+      salary: 620,
+      skills: ['Child Care', 'Cooking', 'Light Housework'],
+      imageUrl: '/images/img_frame_4_309x253.png',
+      rating: 4.5,
+      experience: '4 years',
+      availability: 'Available',
+      age: 26,
+      languages: ['English', 'Burmese', 'Thai']
+    },
+    {
+      id: 6,
+      name: 'Lily Nguyen',
+      country: 'Vietnam',
+      salary: 640,
+      skills: ['Housekeeping', 'Cooking', 'Ironing'],
+      imageUrl: '/images/img_frame_4_309x253.png',
+      rating: 4.8,
+      experience: '7 years',
+      availability: 'Available',
+      age: 29,
+      languages: ['English', 'Vietnamese', 'Cantonese']
+    }
+  ];
 
-  // Function to get optimized image URL
-  const getOptimizedImageUrl = (originalUrl) => {
-    if (!originalUrl) return "/images/img_frame_4_309x253.png";
-    
-    // If using a CDN like CloudFront, you can add optimization parameters
-    // For now, we'll use the original URL but add lazy loading
-    const finalUrl = originalUrl.startsWith('http') ? originalUrl : API_CONFIG.buildImageUrl(originalUrl);
-    return finalUrl;
-  };
-
-  // Fetch top maids from backend
-  useEffect(() => {
-    const fetchTopMaids = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.CATALOGUE.TOP_MAIDS));
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch maids');
-        }
-        
-        const data = await response.json();
-        setMaids(data);
-      } catch (err) {
-        console.error('Error fetching maids:', err);
-        setError('Failed to load helpers. Please try again later.');
-      } finally {
-        setLoading(false);
+  const toggleFavorite = (helperId) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(helperId)) {
+        newFavorites.delete(helperId);
+      } else {
+        newFavorites.add(helperId);
       }
-    };
-
-    fetchTopMaids();
-  }, []);
-
-  // Secure blur protection
-  useEffect(() => {
-    const protectBlur = () => {
-      const blurredImages = document.querySelectorAll('.secure-blur');
-      blurredImages.forEach(img => {
-        // Ensure blur is always applied
-        if (!img.style.filter || !img.style.filter.includes('blur')) {
-          img.style.filter = 'blur(8px)';
-          img.style.transform = 'scale(1.1)';
-        }
-        
-        // Prevent context menu
-        img.addEventListener('contextmenu', (e) => e.preventDefault());
-        
-        // Prevent drag and drop
-        img.addEventListener('dragstart', (e) => e.preventDefault());
-      });
-    };
-
-    // Run protection immediately and set up interval
-    protectBlur();
-    const interval = setInterval(protectBlur, 1000);
-
-    // Set up mutation observer to watch for DOM changes
-    const observer = new MutationObserver(protectBlur);
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['style', 'class']
-    });
-
-    return () => {
-      clearInterval(interval);
-      observer.disconnect();
-    };
-  }, [maids]);
-
-  const { containerRef, visibleItems } = useStaggeredAnimation(maids.slice(currentPage * maidsPerPage, (currentPage + 1) * maidsPerPage), 150);
-
-  const nextPage = () => {
-    setCurrentPage((prev) => {
-      const maxPage = Math.ceil(maids.length / maidsPerPage) - 1;
-      return prev >= maxPage ? 0 : prev + 1;
+      return newFavorites;
     });
   };
 
-  const prevPage = () => {
-    setCurrentPage((prev) => {
-      const maxPage = Math.ceil(maids.length / maidsPerPage) - 1;
-      return prev <= 0 ? maxPage : prev - 1;
-    });
+  const handleHelperClick = (helperId) => {
+    navigate(`/maid/${helperId}`);
   };
 
-  const getCurrentMaids = () => {
-    const startIndex = currentPage * maidsPerPage;
-    return maids.slice(startIndex, startIndex + maidsPerPage);
+  const handleViewAll = () => {
+    navigate('/catalogue');
   };
-
-  const getLanguageRating = (maid) => {
-    if (!maid.maidDetails) return 'N/A';
-    const { englishRating, chineseRating, dialectRating } = maid.maidDetails;
-    const ratings = [englishRating, chineseRating, dialectRating].filter(r => r !== null);
-    if (ratings.length === 0) return 'N/A';
-    return `${Math.round(ratings.reduce((a, b) => a + b, 0) / ratings.length)}/10`;
-  };
-
-  const getSkillsDisplay = (skills) => {
-    if (!skills || skills.length === 0) return 'General housekeeping';
-    return skills.slice(0, 3).join(', ');
-  };
-
-  const handleMaidClick = (maidId) => {
-    navigate(`/maid/${maidId}`);
-  };
-
-  if (loading) {
-    return (
-      <section className="bg-[#f3f3f3] py-12 md:py-16 relative">
-        <div className="max-w-6xl w-full mx-auto px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-semibold text-[#0e0e0e] mb-2">
-              Find Your Helper
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl font-inter font-normal text-[#333232]">
-              Loading our top helpers...
-            </p>
-          </div>
-          <div className="flex justify-center">
-            <div className="loading-spinner"></div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className="bg-[#f3f3f3] py-12 md:py-16 relative">
-        <div className="max-w-6xl w-full mx-auto px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-semibold text-[#0e0e0e] mb-2">
-              Find Your Helper
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl font-inter font-normal text-[#333232] mb-4">
-              {error}
-            </p>
-            <Button variant="outline" size="medium" onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   return (
-    <section className="bg-[#f3f3f3] py-12 md:py-16 relative">
-      <div className="max-w-6xl w-full mx-auto px-4">
-        {/* Section Title */}
+    <section className="bg-gradient-to-br from-slate-50 to-blue-50 py-16 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-orange-400 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-blue-400 rounded-full blur-3xl"></div>
+      </div>
+      
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 relative z-10">
+        {/* Section Header */}
         <div 
           ref={titleRef}
-          className={`text-center mb-8 transition-all duration-1000 ease-out ${
-            isTitleVisible || maids.length > 0
-              ? 'opacity-100 translate-y-0' 
-              : 'opacity-0 translate-y-8'
+          className={`text-center mb-12 transition-all duration-1000 ease-out ${
+            isTitleVisible ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-semibold text-[#0e0e0e] mb-2">
-            Find Your Helper
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-extrabold leading-tight capitalize text-gray-900 mb-4">
+            <span className="text-black">Find Your Perfect </span>
+            <span className="text-[#ff690d]">Helper</span>
           </h2>
-          <p className="text-base sm:text-lg md:text-xl font-inter font-normal text-[#333232]">
-            Browse our top {maids.length} active helpers ready to join your family
+          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+            Discover talented helpers, ready to become part of your family
           </p>
         </div>
 
-        {/* Navigation Arrows */}
-        <div 
-          ref={navRef}
-          className={`flex justify-between items-center mb-6 md:mb-8 transition-all duration-1000 ease-out delay-300 ${
-            isNavVisible || maids.length > 0
-              ? 'opacity-100 translate-y-0' 
-              : 'opacity-0 translate-y-8'
-          }`}
-        >
-          <button
-            onClick={prevPage}
-            className="w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center hover:shadow-md transition-all duration-300 hover-scale"
-            disabled={maids.length === 0}
+        {/* Carousel */}
+        <div className="relative">
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            plugins={[
+              Autoplay({
+                delay: 4000,
+                stopOnInteraction: false,
+                stopOnMouseEnter: true
+              }),
+            ]}
+            className="w-full"
           >
-            <img
-              src="/images/img_frame_1000006136.svg"
-              alt="Previous"
-              className="w-8 h-8"
-            />
-          </button>
-          
-          {/* Page Indicator */}
-          <div className="flex items-center space-x-2">
-            <span className="page-indicator text-sm font-medium">
-              {currentPage + 1} of {Math.ceil(maids.length / maidsPerPage)}
-            </span>
-          </div>
-          
+            <CarouselContent className="-ml-4 my-4">
+              {helpers.map((helper) => (
+                <CarouselItem key={helper.id} className="pl-4 py-2 md:basis-1/2 lg:basis-1/3">
+                  <Card 
+                    className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-2 border-0 shadow-lg bg-white/80 backdrop-blur-sm rounded-lg overflow-hidden"
+                    padding="none"
+                  >
+                      {/* Helper Image */}
+                      <div className="relative overflow-hidden rounded-t-lg">
+                        <img
+                          src={helper.imageUrl}
+                          alt={helper.name}
+                          className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+                          onError={(e) => {
+                            e.target.src = "/images/img_frame_4_309x253.png";
+                          }}
+                        />
+                        
+                        {/* Favorite Button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(helper.id);
+                          }}
+                          className="absolute top-3 right-3 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg transition-all duration-200 hover:bg-white hover:scale-110"
+                        >
+                          <Heart 
+                            className={`w-4 h-4 transition-colors duration-200 ${
+                              favorites.has(helper.id) 
+                                ? 'fill-red-500 text-red-500' 
+                                : 'text-gray-400 hover:text-red-400'
+                            }`}
+                          />
+                        </button>
+                        
+                        {/* Availability Badge */}
+                        <div className="absolute bottom-3 left-3">
+                          <Badge variant="secondary" className="bg-green-500 text-white border-0">
+                            {helper.availability}
+                          </Badge>
+                        </div>
+                        
+                        {/* Rating */}
+                        <div className="absolute bottom-3 right-3 flex items-center space-x-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-sm font-medium">{helper.rating}</span>
+                        </div>
+                      </div>
+                      
+                      {/* Helper Details */}
+                      <div className="p-6 space-y-4" onClick={() => handleHelperClick(helper.id)}>
+                        {/* Name and Age */}
+                        <div className="space-y-1">
+                          <h3 className="text-xl font-bold text-gray-900 group-hover:text-orange-600 transition-colors duration-200">
+                            {helper.name}
+                          </h3>
+                          <p className="text-gray-600 text-sm">{helper.age} years old</p>
+                        </div>
+                        
+                        {/* Location and Experience */}
+                        <div className="flex items-center space-x-4 text-gray-600">
+                          <div className="flex items-center space-x-2">
+                            <MapPin className="w-4 h-4" />
+                            <span className="text-sm">{helper.country}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Briefcase className="w-4 h-4" />
+                            <span className="text-sm">{helper.experience} experience</span>
+                          </div>
+                        </div>
+                        
+                        {/* Salary */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2 text-gray-600">
+                            <Calendar className="w-4 h-4" />
+                            <span className="text-sm">Monthly Salary</span>
+                          </div>
+                          <span className="text-lg font-bold text-orange-600">${helper.salary}</span>
+                        </div>
+                        
+                        {/* Skills */}
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-600 font-medium">Specialties:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {helper.skills.slice(0, 3).map((skill, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        
+                      </div>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            
+            {/* Navigation Arrows */}
+            <CarouselPrevious className="-left-12 lg:-left-16 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl" />
+            <CarouselNext className="-right-12 lg:-right-16 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl" />
+          </Carousel>
+        </div>
+        
+        {/* Call to Action */}
+        <div className="text-center mt-4">
           <button
-            onClick={nextPage}
-            className="w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center hover:shadow-md transition-all duration-300 hover-scale"
-            disabled={maids.length === 0}
+            onClick={handleViewAll}
+            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold rounded-full hover:shadow-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-orange-200"
           >
-            <img
-              src="/images/img_frame_1000006135.svg"
-              alt="Next"
-              className="w-8 h-8"
-            />
+            View All Helpers
+            <svg className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
           </button>
-        </div>
-
-        {/* Helper Profiles Grid */}
-        <div ref={containerRef} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
-          {getCurrentMaids().map((maid, index) => (
-            <div
-              key={maid.id}
-              className={`flex flex-col items-center border border-[#d9d9d9] rounded-2xl p-4 sm:p-6 bg-white shadow hover-lift transition-all duration-700 ease-out cursor-pointer ${
-                visibleItems.includes(index)
-                  ? 'opacity-100 translate-y-0 scale-100'
-                  : 'opacity-0 translate-y-8 scale-95'
-              }`}
-              style={{ transitionDelay: `${index * 100}ms` }}
-              onClick={() => handleMaidClick(maid.id)}
-            >
-              {/* Helper Image with Secure Blur */}
-              <div className="relative w-40 h-40 sm:w-52 sm:h-52 mb-8 overflow-hidden rounded-xl">
-                <img
-                  src={getOptimizedImageUrl(maid.imageUrl)}
-                  alt={maid.name}
-                  className="w-full h-full object-cover secure-blur"
-                  onError={(e) => {
-                    e.target.src = "/images/img_frame_4_309x253.png";
-                  }}
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-20 pointer-events-none"></div>
-              </div>
-
-              {/* Helper Info */}
-              <div className="w-full space-y-3">
-                <h3 className="text-lg sm:text-xl md:text-2xl font-inter font-semibold text-[#0e0e0e] text-center">
-                  {maid.name}
-                </h3>
-
-                <div className="flex items-center justify-center">
-                  <img
-                    src="/images/img_location06.svg"
-                    alt="Location"
-                    className="w-5 h-5 mr-2"
-                  />
-                  <span className="text-base font-inter text-[#0e0e0e]">
-                    {maid.country}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-center">
-                  <img
-                    src="/images/img_calendarfavorite02.svg"
-                    alt="Salary"
-                    className="w-5 h-5 mr-2"
-                  />
-                  <span className="text-base font-inter text-[#0e0e0e]">
-                    ${maid.salary}/month
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-center">
-                  <img
-                    src="/images/img_work.svg"
-                    alt="Skills"
-                    className="w-5 h-5 mr-2"
-                  />
-                  <span className="text-base font-inter text-[#0e0e0e] text-center">
-                    {getSkillsDisplay(maid.skills)}
-                  </span>
-                </div>
-
-                {maid.maidDetails && (
-                  <div className="flex items-center justify-center">
-                    <span className="text-sm font-inter text-[#ff690d]">
-                      Language Rating: {getLanguageRating(maid)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Browse Button */}
-        <div className="text-center">
-          <Button variant="outline" size="medium" className="px-4 py-2 hover-scale">
-            Browse All Helpers
-          </Button>
         </div>
       </div>
     </section>

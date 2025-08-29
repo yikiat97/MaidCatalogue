@@ -414,7 +414,7 @@ const FilterBar = memo(function FilterBar({
         <SmoothRangeSlider
           min={400} 
           max={1000} 
-          step={1}
+          step={25}
           value={defaultSalaryRange}
           onChangeCommitted={(e, v) => onSalaryChange(v)}
           color={brandColors.success} 

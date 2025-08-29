@@ -19,7 +19,7 @@ import {
   useMediaQuery
 } from '@mui/material';
 import maidPic from '../../assets/maidPic.jpg';
-import NavBar from '../../components/Catalogue/NavBar';
+import Header from '../../components/common/Header';
 import logoBlack from '../../assets/logoBlack.png';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -367,12 +367,11 @@ export default function MaidDetails() {
     <Box sx={{ 
       minHeight: '100vh',
       background: `linear-gradient(135deg, ${brandColors.background} 0%, ${brandColors.surface} 100%)`,
-      pb: 4,
-      mt: { xs: 9, md: 10 },
+      pb: 4
     }}>
       <Container maxWidth="xl" sx={{ pt: { xs: 2, md: 3 } }}>
         {/* Header Section */}
-        {/* <Box sx={{ 
+        <Box sx={{ 
           mt: { xs: 9, md: 10 },
           mb: { xs: 3, md: 4 },
           textAlign: 'center',
@@ -427,13 +426,13 @@ export default function MaidDetails() {
               </Typography>
             </Box>
           </Box>
-        </Box> */}
+        </Box>
 
         {/* Main Content */}
         <Box sx={{ flexGrow: 1 }}>
           {/* Navigation Bar */}
           <Box sx={{ mb: 3 }}>
-            <NavBar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+            <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
           </Box>
 
           {/* Back Button */}
@@ -463,7 +462,8 @@ export default function MaidDetails() {
             background: brandColors.surface,
             borderRadius: 3,
             p: { xs: 2, md: 3 },
-            boxShadow: '0 4px 20px rgba(12, 25, 27, 0.08)'
+            boxShadow: '0 4px 20px rgba(12, 25, 27, 0.08)',
+            border: `1px solid ${brandColors.border}`
           }}>
             {/* Main Content */}
             <Grid container spacing={4}>
@@ -570,7 +570,7 @@ export default function MaidDetails() {
                            fullWidth
                            startIcon={<WhatsAppIcon />}
                            onClick={() => {
-                             const message = `Hi, I'm interested in maid ${maid.name} (ID: ${maid.id}) Link: ${API_CONFIG.BASE_URL}/maid/${maid.id}.`;
+                             const message = `Hi, I'm interested in maid ${maid.name} (ID: ${maid.id}).`;
                              window.open(`https://wa.me/88270086?text=${encodeURIComponent(message)}`, '_blank');
                            }}
                            sx={{
@@ -593,10 +593,6 @@ export default function MaidDetails() {
                            variant="outlined"
                            size="large"
                            fullWidth
-                           onClick={() => {
-                            const message = `Hi, I would like to interview with maid: ${maid.name} (ID: ${maid.id}). Link: ${API_CONFIG.BASE_URL}/maid/${maid.id}.`;
-                            window.open(`https://wa.me/88270086?text=${encodeURIComponent(message)}`, '_blank');
-                          }}
                            sx={{
                              fontWeight: 700,
                              borderRadius: 2,
@@ -737,7 +733,7 @@ export default function MaidDetails() {
                               Rest Days/Month
                             </Typography>
                             <Typography sx={{ fontWeight: 600 }}>
-                              {maid.maidDetails?.restDay !== undefined && maid.maidDetails?.restDay !== null ? `${maid.maidDetails.restDay} days` : 'N/A'}
+                              {maid.maidDetails?.restDay || 'N/A'} days
                             </Typography>
                           </Box>
 
@@ -758,15 +754,6 @@ export default function MaidDetails() {
                                 fontWeight: 700
                               }}
                             />
-                          </Box>
-
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography variant="body2" sx={{ color: brandColors.textSecondary }}>
-                              Supplier
-                            </Typography>
-                            <Typography sx={{ fontWeight: 600 }}>
-                              {maid.supplier || 'N/A'}
-                            </Typography>
                           </Box>
                         </Stack>
                       </CardContent>

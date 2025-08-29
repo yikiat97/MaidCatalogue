@@ -1,14 +1,36 @@
 import React from 'react';
 import { useAnimation } from '../../hooks/useAnimation';
+import HelperFinderCard from './HelperFinderCard';
 
 const HeroSection = () => {
   const { elementRef: headingRef, isVisible: isHeadingVisible } = useAnimation(0.3);
   const { elementRef: descRef, isVisible: isDescVisible } = useAnimation(0.2);
-  const { elementRef: imageRef, isVisible: isImageVisible } = useAnimation(0.1);
+  const { elementRef: cardRef, isVisible: isCardVisible } = useAnimation(0.1);
 
   return (
-    <section className="bg-[#f8f8f8] py-12 md:py-16">
-      <div className="max-w-6xl w-full mx-auto px-4">
+    <section 
+      className="relative flex items-center bg-gray-100"
+      style={{
+        height: '100vh',
+        paddingTop: '80px' // Account for fixed navbar
+      }}
+    >
+      {/* Video Background */}
+      <video
+        className="absolute top-0 left-0 w-full h-full object-cover z-0"
+        autoPlay
+        muted
+        loop
+        playsInline
+      >
+        <source src="/assets/0828.mp4" type="video/mp4" />
+        {/* Fallback image for browsers that don't support video */}
+        <img src="/images/hero-bg.jpg" alt="Hero background" className="w-full h-full object-cover" />
+      </video>
+      
+      {/* Dark overlay for text readability */}
+      <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
+      <div className="max-w-[1440px] w-full mx-auto px-4 relative z-20">
         {/* Main Heading */}
         <div 
           ref={headingRef}
@@ -19,9 +41,9 @@ const HeroSection = () => {
           }`}
         >
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-inter font-extrabold leading-tight capitalize">
-            <span className="text-black">Most </span>
+            <span className="text-white">Most </span>
             <span className="text-[#ff690d]">affordable</span>
-            <span className="text-black"> maid agency in Singapore</span>
+            <span className="text-white"> maid agency in Singapore</span>
           </h1>
         </div>
 
@@ -34,26 +56,23 @@ const HeroSection = () => {
               : 'opacity-0 translate-y-8'
           }`}
         >
-          <p className="text-base sm:text-lg md:text-xl font-inter font-normal leading-relaxed text-black">
+          <p className="text-base sm:text-lg md:text-xl font-inter font-normal leading-relaxed text-white">
             With one of our packages carrying absolutely no service fee, we are proud to be the most affordable maid agency in Singapore—so every family can bring a helper home without stretching their budget. Beyond cost savings, our fee structure is fully transparent
           </p>
         </div>
 
-        {/* Hero Image */}
+        {/* Helper Finder Card */}
         <div 
-          ref={imageRef}
-          className={`flex justify-center transition-all duration-1000 ease-out delay-500 ${
-            isImageVisible 
+          ref={cardRef}
+          className={`transition-all duration-1000 ease-out delay-500 ${
+            isCardVisible 
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'
           }`}
         >
-          <img
-            src="/images/img_rectangle_5.png"
-            alt="Maid Agency Services"
-            className="w-full max-w-3xl h-auto rounded-2xl object-cover animate-float"
-          />
+          <HelperFinderCard />
         </div>
+
       </div>
     </section>
   );

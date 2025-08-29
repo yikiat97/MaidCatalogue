@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Plus, Trash2, X, Camera, Save } from 'lucide-react';
 import API_CONFIG from '../../config/api.js';
 
-const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => {
+const MaidDetailModal = ({ maidId, onClose }) => {
   const [maid, setMaid] = useState(null);
   const [formData, setFormData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,13 +41,6 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
     };
 
     if (maidId) fetchMaid();
-
-    // Cleanup function to revoke any preview URLs when component unmounts
-    return () => {
-      if (formData?.imagePreviewUrl) {
-        URL.revokeObjectURL(formData.imagePreviewUrl);
-      }
-    };
   }, [maidId]);
 
   const handleInputChange = (e) => {
@@ -155,157 +148,17 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
     const extension = file.name.split('.').pop();
     const filename = file.name.split('.')[0].replace(/\s+/g, '') + timestamp + '.' + extension;
 
-    // Clean up previous preview URL if it exists
-    if (formData.imagePreviewUrl) {
-      URL.revokeObjectURL(formData.imagePreviewUrl);
-    }
-
-    // Create a preview URL for the selected file
-    const previewUrl = URL.createObjectURL(file);
-
-    // Store the file object, metadata, and preview URL in formData
+    // Store the file object and metadata in formData
     setFormData(prev => ({
       ...prev,
       imageFile: file,
-      imageUrl: filename, // Store the filename for backend
-      imagePreviewUrl: previewUrl // Store the preview URL for display
+      imageUrl: filename // Just store the filename for display purposes
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    // Validate required fields
-    if (!formData.name || formData.name.trim() === '') {
-      if (onError) {
-        onError('Full Name is required.');
-      } else {
-        alert('Full Name is required.');
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.country || formData.country.trim() === '') {
-      if (onError) {
-        onError('Country is required.');
-      } else {
-        alert('Country is required.');
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.supplier || formData.supplier.trim() === '') {
-      if (onError) {
-        onError('Supplier is required.');
-      } else {
-        alert('Supplier is required.');
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.DOB || formData.DOB.trim() === '') {
-      if (onError) {
-        onError('Date of Birth is required.');
-      } else {
-        alert('Date of Birth is required.');
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.Religion || formData.Religion.trim() === '') {
-      if (onError) {
-        onError('Religion is required.');
-      } else {
-        alert('Religion is required.');
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.maritalStatus || formData.maritalStatus.trim() === '') {
-      if (onError) {
-        onError('Marital Status is required.');
-      } else {
-        alert('Marital Status is required.');
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.salary || formData.salary === null || formData.salary === undefined || formData.salary === '') {
-      if (onError) {
-        onError('Salary is required.');
-      } else {
-        alert('Salary is required.');
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.loan || formData.loan === null || formData.loan === undefined || formData.loan === '') {
-      if (onError) {
-        onError('Loan Amount is required.');
-      } else {
-        alert('Loan Amount is required.');
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.height || formData.height === null || formData.height === undefined || formData.height === '') {
-      if (onError) {
-        onError('Height is required.');
-      } else {
-        alert('Height is required.');
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.weight || formData.weight === null || formData.weight === undefined || formData.weight === '') {
-      if (onError) {
-        onError('Weight is required.');
-      } else {
-        alert('Weight is required.');
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.maidDetails?.restDay || formData.maidDetails.restDay === null || formData.maidDetails.restDay === undefined || formData.maidDetails.restDay === '') {
-      if (onError) {
-        onError('Rest Days is required. Please specify the number of rest days per month.');
-      } else {
-        alert('Rest Days is required. Please specify the number of rest days per month.');
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.skills || formData.skills.length === 0 || !formData.skills.some(skill => skill.trim() !== '')) {
-      if (onError) {
-        onError('At least one skill is required.');
-      } else {
-        alert('At least one skill is required.');
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.type || formData.type.length === 0 || !formData.type.some(type => type.trim() !== '')) {
-      if (onError) {
-        onError('At least one type is required.');
-      } else {
-        alert('At least one type is required.');
-      }
-      setIsSubmitting(false);
-      return;
-    }
 
     try {
       let imageUrl = formData.imageUrl;
@@ -325,7 +178,7 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
           loan: parseFloat(formData.loan) || 0,
           height: parseFloat(formData.height) || 0,
           weight: parseFloat(formData.weight) || 0,
-          NumChildren: formData.NumChildren !== null && formData.NumChildren !== undefined && formData.NumChildren !== '' ? parseInt(formData.NumChildren) : 0,
+          NumChildren: parseInt(formData.NumChildren) || 0,
           DOB: formData.DOB,
           skills: formData.skills.filter(skill => skill.trim() !== ''),
           languages: formData.languages.filter(lang => lang.trim() !== ''),
@@ -355,30 +208,10 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
         if (response.ok) {
           const result = await response.json();
           console.log('Maid updated:', result);
-          if (onSuccess) {
-            onSuccess('Maid updated successfully!');
-          } else {
-            alert('Maid updated successfully!');
-          }
-          // Refresh the maid list to show updated content
-          if (onRefresh) {
-            onRefresh();
-          }
+          alert('Maid updated successfully!');
           onClose();
         } else {
-          const errorData = await response.json();
-          
-          // Handle different error message formats
-          let errorMessage = 'Failed to update maid';
-          if (errorData.errors && Array.isArray(errorData.errors)) {
-            // Format: { message: "Validation failed", errors: ["error1", "error2"] }
-            errorMessage = errorData.errors.join(', ');
-          } else if (errorData.message) {
-            // Format: { message: "error message" }
-            errorMessage = errorData.message;
-          }
-          
-          throw new Error(errorMessage);
+          throw new Error('Failed to update maid');
         }
       } else {
         // No new image file, send as JSON without image
@@ -389,7 +222,7 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
           loan: parseFloat(formData.loan) || 0,
           height: parseFloat(formData.height) || 0,
           weight: parseFloat(formData.weight) || 0,
-          NumChildren: formData.NumChildren !== null && formData.NumChildren !== undefined && formData.NumChildren !== '' ? parseInt(formData.NumChildren) : 0,
+          NumChildren: parseInt(formData.NumChildren) || 0,
           DOB: formData.DOB,
           skills: formData.skills.filter(skill => skill.trim() !== ''),
           languages: formData.languages.filter(lang => lang.trim() !== ''),
@@ -418,39 +251,15 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
         if (response.ok) {
           const result = await response.json();
           console.log('Maid updated:', result);
-          if (onSuccess) {
-            onSuccess('Maid updated successfully!');
-          } else {
-            alert('Maid updated successfully!');
-          }
-          // Refresh the maid list to show updated content
-          if (onRefresh) {
-            onRefresh();
-          }
+          alert('Maid updated successfully!');
           onClose();
         } else {
-          const errorData = await response.json();
-          
-          // Handle different error message formats
-          let errorMessage = 'Failed to update maid';
-          if (errorData.errors && Array.isArray(errorData.errors)) {
-            // Format: { message: "Validation failed", errors: ["error1", "error2"] }
-            errorMessage = errorData.errors.join(', ');
-          } else if (errorData.message) {
-            // Format: { message: "error message" }
-            errorMessage = errorData.message;
-          }
-          
-          throw new Error(errorMessage);
+          throw new Error('Failed to update maid');
         }
       }
     } catch (error) {
       console.error('Error updating maid:', error);
-      if (onError) {
-        onError(`Error updating maid: ${error.message}`);
-      } else {
-        alert('Error updating maid. Please try again.');
-      }
+      alert('Error updating maid. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -508,7 +317,7 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                     <label className="block text-sm font-medium text-gray-700 mb-2">Profile Photo</label>
                     <div className="relative">
                       <img 
-                        src={formData.imagePreviewUrl || (formData.imageUrl ? API_CONFIG.buildImageUrl(formData.imageUrl) : '/placeholder.jpg')} 
+                        src={formData.imageUrl ? API_CONFIG.buildImageUrl(formData.imageUrl) : '/placeholder.jpg'} 
                         alt={formData.name} 
                         className="w-32 h-32 object-cover rounded-lg border-2 border-gray-200" 
                       />
@@ -537,33 +346,7 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                     >
                       Choose File
                     </button>
-                    {formData.imageFile && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          // Clean up preview URL
-                          if (formData.imagePreviewUrl) {
-                            URL.revokeObjectURL(formData.imagePreviewUrl);
-                          }
-                          // Clear the selected file
-                          setFormData(prev => ({
-                            ...prev,
-                            imageFile: null,
-                            imagePreviewUrl: null
-                          }));
-                        }}
-                        className="ml-2 px-3 py-2 text-sm text-red-600 border border-red-300 rounded-md hover:bg-red-50"
-                      >
-                        Remove
-                      </button>
-                    )}
-                    {formData.imageFile && (
-                      <div className="mt-2">
-                        <p className="text-sm text-blue-600 font-medium">New image selected (not saved yet)</p>
-                        <p className="text-xs text-gray-500 mt-1">File: {formData.imageFile.name}</p>
-                      </div>
-                    )}
-                    {formData.imageUrl && !formData.imageFile && (
+                    {formData.imageUrl && (
                       <p className="mt-2 text-sm text-gray-500">Current: {formData.imageUrl}</p>
                     )}
                   </div>
@@ -610,7 +393,7 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Height (cm) *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Height (cm)</label>
                     <input 
                       name="height" 
                       type="number" 
@@ -618,12 +401,11 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                       max="200"
                       value={formData.height} 
                       onChange={handleInputChange} 
-                      required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Weight (kg) *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
                     <input 
                       name="weight" 
                       type="number"
@@ -631,34 +413,31 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                       max="150" 
                       value={formData.weight} 
                       onChange={handleInputChange} 
-                      required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
                     />
                   </div>
-                                     <div>
-                     <label className="block text-sm font-medium text-gray-700 mb-1">Religion *</label>
-                     <select 
-                       name="Religion" 
-                       value={formData.Religion} 
-                       onChange={handleInputChange} 
-                       required
-                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                     >
-                       <option value="">Select Religion</option>
-                       <option value="Muslim">Muslim</option>
-                       <option value="Christian">Christian</option>
-                       <option value="Buddhist">Buddhist</option>
-                       <option value="Hindu">Hindu</option>
-                       <option value="Others">Others</option>
-                     </select>
-                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Marital Status *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Religion</label>
+                    <select 
+                      name="Religion" 
+                      value={formData.Religion} 
+                      onChange={handleInputChange} 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select Religion</option>
+                      <option value="Muslim">Muslim</option>
+                      <option value="Christian">Christian</option>
+                      <option value="Buddhist">Buddhist</option>
+                      <option value="Hindu">Hindu</option>
+                      <option value="Others">Others</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Marital Status</label>
                     <select 
                       name="maritalStatus" 
                       value={formData.maritalStatus} 
                       onChange={handleInputChange} 
-                      required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">Select Status</option>
@@ -705,12 +484,11 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Supplier ID *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Supplier ID</label>
                     <input 
                       name="supplier" 
                       value={formData.supplier || ''} 
                       onChange={handleInputChange} 
-                      required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
                       placeholder="e.g., ID-2"
                     />
@@ -719,26 +497,15 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
 
                 {/* Status Checkboxes */}
                 <div className="flex gap-6">
-                  <label className="flex items-center space-x-2">
-                    <div className="relative inline-block w-12 h-6 transition-colors duration-200 ease-in-out">
-                      <input
-                        type="checkbox"
-                        name="isActive"
-                        checked={formData.isActive}
-                        onChange={handleInputChange}
-                        className="sr-only"
-                      />
-                      <div className={`w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${
-                        formData.isActive ? 'bg-blue-600' : 'bg-gray-300'
-                      }`}>
-                        <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200 ease-in-out ${
-                          formData.isActive ? 'translate-x-6' : 'translate-x-1'
-                        }`} style={{ marginTop: '2px' }} />
-                      </div>
-                    </div>
-                    <span className="ml-2 text-sm text-gray-700">
-                      {formData.isActive ? 'Published' : 'Draft'}
-                    </span>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      name="isActive"
+                      checked={formData.isActive}
+                      onChange={handleInputChange}
+                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Is Active</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -760,7 +527,7 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                 {/* Skills */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-medium text-gray-700">Skills *</label>
+                    <label className="text-sm font-medium text-gray-700">Skills</label>
                     <button
                       type="button"
                       onClick={() => addArrayItem('skills')}
@@ -887,7 +654,7 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                 {/* Type/Category */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-medium text-gray-700">Type/Category *</label>
+                    <label className="text-sm font-medium text-gray-700">Type/Category</label>
                     <button
                       type="button"
                       onClick={() => addArrayItem('type')}
@@ -943,19 +710,18 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                     <div>
-                     <label className="block text-sm font-medium text-gray-700 mb-1">Rest Days (per month) *</label>
-                     <input 
-                       name="restDay" 
-                       type="number"
-                       min="0"
-                       max="31" 
-                       value={formData.maidDetails.restDay || ''} 
-                       onChange={handleDetailChange} 
-                       required
-                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                     />
-                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Rest Days (per month)</label>
+                    <input 
+                      name="restDay" 
+                      type="number"
+                      min="0"
+                      max="31" 
+                      value={formData.maidDetails.restDay || ''} 
+                      onChange={handleDetailChange} 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                    />
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Highest Education</label>
                     <select 
@@ -972,7 +738,7 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                       <option value="Bachelor's Degree">Bachelor's Degree</option>
                     </select>
                   </div>
-                  {/* <div className="md:col-span-2">
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Religion (Additional Details)</label>
                     <input 
                       name="religion" 
@@ -981,9 +747,9 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Additional religious information" 
                     />
-                  </div> */}
+                  </div>
                 </div>
-                {/* <div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Employment History Summary</label>
                   <textarea 
                     name="employmentHistory" 
@@ -993,7 +759,7 @@ const MaidDetailModal = ({ maidId, onClose, onError, onSuccess, onRefresh }) => 
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
                     placeholder="Brief employment history..."
                   />
-                </div> */}
+                </div>
               </div>
             )}
 

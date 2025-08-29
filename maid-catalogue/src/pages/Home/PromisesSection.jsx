@@ -8,19 +8,22 @@ const PromisesSection = () => {
 
   const promises = [
     {
-      number: "1",
       title: "Affordability.",
-      description: "Every family can afford a helper with us"
+      description: "Every family can afford a helper with us",
+      gradient: "from-green-400 to-emerald-500",
+      image: "/images/1.jpeg"
     },
     {
-      number: "2",
       title: "Transparency",
-      description: "No hidden fees. Promise"
+      description: "No hidden fees. Promise",
+      gradient: "from-blue-400 to-cyan-500",
+      image: "/images/2.jpeg"
     },
     {
-      number: "3",
       title: "Post deployment service",
-      description: "No missing in action after payment"
+      description: "No missing in action after payment",
+      gradient: "from-purple-400 to-indigo-500",
+      image: "/images/3.jpeg"
     }
   ];
 
@@ -28,7 +31,7 @@ const PromisesSection = () => {
 
   return (
     <section className="bg-[#585757] py-12 md:py-20">
-      <div className="max-w-6xl w-full mx-auto px-4">
+      <div className="max-w-[1440px] w-full mx-auto px-4">
         {/* Section Title */}
         <div 
           ref={titleRef}
@@ -47,62 +50,55 @@ const PromisesSection = () => {
           </h2>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8">
-          {/* Left Side - Promise Cards */}
-          <div ref={containerRef} className="w-full md:w-1/2 space-y-6">
-            {promises.map((promise, index) => (
-              <Card
-                key={index}
-                className={`flex items-center w-full md:w-[440px] min-h-[110px] bg-white hover-lift transition-all duration-700 ease-out ${
-                  visibleItems.includes(index)
-                    ? 'opacity-100 translate-x-0 scale-100'
-                    : 'opacity-0 -translate-x-8 scale-95'
-                }`}
-                variant="default"
-                padding="medium"
-                style={{ transitionDelay: `${index * 150}ms` }}
-              >
-                <div className="flex items-start">
-                  <span className="text-4xl md:text-5xl font-impact font-normal text-[#ff690d] mr-6 -mt-2 animate-pulse-slow">
-                    {promise.number}
-                  </span>
-                  <div>
-                    <h3 className="text-lg sm:text-xl md:text-2xl font-inter font-extrabold text-black capitalize mb-1">
-                      {promise.title}
-                    </h3>
-                    <p className="text-sm sm:text-base font-inter font-medium text-[#ff690d]">
-                      {promise.description}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+        {/* Promise Cards Grid Layout */}
+        <div ref={containerRef} className="max-w-7xl mx-auto">
+          {/* Single Row - 3 Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            {promises.map((promise, index) => {
+              return (
+                <Card
+                  key={index}
+                  className={`group relative bg-white hover:shadow-2xl hover:shadow-[#ff690d]/20 transition-all duration-500 ease-out overflow-hidden border-0 hover:-translate-y-2 hover:scale-105 ${
+                    visibleItems.includes(index)
+                      ? 'opacity-100 translate-y-0 scale-100'
+                      : 'opacity-0 translate-y-8 scale-95'
+                  }`}
+                  variant="default"
+                  padding="none"
+                  style={{ transitionDelay: `${index * 150}ms` }}
+                >
 
-          {/* Right Side - Images */}
-          <div 
-            ref={rightRef}
-            className={`flex flex-row justify-center md:justify-end gap-[2px] mt-8 md:mt-0 transition-all duration-1000 ease-out delay-500 ${
-              isRightVisible 
-                ? 'opacity-100 translate-x-0' 
-                : 'opacity-0 translate-x-8'
-            }`}
-          >
-            <img
-              src="/images/img_rectangle_1.png"
-              alt="Promise Image 1"
-              className="w-24 sm:w-36 md:w-44 h-40 sm:h-64 md:h-80 rounded-tl-3xl rounded-bl-3xl object-cover hover-scale"
-            />
-            <img
-              src="/images/img_rectangle_2.png"
-              alt="Promise Image 2"
-              className="w-24 sm:w-36 md:w-44 h-40 sm:h-64 md:h-80 object-cover hover-scale"
-            />
-            <img
-              src="/images/img_rectangle_3.png"
-              alt="Promise Image 3"
-              className="w-24 sm:w-36 md:w-44 h-40 sm:h-64 md:h-80 rounded-tr-3xl rounded-br-3xl object-cover hover-scale"
-            />
+                  <div className="relative h-[350px] md:h-[400px] flex flex-row">
+                    {/* Image Section with Diagonal Cut - Left Side */}
+                    <div 
+                      className="relative h-full w-[55%] bg-cover bg-center"
+                      style={{ 
+                        backgroundImage: `url(${promise.image})`,
+                        clipPath: 'polygon(0 0, 100% 0, 85% 100%, 0 100%)'
+                      }}
+                    >
+                    </div>
+                    
+                    {/* Text Section - Right Side */}
+                    <div className="relative h-full w-[45%] bg-white -ml-[5%] pl-4 pr-3 md:pl-8 md:pr-6 flex flex-col justify-center">
+                      <div className="text-left">
+                        <h3 className="text-lg md:text-xl lg:text-2xl font-inter font-extrabold text-black capitalize mb-3 group-hover:text-[#ff690d] transition-colors duration-300">
+                          {promise.title}
+                        </h3>
+                        <p className="text-sm md:text-base font-inter font-medium text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                          {promise.description}
+                        </p>
+                      </div>
+                      
+                      {/* Bottom decorative line */}
+                      <div className="mt-4 flex justify-start">
+                        <div className={`h-1 bg-gradient-to-r ${promise.gradient} w-16 md:w-20 rounded-full group-hover:w-24 md:group-hover:w-28 transition-all duration-500`}></div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </div>

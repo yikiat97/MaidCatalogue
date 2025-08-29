@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import API_CONFIG from '../../config/api.js';
 
 import { Search, Home, Package, Users, UserCheck, ShoppingCart, Store, Settings, LogOut, Bell, X, Plus, Trash2, Filter, ChevronDown, ChevronUp, Menu } from 'lucide-react';
@@ -10,7 +10,6 @@ import AdminLogo from '../../components/admin/AdminLogo';
 
 
 const Dashboard = () => {
-  const navigate = useNavigate();
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [generatedLink, setGeneratedLink] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
@@ -21,65 +20,11 @@ const Dashboard = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-  const { userId: userIdParam } = useParams(); // ✅ use clearer alias
-  const [userId, setUserId] = useState(null);
+const { userId: userIdParam } = useParams(); // ✅ use clearer alias
+const [userId, setUserId] = useState(null);
   const [recommendedIds, setRecommendedIds] = useState([]);
   
-  // Handle unauthorized access by redirecting to login
-  const handleUnauthorizedAccess = (action = 'perform this action') => {
-    // Clear any stored data
-    localStorage.removeItem('adminToken');
-    sessionStorage.clear();
-    
-    // Show error message briefly
-    setError(`Access denied or session expired. You cannot ${action}. Redirecting to login...`);
-    
-    // Redirect to admin login after a short delay
-    setTimeout(() => {
-      navigate('/system-access');
-    }, 2000);
-  };
 
-  // Check if response indicates unauthorized access
-  const checkAuthStatus = (response, action = 'perform this action') => {
-    if (response.status === 401 || response.status === 403) {
-      handleUnauthorizedAccess(action);
-      return true; // Indicates unauthorized
-    }
-    return false; // Authorized
-  };
-
-  // Manual logout function that redirects to login
-  const handleLogout = async () => {
-    try {
-      // Call logout endpoint
-      const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.LOGOUT), {
-        method: 'POST',
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        console.log('Logout successful');
-        setSuccess('You have been logged out successfully. Redirecting to login...');
-      } else {
-        console.error('Logout failed');
-        setError('Logout failed. Redirecting to login...');
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-      setError('Logout failed due to network error. Redirecting to login...');
-    }
-    
-    // Always clear local data and redirect after a short delay
-    setTimeout(() => {
-      // Clear any stored data
-      localStorage.removeItem('adminToken');
-      sessionStorage.clear();
-      navigate('/system-access');
-    }, 2000);
-  };
 
   const [formData, setFormData] = useState({
     name: '',
@@ -88,23 +33,19 @@ const Dashboard = () => {
     salary: '',
     loan: '',
     DOB: '',
-    height: '',
-    weight: '',
-    Religion: '',
     maritalStatus: '',
-    NumChildren: '',
-    skills: [],
-    languages: [],
-    type: [],
+    skills: [''],
+    languages: [''],
+    type: [''],
     isActive: true,
     isEmployed: false,
     supplier: '',
     maidDetails: {
       description: '',
       restDay: '',
-      englishRating: '',
-      chineseRating: '',
-      dialectRating: '',
+      englishRating: 0,
+      chineseRating: 0,
+      dialectRating: 0,
       highestEducation: '',
       religion: '',
       employmentHistory: ''
@@ -136,7 +77,7 @@ const Dashboard = () => {
   const countryOptions = ['Philippines', 'Indonesia', 'Myanmar'];
   const maritalStatusOptions = ['Single', 'Married', 'Widowed', 'Divorced'];
   const religionOptions = ['Christian', 'Muslim', 'Buddhist', 'Hindu', 'Catholic', 'Others'];
-  const availabilityOptions = ['Available', 'Employed', 'Draft'];
+  const availabilityOptions = ['Available', 'Employed'];
 
   const [maids, setMaids] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -147,24 +88,18 @@ const Dashboard = () => {
       const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.MAIDS), {
         credentials: 'include'
       });
-      
-      // Check if response indicates unauthorized access
-      if (checkAuthStatus(response, 'view maids')) {
-        return; // Exit early if unauthorized
-      }
-      
       const data = await response.json();
 
       const formatted = data.map((maid) => ({
         id: maid.id,
         supplier: maid.supplier,
-        imageUrl: maid.imageUrl,
+        photo: '👩', 
         name: maid.name,
         nationality: maid.country,
         religion: maid.Religion,
         ageWeightHeight: `${calculateAge(maid.DOB)}yo/${maid.height}cm/${maid.weight}kg`,
         maritalStatus: `${maid.maritalStatus}/${maid.NumChildren}`,
-        availability: maid.isEmployed ? 'Employed' : (maid.isActive ? 'Available' : 'Draft'),
+        availability: maid.isEmployed ? 'Employed' : 'Available',
         // Add raw values for filtering
         age: calculateAge(maid.DOB),
         height: maid.height,
@@ -180,10 +115,6 @@ const Dashboard = () => {
       setMaids(formatted);
     } catch (err) {
       console.error('Failed to fetch maids:', err);
-      // Check if it's an auth error
-      if (err.message && (err.message.includes('401') || err.message.includes('403'))) {
-        handleUnauthorizedAccess('view maids');
-      }
     }
   };
 
@@ -200,25 +131,18 @@ const Dashboard = () => {
       const response = await fetch(API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.ADMIN.SEARCH_MAIDS, { query }), {
         credentials: 'include'
       });
-      
-      // Check if response indicates unauthorized access
-      if (checkAuthStatus(response, 'search maids')) {
-        setIsSearching(false);
-        return; // Exit early if unauthorized
-      }
-      
       const data = await response.json();
 
       const formatted = data.map((maid) => ({
         id: maid.id,
         supplier: maid.supplier,
-        imageUrl: maid.imageUrl,
+        photo: '👩', 
         name: maid.name,
         nationality: maid.country,
         religion: maid.Religion,
         ageWeightHeight: `${calculateAge(maid.DOB)}yo/${maid.height}cm/${maid.weight}kg`,
         maritalStatus: `${maid.maritalStatus}/${maid.NumChildren}`,
-        availability: maid.isEmployed ? 'Employed' : (maid.isActive ? 'Available' : 'Draft'),
+        availability: maid.isEmployed ? 'Employed' : 'Available',
         // Add raw values for filtering
         age: calculateAge(maid.DOB),
         height: maid.height,
@@ -234,10 +158,6 @@ const Dashboard = () => {
       setMaids(formatted);
     } catch (err) {
       console.error('Failed to search maids:', err);
-      // Check if it's an auth error
-      if (err.message && (err.message.includes('401') || err.message.includes('403'))) {
-        handleUnauthorizedAccess('search maids');
-      }
     } finally {
       setIsSearching(false);
     }
@@ -263,31 +183,7 @@ const Dashboard = () => {
   }, [searchQuery]);
 
   useEffect(() => {
-    // Check session validity on page load
-    const checkInitialSession = async () => {
-      try {
-        const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.MAIDS), {
-          method: 'HEAD', // Lightweight check
-          credentials: 'include'
-        });
-        
-        if (response.status === 401 || response.status === 403) {
-          handleUnauthorizedAccess('access the admin page');
-          return; // Don't fetch maids if unauthorized
-        }
-        
-        // If authorized, proceed with normal operations
-        fetchMaids();
-      } catch (error) {
-        console.error('Initial session check failed:', error);
-        // If we can't even check, assume unauthorized
-        handleUnauthorizedAccess('access the admin page');
-        return;
-      }
-    };
-    
-    checkInitialSession();
-    clearMessages(); // Clear any existing messages when component mounts
+    fetchMaids();
   }, []);
 
   useEffect(() => {
@@ -395,7 +291,7 @@ const Dashboard = () => {
     if (!confirm) return;
   
     try {
-      const response = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.ADMIN.MAIDS}/${maidId}`), {
+      const response = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.ADMIN.MAID}/${maidId}`), {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -569,85 +465,6 @@ const Dashboard = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Validate required fields
-    if (!formData.name || formData.name.trim() === '') {
-      setError('Full Name is required.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.country || formData.country.trim() === '') {
-      setError('Country is required.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.supplier || formData.supplier.trim() === '') {
-      setError('Supplier is required.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.DOB || formData.DOB.trim() === '') {
-      setError('Date of Birth is required.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.Religion || formData.Religion.trim() === '') {
-      setError('Religion is required.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.maritalStatus || formData.maritalStatus.trim() === '') {
-      setError('Marital Status is required.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.salary || formData.salary === null || formData.salary === undefined || formData.salary === '') {
-      setError('Monthly Salary is required.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.loan || formData.loan === null || formData.loan === undefined || formData.loan === '') {
-      setError('Loan Amount is required.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.height || formData.height === null || formData.height === undefined || formData.height === '') {
-      setError('Height is required.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.weight || formData.weight === null || formData.weight === undefined || formData.weight === '') {
-      setError('Weight is required.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.maidDetails?.restDay || formData.maidDetails.restDay === null || formData.maidDetails.restDay === undefined || formData.maidDetails.restDay === '') {
-      setError('Rest Days is required. Please specify the number of rest days per month.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.skills || formData.skills.length === 0 || !formData.skills.some(skill => skill.trim() !== '')) {
-      setError('At least one skill is required.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.type || formData.type.length === 0 || !formData.type.some(t => t.trim() !== '')) {
-      setError('At least one type/category is required.');
-      setIsSubmitting(false);
-      return;
-    }
-
     // Debug: log the current formData state right before submission
     console.log('=== FORM SUBMISSION DEBUG ===');
     console.log('Current formData state:', formData);
@@ -667,7 +484,7 @@ const Dashboard = () => {
       // Prepare maid data with proper formatting
       const maidData = {
         ...formData,
-        NumChildren: formData.NumChildren !== null && formData.NumChildren !== undefined && formData.NumChildren !== '' ? parseInt(formData.NumChildren) : 0,
+        NumChildren: parseInt(formData.NumChildren) || 0,
         salary: parseInt(formData.salary) || 500, // Default to minimum required salary
         DOB: formData.DOB,
         maritalStatus: formData.maritalStatus || 'Single',
@@ -745,21 +562,12 @@ const Dashboard = () => {
           body: maidFormData,
         });
 
-        // Check if response indicates unauthorized access
-        if (checkAuthStatus(response, 'add maids')) {
-          return; // Exit early if unauthorized
-        }
-
         if (response.ok) {
           const result = await response.json();
           console.log('Maid added successfully:', result);
-          setSuccess('Maid added successfully!');
           resetForm();
           setIsModalOpen(false);
-          // Refresh the maid list to show the newly added maid
-          fetchMaids();
-          // Clear success message after 3 seconds
-          setTimeout(() => setSuccess(null), 3000);
+          alert('Maid added successfully!');
         } else {
           const errorData = await response.json();
           console.error('Server error:', errorData);
@@ -785,70 +593,43 @@ const Dashboard = () => {
           body: JSON.stringify(submitData),
         });
 
-        // Check if response indicates unauthorized access
-        if (checkAuthStatus(response, 'add maids')) {
-          return; // Exit early if unauthorized
-        }
-
         if (response.ok) {
           const result = await response.json();
           console.log('Maid added successfully:', result);
-          setSuccess('Maid added successfully!');
           resetForm();
           setIsModalOpen(false);
-          // Refresh the maid list to show the newly added maid
-          fetchMaids();
-          // Clear success message after 3 seconds
-          setTimeout(() => setSuccess(null), 3000);
+          alert('Maid added successfully!');
         } else {
           const errorData = await response.json();
           console.error('Server error:', errorData);
-          
-          // Handle different error message formats
-          let errorMessage = 'Failed to add maid';
-          if (errorData.errors && Array.isArray(errorData.errors)) {
-            // Format: { message: "Validation failed", errors: ["error1", "error2"] }
-            errorMessage = errorData.errors.join(', ');
-          } else if (errorData.message) {
-            // Format: { message: "error message" }
-            errorMessage = errorData.message;
-          }
-          
-          throw new Error(errorMessage);
+          throw new Error(errorData.message || 'Failed to add maid');
         }
       }
     } catch (error) {
       console.error('Error adding maid:', error);
-      setError(`Error adding maid: ${error.message}`);
-      // Clear error message after 5 seconds
-      setTimeout(() => setError(null), 5000);
+      alert(`Error adding maid: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
   };
   
   
-      const clearMessages = () => {
-    setError(null);
-    setSuccess(null);
-  };
-
-  const resetForm = () => {
-    setFormData({
+    const resetForm = () => {
+      setFormData({
         name: '',
         imageUrl: '',
         country: '',
         salary: '',
-        loan: '',
+        loan:'',
         DOB: '',
         height: '',
         weight: '',
         Religion: '',
-        maritalStatus: '',
+        maritalStatus: 'Single',
         NumChildren: '',
-        skills: [], // Empty skills array
-        languages: [], // Empty languages array
-        type: [], // Empty type array
+        skills: ['Cooking'], // Default skill
+        languages: ['English'], // Default language
+        type: ['New/Fresh'], // Default type
         isActive: true,
         isEmployed: false,
         supplier: '',
@@ -856,15 +637,14 @@ const Dashboard = () => {
           description: '',
           restDay: '',
           highestEducation: '',
-          englishRating: '',
-          chineseRating: '',
-          dialectRating: '',
+          englishRating: 0,
+          chineseRating: 0,
+          dialectRating: 0,
           religion: '',
           employmentHistory: ''
         },
         employmentDetails: []
       });
-      clearMessages(); // Clear any existing error/success messages
     };
   
     const getAvailabilityColor = (status) => {
@@ -1251,13 +1031,10 @@ const Dashboard = () => {
               <Settings className="w-5 h-5" />
               <span>Settings</span>
             </a>
-            <button 
-              onClick={handleLogout}
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100 w-full text-left"
-            >
+            <a href="/system-access" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
               <LogOut className="w-5 h-5" />
               <span>Log Out</span>
-            </button>
+            </a>
           </div>
         </nav>
       </div>
@@ -1306,63 +1083,6 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-
-        {/* Error and Success Messages */}
-        {error && (
-          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-[60] bg-red-50 border-l-4 border-red-400 p-4 mx-4 rounded-md shadow-lg max-w-md">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
-              <div className="ml-auto pl-3">
-                <div className="-mx-1.5 -my-1.5">
-                  <button
-                    onClick={() => setError(null)}
-                    className="inline-flex bg-red-50 rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
-                  >
-                    <span className="sr-only">Dismiss</span>
-                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M3.293 3.293a1 1 0 011.414 0L10 8.586l5.293-5.293a1 1 0 111.414 1.414L11.414 10l5.293 5.293a1 1 0 01-1.414 1.414L10 11.414l-5.293 5.293a1 1 0 01-1.414-1.414L8.586 10 3.293 4.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {success && (
-          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-[60] bg-green-50 border-l-4 border-green-400 p-4 mx-4 rounded-md shadow-lg max-w-md">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-green-700">{success}</p>
-              </div>
-              <div className="ml-auto pl-3">
-                <div className="-mx-1.5 -my-1.5">
-                  <button
-                    onClick={() => setSuccess(null)}
-                    className="inline-flex bg-green-50 rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50"
-                  >
-                    <span className="sr-only">Dismiss</span>
-                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M3.293 3.293a1 1 0 011.414 0L10 8.586l5.293-5.293a1 1 0 111.414 1.414L11.414 10l5.293 5.293a1 1 0 01-1.414 1.414L10 11.414l-5.293 5.293a1 1 0 01-1.414-1.414L8.586 10 3.293 4.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Enhanced Filters */}
         <div className="bg-white border-b flex-shrink-0">
@@ -1522,9 +1242,9 @@ const Dashboard = () => {
                   <h2 className="text-lg lg:text-xl font-semibold text-gray-800">
                     Maids Count: ({filteredMaids.length})
                   </h2>
-                  {/* <button className="px-3 lg:px-4 py-2 text-sm text-red-600 border border-red-300 rounded-md hover:bg-red-50">
+                  <button className="px-3 lg:px-4 py-2 text-sm text-red-600 border border-red-300 rounded-md hover:bg-red-50">
                     Delete
-                  </button> */}
+                  </button>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
                   <button 
@@ -1546,21 +1266,8 @@ const Dashboard = () => {
                   <div key={index} className="border rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                          {maid.imageUrl ? (
-                            <img 
-                              src={API_CONFIG.buildImageUrl(maid.imageUrl)} 
-                              alt={maid.name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.target.style.display = 'none';
-                                e.target.nextSibling.style.display = 'flex';
-                              }}
-                            />
-                          ) : null}
-                          <div className={`w-full h-full flex items-center justify-center text-sm ${maid.imageUrl ? 'hidden' : ''}`}>
-                            👩
-                          </div>
+                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm">
+                          {maid.photo}
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">{maid.name}</p>
@@ -1653,21 +1360,8 @@ const Dashboard = () => {
                             {maid.supplier}
                           </td>
                           <td className="px-3 py-4">
-                            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                              {maid.imageUrl ? (
-                                <img 
-                                  src={API_CONFIG.buildImageUrl(maid.imageUrl)} 
-                                  alt={maid.name}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'flex';
-                                  }}
-                                />
-                              ) : null}
-                              <div className={`w-full h-full flex items-center justify-center text-sm ${maid.imageUrl ? 'hidden' : ''}`}>
-                                👩
-                              </div>
+                            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-sm">
+                              {maid.photo}
                             </div>
                           </td>
                           <td className="px-3 py-4 text-sm font-medium text-gray-900 truncate" title={maid.name}>
@@ -1739,34 +1433,13 @@ const Dashboard = () => {
           isSubmitting={isSubmitting}
           handleSubmit={handleSubmit}
           resetForm={resetForm}
-          setIsModalOpen={(open) => {
-            setIsModalOpen(open);
-            if (!open) {
-              clearMessages(); // Clear messages when modal is closed
-              resetForm(); // Reset form data when modal is closed
-            }
-          }}
+          setIsModalOpen={setIsModalOpen}
           />
         )}
 
         {/* update Maid Modal */}
         {selectedMaid && (
-          <MaidDetailModal 
-            maidId={selectedMaid} 
-            onClose={() => {
-              setSelectedMaid(null);
-              clearMessages(); // Clear messages when modal is closed
-            }}
-            onError={(errorMessage) => {
-              setError(errorMessage);
-              setTimeout(() => setError(null), 5000);
-            }}
-            onSuccess={(successMessage) => {
-              setSuccess(successMessage);
-              setTimeout(() => setSuccess(null), 3000);
-            }}
-            onRefresh={fetchMaids}
-          />
+          <MaidDetailModal maidId={selectedMaid} onClose={() => setSelectedMaid(null)} />
         )}
 
         {/* Link Generator Modal */}

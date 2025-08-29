@@ -28,7 +28,7 @@ const API_CONFIG = {
       USERS: '/api/admin/users',
       GENERATE_LINK: '/api/admin/generate-link',
       SEARCH_MAIDS: '/api/admin/maids/search',
-      DELETE_RECOMMENDATION: '/api/admin/users',
+      DELETE_USER_RECOMMENDATION: '/api/admin/users',
     },
     
     // Catalogue endpoints
@@ -40,10 +40,10 @@ const API_CONFIG = {
     
     // User endpoints
     USER: {
-      RECOMMENDATIONS: '/api/user/recommendation', // load recommendations on admin page 
-      RECOMMENDED: '/api/user/recommended',  //verify recommendations token and link to user
+      RECOMMENDATIONS: '/api/user/recommendation',
+      RECOMMENDED: '/api/user/recommended',
       FAVORITES: '/api/user/favorites',
-      // GENERATE_LINK: '/api/user/generate-link',
+      GENERATE_LINK: '/api/user/generate-link',
     },
   },
   

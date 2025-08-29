@@ -2,11 +2,12 @@ import { useState ,useEffect} from 'react';
 import { Container, Typography, Grid, Button, Collapse , Box, Paper, useTheme, useMediaQuery } from '@mui/material';
 import MaidCard from '../../components/Catalogue/MaidCard';
 import FilterBar from '../../components/Catalogue/FilterBar';
-import NavBar from '../../components/Catalogue/NavBar';
+import Header from '../../components/common/Header';
 import LoginPromptModal from '../../components/Catalogue/LoginPromptModal';
 import logoBlack from '../../assets/logoBlack.png';
 import { useMaidContext } from '../../context/maidList';
 import API_CONFIG from '../../config/api.js';
+import { apiRequest, handleAPIError } from '../../utils/apiUtils.js';
 
 // Brand colors
 const brandColors = {
@@ -48,85 +49,84 @@ export default function Catalogue() {
     // Function to check authentication
     const checkAuth = async () => {
       try {
-        const res = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.PROFILE), {
-          credentials: 'include',
-        });
+        const userData = await apiRequest(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.PROFILE));
+        
+        // User is authenticated
+        setIsAuthenticated(true);
+        setShowWelcomeModal(false);
+        localStorage.removeItem('hasSeenWelcomeModal');
 
-        if (res.ok) {
-          setIsAuthenticated(true);
-          // Hide welcome modal when user is authenticated
-          setShowWelcomeModal(false);
-          // Clear the welcome modal flag when user logs in
-          localStorage.removeItem('hasSeenWelcomeModal');
-
-          fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.CATALOGUE.USER_FAVORITES), {
-            credentials: 'include',
-          })
-            .then((res) => {
-              if (!res.ok) {
-                throw new Error('Failed to fetch favorites');
-              }
-              return res.json();
-            })
-            .then((data) => {
-              // Extract maid IDs from the response
-              const favoriteIds = Array.isArray(data) ? data.map(maid => maid.id) : [];
-              setUserFavorites(favoriteIds);
-            })
-            .catch((err) => {
-              console.error(err);
-              setUserFavorites([]);
-            });
-        } else {
-          setIsAuthenticated(false);
-          // Check if user has already seen the welcome modal
-          const hasSeenWelcome = localStorage.getItem('hasSeenWelcomeModal');
-          if (!hasSeenWelcome) {
-            setShowWelcomeModal(true);
-          }
+        // Fetch user favorites
+        try {
+          const favData = await apiRequest(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.CATALOGUE.USER_FAVORITES));
+          const favoriteIds = Array.isArray(favData) ? favData.map(maid => maid.id) : [];
+          setUserFavorites(favoriteIds);
+        } catch (favError) {
+          handleAPIError(favError, { 
+            customMessage: 'Could not load favorites',
+            showAlert: false // Don't show alert for favorites error
+          });
+          setUserFavorites([]);
         }
-      } catch (err) {
-        console.error(err);
+      } catch (authError) {
+        // User is not authenticated
         setIsAuthenticated(false);
-        // Check if user has already seen the welcome modal
+        setUserFavorites([]);
+        
+        // Show welcome modal if not seen before
         const hasSeenWelcome = localStorage.getItem('hasSeenWelcomeModal');
         if (!hasSeenWelcome) {
           setShowWelcomeModal(true);
         }
+        
+        // Only log auth errors, don't show alerts
+        handleAPIError(authError, { 
+          showAlert: false,
+          logError: false // Expected when not logged in
+        });
       }
     };
 
     // Function to get all maids with pagination and caching
     const fetchMaids = async (page = 1, append = false) => {
       try {
-        const params = new URLSearchParams({
-          page: page.toString(),
-          limit: '20', // Show 20 maids per page for better performance
-        });
-
-        const res = await fetch(API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.CATALOGUE.MAIDS, {
+        const url = API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.CATALOGUE.MAIDS, {
           page: page.toString(),
           limit: '20'
-        }), {
-          credentials: 'include',
         });
         
-        if (!res.ok) {
-          throw new Error('Failed to fetch maids');
-        }
-        
-        const data = await res.json();
+        const data = await apiRequest(url);
         console.log('Fetched maids:', data);
         
+        // Handle API response structure: {maids: [], pagination: {}}
+        const maidsArray = data.maids || data || [];
+        
         if (append) {
-          setMaids(prev => [...prev, ...data.maids]);
-          setMaidList(prev => [...prev, ...data.maids]);
+          setMaids(prev => [...prev, ...maidsArray]);
+          setMaidList(prev => [...prev, ...maidsArray]);
         } else {
-          setMaids(data.maids);
-          setMaidList(data.maids);
+          setMaids(maidsArray);
+          setMaidList(maidsArray);
+        }
+        
+        // Log pagination info if available
+        if (data.pagination) {
+          console.log('Pagination info:', data.pagination);
         }
       } catch (err) {
-        console.error('Error fetching maids:', err);
+        handleAPIError(err, {
+          customMessage: 'Failed to load maid catalog. Please try again.',
+          onNetworkError: () => {
+            // Could show a retry button here
+            console.log('Network error loading maids, keeping existing data');
+          }
+        });
+        
+        // Set empty array on error only if we don't have existing data
+        if (!append) {
+          setMaids([]);
+          setMaidList([]);
+        }
       }
     };
 
@@ -202,8 +202,7 @@ export default function Catalogue() {
           <Box sx={{ 
             flexShrink: 0, 
             width: { xs: '100%', lg: 320 },
-            mb: { xs: 3, lg: 0 },
-            mt: { xs: '20px', lg: '20px'},
+            mb: { xs: 3, lg: 0 }
           }}>
             <Paper sx={{ 
               borderRadius: 3,
@@ -216,7 +215,6 @@ export default function Catalogue() {
                 p: 3,
                 background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryLight} 100%)`,
                 color: 'white'
-                
               }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
                   Refine Search
@@ -248,7 +246,7 @@ export default function Catalogue() {
           <Box sx={{ flexGrow: 1 }}>
             {/* Navigation Bar */}
             <Box sx={{ mb: 3 }}>
-              <NavBar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+              <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
             </Box>
 
             {/* Results Grid */}
@@ -323,7 +321,7 @@ export default function Catalogue() {
 
               {/* Maid Cards Grid */}
               {filteredMaids.length > 0 ? (
-                <Grid container spacing={4} justifyContent="center">
+                <Grid container spacing={2} justifyContent="center">
                   {filteredMaids.map((maid) => (
                     <Grid 
                       item 

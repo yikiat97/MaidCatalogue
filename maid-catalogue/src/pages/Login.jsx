@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API_CONFIG from '../config/api.js';
+import { apiRequest, handleAPIError } from '../utils/apiUtils.js';
 import logoBlack from '../assets/logoBlack.png';
 
 export default function Login() {
@@ -22,99 +23,52 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.LOGIN), {
+      // First, authenticate the user
+      await apiRequest(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.LOGIN), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ email, password }),
-        credentials: 'include',
       });
 
-      if (res.ok) {
-        const result = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.SIMPLE_CALLBACK), {
-          method: 'POST',
-          credentials: 'include',
-        });
+      // Get user data via simple callback
+      const userData = await apiRequest(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.SIMPLE_CALLBACK), {
+        method: 'POST',
+      });
+
+      console.log('User data:', userData);
+      
+      // Check if there's a redirect URL stored (from recommendation link)
+      const redirectUrl = localStorage.getItem('redirectAfterLogin');
+      console.log('🔍 Login: redirectUrl found:', redirectUrl);
+      
+      if (userData.role === 'admin') {
+        navigate('/admin');
+      } else if (redirectUrl) {
+        // Clear the stored URL
+        localStorage.removeItem('redirectAfterLogin');
         
-        if (result.ok) {
-          const userData = await result.json();
-          console.log('User data:', userData);
-          
-          // Check if there's a redirect URL stored (from recommendation link)
-          const redirectUrl = localStorage.getItem('redirectAfterLogin');
-          console.log('🔍 Login: redirectUrl found:', redirectUrl);
-          
-        // Always call the auth callback to check for recommend_token cookie
+        // Call the auth callback endpoint to associate recommendation with user
         try {
-          console.log('🔍 Calling auth callback to check for recommend_token cookie...');
-          const callbackRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
+          const callbackData = await apiRequest(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
             method: 'POST',
-            credentials: 'include',
           });
-          
-          if (callbackRes.ok) {
-            const callbackData = await callbackRes.json();
-            console.log('Auth callback successful:', callbackData);
-            
-            // If there's a redirect URL, use it; otherwise go to recommendations
-            if (redirectUrl) {
-              // Clear the stored URL
-              localStorage.removeItem('redirectAfterLogin');
-              console.log('🔄 Redirecting back to recommendation page:', redirectUrl);
-              window.location.href = redirectUrl;
-            } else {
-              console.log('🔄 No redirect URL, going to recommendations page');
-              navigate('/Recommend');
-            }
-          } else {
-            console.log('No recommend_token cookie found');
-            
-            // If there's a redirect URL, still use it (fallback)
-            if (redirectUrl) {
-              localStorage.removeItem('redirectAfterLogin');
-              console.log('🔄 Auth callback failed but redirecting to stored URL:', redirectUrl);
-              window.location.href = redirectUrl;
-            } else {
-              console.log('🔄 No recommendations, going to catalogue');
-              navigate('/MaidBio');
-            }
-          }
-        } catch (err) {
-          console.error('Auth callback error:', err);
-          
-          // If there's a redirect URL, still use it (fallback)
-          if (redirectUrl) {
-            localStorage.removeItem('redirectAfterLogin');
-            console.log('🔄 Auth callback error but redirecting to stored URL:', redirectUrl);
-            window.location.href = redirectUrl;
-          } else {
-            console.log('🔄 No recommendations, going to catalogue');
-            navigate('/MaidBio');
-          }
+          console.log('Auth callback successful:', callbackData);
+        } catch (callbackError) {
+          // Log but don't fail login for callback errors
+          console.warn('Auth callback failed:', callbackError);
         }
-        } else {
-          setError('Login failed. Please try again.');
-        }
+        
+        // Redirect back to recommendation page
+        window.location.href = redirectUrl;
       } else {
-        const errorData = await res.json();
-        if (res.status === 401) {
-          setError('Invalid email or password. Please check your credentials and try again.');
-        } else if (res.status === 403) {
-          setError('Account is locked or suspended. Please contact support.');
-        } else if (res.status === 404) {
-          setError('Account not found. Please check your email or sign up.');
-        } else if (res.status === 429) {
-          setError('Too many login attempts. Please wait a few minutes before trying again.');
-        } else if (res.status >= 500) {
-          setError('Server error. Please try again later or contact support.');
-        } else {
-          setError(errorData.message || 'Login failed. Please check your credentials and try again.');
-        }
+        navigate('/catalogue');
       }
-    } catch (err) {
-      console.error('Login error:', err);
-      setError('An error occurred. Please try again.');
+    } catch (error) {
+      handleAPIError(error, {
+        showAlert: false, // We'll use our own error state
+        customMessage: 'Login failed. Please check your credentials and try again.'
+      });
+      
+      setError(error.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -128,23 +82,18 @@ export default function Login() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.FORGOT_PASSWORD), {
+      await apiRequest(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.FORGOT_PASSWORD), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
 
-      if (res.ok) {
-        alert('Reset password link has been sent to your email');
-        setShowForgotModal(false);
-        setForgotEmail('');
-      } else {
-        const errorText = await res.text();
-        alert('Failed to send reset email: ' + errorText);
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Failed to send reset email due to server error.');
+      alert('Reset password link has been sent to your email');
+      setShowForgotModal(false);
+      setForgotEmail('');
+    } catch (error) {
+      handleAPIError(error, {
+        customMessage: 'Failed to send reset email. Please try again.'
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -493,46 +442,18 @@ export default function Login() {
 
             <button
               onClick={handleSubmit}
-              disabled={loading}
-              style={{
-                ...styles.button,
-                ...(loading ? styles.disabledButton : {})
-              }}
+              style={styles.button}
               onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 10px 30px rgba(255, 107, 26, 0.4)';
-                }
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 10px 30px rgba(255, 107, 26, 0.4)';
               }}
               onMouseLeave={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = 'none';
-                }
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
               }}
             >
-              {loading ? 'Signing In...' : 'Sign In'}
+              Sign In
             </button>
-            
-            {error && (
-              <div style={{
-                background: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: '10px',
-                padding: '12px',
-                marginTop: '15px',
-                textAlign: 'center'
-              }}>
-                <p style={{ 
-                  color: '#dc2626', 
-                  margin: '0',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}>
-                  ⚠️ {error}
-                </p>
-              </div>
-            )}
           </div>
 
           <div style={styles.forgotPassword}>

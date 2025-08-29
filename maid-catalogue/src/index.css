@@ -235,3 +235,53 @@ button:disabled:hover {
 html {
   scroll-behavior: smooth;
 }
+
+/* Hide scrollbars for carousel */
+.overflow-x-auto::-webkit-scrollbar {
+  display: none;
+}
+
+.overflow-x-auto {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* WhatsApp Float Animation for Animated Icon */
+.whatsapp-float-animated {
+  animation: whatsapp-float 3s ease-in-out infinite;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.whatsapp-float-animated:focus {
+  outline: 2px solid #25d366;
+  outline-offset: 2px;
+}
+
+@keyframes whatsapp-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Ensure animated icon maintains aspect ratio */
+.whatsapp-float-animated img {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* WhatsApp responsive adjustments */
+@media (max-width: 640px) {
+  .whatsapp-float-animated img {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+  }
+}

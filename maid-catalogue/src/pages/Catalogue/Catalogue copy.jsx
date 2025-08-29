@@ -22,7 +22,7 @@ import {
 } from '@mui/material';
 import MaidCard from '../../components/Catalogue/MaidCard';
 import FilterBar from '../../components/Catalogue/FilterBar';
-import NavBar from '../../components/Catalogue/NavBar';
+import Header from '../../components/common/Header';
 import logoBlack from '../assets/logoBlack.png';
 import { useMaidContext } from '../../context/maidList';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -235,9 +235,9 @@ export default function Catalogue() {
 
           {/* Main Content */}
           <Grid item xs={12} md={9} lg={9.5}>
-            {/* NavBar */}
+            {/* Header */}
             <Box sx={{ mb: 3 }}>
-              <NavBar isAuthenticated={isAuthenticated} />
+              <Header isAuthenticated={isAuthenticated} />
             </Box>
 
             {/* Header Section */}
@@ -471,7 +471,7 @@ export default function Catalogue() {
               <Fade in timeout={500}>
                 <Grid 
                   container 
-                  spacing={4} 
+                  spacing={2} 
                   sx={{ 
                     display: gridView ? 'grid' : 'flex',
                     gridTemplateColumns: gridView ? {

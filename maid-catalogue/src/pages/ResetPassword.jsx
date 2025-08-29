@@ -367,7 +367,7 @@ export default function ResetPassword() {
       fontWeight: '600',
       marginBottom: '10px'
     },
-    errorText: {
+    errorMessage: {
       fontSize: '14px',
       color: '#666',
       marginBottom: '20px'
@@ -383,7 +383,7 @@ export default function ResetPassword() {
           <div style={styles.errorContainer}>
             <div style={styles.errorIcon}>⚠️</div>
             <h2 style={styles.errorTitle}>Invalid Reset Link</h2>
-            <p style={styles.errorText}>
+            <p style={styles.errorMessage}>
               This password reset link is invalid or has expired. Please request a new password reset.
             </p>
             <button
