@@ -27,7 +27,7 @@ const Card = ({
 
   const shadows = {
     true: 'shadow-[0_2px_5px_rgba(0,0,0,0.1)]',
-    false: '',
+    false: '!shadow-none',
   };
 
   const roundings = {

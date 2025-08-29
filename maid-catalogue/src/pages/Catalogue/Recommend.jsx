@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Container, Typography, Grid, Box, Paper, useTheme, useMediaQuery, Modal, Button } from '@mui/material';
 import MaidCard from '../../components/Catalogue/MaidCard';
-import NavBar from '../../components/Catalogue/NavBar';
+import Header from '../../components/common/Header';
 import { useLocation, useNavigate } from 'react-router-dom';
 import logoBlack from '../../assets/logoBlack.png';
 import API_CONFIG from '../../config/api.js';
@@ -30,8 +30,6 @@ export default function Recommended() {
   const [userFavorites, setUserFavorites] = useState([]);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [selectedMaid, setSelectedMaid] = useState(null);
-  const [recommendationAssociated, setRecommendationAssociated] = useState(false);
-  const [isAssociating, setIsAssociating] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -68,107 +66,29 @@ export default function Recommended() {
             console.log('⚠️ User is not a customer, role:', authData.user?.role);
           }
 
-          // 2️⃣ If authenticated AND has token, use the token to fetch recommendations AND associate with user
-          if (token) {
-            console.log('🔐 User is authenticated with token, fetching recommendations using token...');
-            
-            // First, call auth callback to associate the recommendation with the user
-            console.log('🔗 Associating recommendation token with authenticated user...');
-            setIsAssociating(true);
-            try {
-              const callbackRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
-                method: 'POST',
-                credentials: 'include',
-              });
-              
-              if (callbackRes.ok) {
-                const callbackData = await callbackRes.json();
-                console.log('✅ Recommendation successfully associated with user:', callbackData);
-                setRecommendationAssociated(true);
-                
-                // Clear success message after 5 seconds
-                setTimeout(() => {
-                  setRecommendationAssociated(false);
-                }, 5000);
-                
-                // Check if callback wants to redirect (though this shouldn't happen for authenticated users)
-                if (callbackData.redirectTo) {
-                  console.log('🔄 Callback requested redirect to:', callbackData.redirectTo);
-                  // For authenticated users, we usually don't redirect, but log it
-                }
-              } else {
-                console.log('⚠️ Auth callback failed, but continuing with token-based fetch');
-              }
-            } catch (err) {
-              console.error('❌ Error calling auth callback:', err);
-            } finally {
-              setIsAssociating(false);
-            }
-            
-            // Now fetch recommendations using the token
-            const fetchURL = API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.USER.RECOMMENDED}/${token}`);
-            console.log('🌐 Fetching from:', fetchURL);
-            
-            const recRes = await fetch(fetchURL, {
-              credentials: 'include',
-            });
-            
-            console.log('📡 Token-based recommendations response status:', recRes.status);
-            
-            if (recRes.ok) {
-              const recData = await recRes.json();
-              console.log('✅ Token-based recommendations:', recData);
-              console.log('📊 Number of recommendations:', recData.length);
-              setRecommendedMaids(recData);
-              
-              // Show success message that recommendations were associated
-              console.log('🎉 Recommendations successfully associated with your account!');
-              
-              // Optionally, you could also fetch personal recommendations here to show updated list
-              // But for now, we'll show the token-based recommendations
-            } else {
-              console.error('❌ Failed to fetch token-based recommendations:', recRes.status);
-              const errorText = await recRes.text();
-              console.error('📄 Error response:', errorText);
-              
-              // If token-based fetch fails, try personal recommendations as fallback
-              console.log('🔄 Trying personal recommendations as fallback...');
-              const fallbackRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.USER.RECOMMENDED), {
-                credentials: 'include',
-              });
-              
-              if (fallbackRes.ok) {
-                const fallbackData = await fallbackRes.json();
-                console.log('✅ Fallback to personal recommendations successful:', fallbackData);
-                setRecommendedMaids(fallbackData);
-              } else {
-                console.error('❌ Fallback also failed:', fallbackRes.status);
-                setRecommendedMaids([]);
-              }
-            }
+          // 2️⃣ If authenticated, fetch user's personal recommendations (ignore token)
+          console.log('🔐 User is authenticated, fetching personal recommendations...');
+          const recRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.USER.RECOMMENDED), {
+            credentials: 'include',
+          });
+          
+          console.log('📡 Personal recommendations response status:', recRes.status);
+          
+          if (recRes.ok) {
+            const recData = await recRes.json();
+            console.log('✅ Authenticated user recommendations:', recData);
+            // Handle both array response and object response
+            const maidsArray = Array.isArray(recData) ? recData : (recData.maids || []);
+            console.log('📊 Number of recommendations:', maidsArray.length);
+            setRecommendedMaids(maidsArray);
           } else {
-            // 3️⃣ If authenticated but no token, fetch user's personal recommendations
-            console.log('🔐 User is authenticated but no token, fetching personal recommendations...');
-            const recRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.USER.RECOMMENDED), {
-              credentials: 'include',
-            });
-            
-            console.log('📡 Personal recommendations response status:', recRes.status);
-            
-            if (recRes.ok) {
-              const recData = await recRes.json();
-              console.log('✅ Authenticated user recommendations:', recData);
-              console.log('📊 Number of recommendations:', recData.length);
-              setRecommendedMaids(recData);
-            } else {
-              console.error('❌ Failed to fetch authenticated user recommendations:', recRes.status);
-              const errorText = await recRes.text();
-              console.error('📄 Error response:', errorText);
-              setRecommendedMaids([]);
-            }
+            console.error('❌ Failed to fetch authenticated user recommendations:', recRes.status);
+            const errorText = await recRes.text();
+            console.error('📄 Error response:', errorText);
+            setRecommendedMaids([]);
           }
 
-          // 4️⃣ Fetch user favorites if authenticated
+          // 3️⃣ Fetch user favorites if authenticated
           console.log('❤️ Fetching user favorites...');
           const favRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.USER.FAVORITES), {
             credentials: 'include',
@@ -195,10 +115,10 @@ export default function Recommended() {
           setIsAuthenticated(false); // not logged in
           setUserFavorites([]);
           
-          // 5️⃣ If not authenticated and has token, fetch anonymous recommendations
+          // 4️⃣ If not authenticated and has token, fetch anonymous recommendations
           if (token) {
             console.log('👤 User not authenticated, fetching anonymous recommendations with token...');
-            const fetchURL = API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.USER.RECOMMENDED}/${token}`);
+            const fetchURL = API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.USER.RECOMMENDED, { token });
             console.log('🌐 Fetching from:', fetchURL);
             
             const recRes = await fetch(fetchURL, {
@@ -210,15 +130,14 @@ export default function Recommended() {
             if (recRes.ok) {
               const recData = await recRes.json();
               console.log('✅ Anonymous recommendations:', recData);
-              console.log('📊 Number of recommendations:', recData.length);
-              setRecommendedMaids(recData);
+              // Handle API response structure: {maids: [], token: "", expiresAt: ""}
+              const maidsArray = recData.maids || recData || [];
+              console.log('📊 Number of recommendations:', maidsArray.length);
+              setRecommendedMaids(maidsArray);
             } else {
               console.error('❌ Failed to fetch anonymous recommendations:', recRes.status);
               const errorText = await recRes.text();
               console.error('📄 Error response:', errorText);
-              
-              // Show user-friendly error message
-              console.log('❌ Token-based recommendations failed, showing empty state');
               setRecommendedMaids([]);
             }
           } else {
@@ -354,7 +273,7 @@ export default function Recommended() {
         <Box sx={{ flexGrow: 1 }}>
           {/* Navigation Bar */}
           <Box sx={{ mb: 3 }}>
-            <NavBar isAuthenticated={isAuthenticated} />
+            <Header isAuthenticated={isAuthenticated} />
           </Box>
 
           {/* Results Grid */}
@@ -399,80 +318,9 @@ export default function Recommended() {
               </Box>
             </Box>
 
-            {/* Success Message for Associated Recommendations */}
-            {isAssociating && (
-              <Box sx={{ 
-                mb: 3,
-                p: 2,
-                borderRadius: 2,
-                background: `linear-gradient(135deg, ${brandColors.primary}15 0%, ${brandColors.primaryLight}25 100%)`,
-                border: `1px solid ${brandColors.primary}30`,
-                textAlign: 'center'
-              }}>
-                <Typography variant="body1" sx={{ 
-                  color: brandColors.primary,
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 1
-                }}>
-                  🔄 Associating recommendations with your account...
-                </Typography>
-              </Box>
-            )}
-
-            {recommendationAssociated && (
-              <Box sx={{ 
-                mb: 3,
-                p: 2,
-                borderRadius: 2,
-                background: `linear-gradient(135deg, ${brandColors.success}15 0%, ${brandColors.success}25 100%)`,
-                border: `1px solid ${brandColors.success}30`,
-                textAlign: 'center'
-              }}>
-                <Typography variant="body1" sx={{ 
-                  color: brandColors.success,
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 1
-                }}>
-                  ✅ Recommendations successfully added to your account!
-                </Typography>
-                <Typography variant="body2" sx={{ 
-                  color: brandColors.success,
-                  mt: 0.5,
-                  opacity: 0.8
-                }}>
-                  These recommendations are now saved and will appear in your personal recommendations.
-                </Typography>
-                {/* <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => {
-                    // Refresh the page to show personal recommendations
-                    window.location.reload();
-                  }}
-                  sx={{
-                    mt: 1,
-                    borderColor: brandColors.success,
-                    color: brandColors.success,
-                    '&:hover': {
-                      borderColor: brandColors.success,
-                      backgroundColor: `${brandColors.success}10`,
-                    }
-                  }}
-                >
-                  View Personal Recommendations
-                </Button> */}
-              </Box>
-            )}
-
             {/* Maid Cards Grid */}
             {recommendedMaids.length > 0 ? (
-              <Grid container spacing={4} justifyContent="flex-start">
+              <Grid container spacing={3} justifyContent="flex-start">
                 {recommendedMaids.map((maid) => (
                   <Grid item xs={5} md={3} key={maid.id}>
                     <MaidCard

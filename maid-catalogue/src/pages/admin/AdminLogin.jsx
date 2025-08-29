@@ -44,19 +44,7 @@ export default function AdminLogin() {
         }
       } else {
         const errorData = await res.json();
-        if (res.status === 401) {
-          setError('Invalid email or password. Please check your credentials and try again.');
-        } else if (res.status === 403) {
-          setError('Access denied. You do not have admin privileges.');
-        } else if (res.status === 404) {
-          setError('Admin account not found. Please contact system administrator.');
-        } else if (res.status === 429) {
-          setError('Too many login attempts. Please wait a few minutes before trying again.');
-        } else if (res.status >= 500) {
-          setError('Server error. Please try again later or contact support.');
-        } else {
-          setError(errorData.message || 'Login failed. Please check your credentials and try again.');
-        }
+        setError(errorData.message || 'Login failed. Please try again.');
       }
     } catch (err) {
       console.error('Admin login error:', err);
@@ -216,25 +204,7 @@ export default function AdminLogin() {
           >
             {loading ? 'Accessing...' : 'Access System'}
           </button>
-          {error && (
-            <div style={{
-              background: '#fef2f2',
-              border: '1px solid #fecaca',
-              borderRadius: '8px',
-              padding: '12px',
-              marginTop: '15px',
-              textAlign: 'center'
-            }}>
-              <p style={{ 
-                color: '#dc2626', 
-                margin: '0',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}>
-                ⚠️ {error}
-              </p>
-            </div>
-          )}
+          {error && <p style={{ color: 'red', marginTop: '10px', textAlign: 'center' }}>{error}</p>}
         </div>
       </div>
     </div>

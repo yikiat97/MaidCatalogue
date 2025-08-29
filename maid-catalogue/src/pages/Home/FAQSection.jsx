@@ -74,8 +74,8 @@ const FAQSection = () => {
   ];
 
   return (
-    <section className="py-12 bg-white">
-      <div className="max-w-6xl w-full mx-auto px-4">
+    <section className="py-12 bg-white overflow-x-hidden">
+      <div className="max-w-[1440px] w-full mx-auto px-4">
         {/* Section Title */}
         <div 
           ref={titleRef}
@@ -100,8 +100,8 @@ const FAQSection = () => {
             ref={leftRef}
             className={`w-full md:w-1/2 transition-all duration-1000 ease-out delay-300 ${
               isLeftVisible 
-                ? 'opacity-100 translate-x-0' 
-                : 'opacity-0 -translate-x-8'
+                ? 'opacity-100 translate-y-0' 
+                : 'opacity-0 translate-y-4'
             }`}
           >
             <Accordion items={leftColumnFAQs} allowMultiple={false} />
@@ -112,8 +112,8 @@ const FAQSection = () => {
             ref={rightRef}
             className={`w-full md:w-1/2 transition-all duration-1000 ease-out delay-500 ${
               isRightVisible 
-                ? 'opacity-100 translate-x-0' 
-                : 'opacity-0 translate-x-8'
+                ? 'opacity-100 translate-y-0' 
+                : 'opacity-0 translate-y-4'
             }`}
           >
             <Accordion items={rightColumnFAQs} allowMultiple={false} />

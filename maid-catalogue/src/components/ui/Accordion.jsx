@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 
 const AccordionItem = ({ title, children, isOpen, onToggle }) => {
   return (
-    <div className="bg-[#ff690dd3] rounded-[20px] shadow-[0_4px_4px_rgba(0,0,0,0.25)] mb-4">
+    <div className="bg-[#ff690dd3] rounded-[20px] shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
       <button
         onClick={onToggle}
         className="w-full px-4 py-4 text-left flex justify-between items-center focus:outline-none"
       >
-        <span className="text-[24px] font-avenir-next font-semibold leading-[32px] text-white pr-4">
+        <span className="text-sm sm:text-base md:text-lg lg:text-xl font-avenir-next font-semibold leading-relaxed text-white pr-4">
           {title}
         </span>
         <div className="bg-white rounded-[12px] w-[25px] h-[25px] flex items-center justify-center shadow-[0_4px_4px_rgba(246,170,95,0.25)] flex-shrink-0">
@@ -30,7 +30,7 @@ const AccordionItem = ({ title, children, isOpen, onToggle }) => {
   );
 };
 
-const Accordion = ({ items, allowMultiple = false, className = '' }) => {
+const Accordion = ({ items, allowMultiple = false, className = '', spacing = '6' }) => {
   const [openItems, setOpenItems] = useState(new Set());
 
   const toggleItem = (index) => {
@@ -55,7 +55,7 @@ const Accordion = ({ items, allowMultiple = false, className = '' }) => {
   };
 
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div className={`space-y-${spacing} ${className}`}>
       {items.map((item, index) => (
         <AccordionItem
           key={index}
@@ -86,6 +86,7 @@ Accordion.propTypes = {
   ).isRequired,
   allowMultiple: PropTypes.bool,
   className: PropTypes.string,
+  spacing: PropTypes.string,
 };
 
 export default Accordion;

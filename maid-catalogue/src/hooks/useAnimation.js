@@ -38,7 +38,7 @@ export const useStaggeredAnimation = (items, delay = 100) => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && items && Array.isArray(items)) {
           items.forEach((_, index) => {
             setTimeout(() => {
               setVisibleItems(prev => [...prev, index]);

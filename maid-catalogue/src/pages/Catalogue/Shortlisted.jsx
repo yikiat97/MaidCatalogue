@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import maidPic from '../../assets/maidPic.jpg';
 import API_CONFIG from '../../config/api.js';
 import MaidCard from '../../components/Catalogue/MaidCard';
-import NavBar from '../../components/Catalogue/NavBar';
+import Header from '../../components/common/Header';
 import logoBlack from '../../assets/logoBlack.png';
 
 // Brand colors
@@ -152,7 +152,7 @@ export default function Favorites() {
         <Box sx={{ flexGrow: 1 }}>
           {/* Navigation Bar */}
           <Box sx={{ mb: 3 }}>
-            <NavBar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+            <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
           </Box>
 
           {/* Results Grid */}
@@ -199,7 +199,7 @@ export default function Favorites() {
 
             {/* Maid Cards Grid */}
             {favoriteMaids.length > 0 ? (
-              <Grid container spacing={4} justifyContent="flex-start">
+              <Grid container spacing={3} justifyContent="flex-start">
                 {favoriteMaids.map((maid) => (
                   <Grid item xs={5} md={3} key={maid.id}>
                     <MaidCard 
