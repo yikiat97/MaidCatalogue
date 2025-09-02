@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import API_CONFIG from '../config/api.js';
-import { apiRequest, handleAPIError } from '../utils/apiUtils.js';
-import logoBlack from '../assets/logoBlack.png';
+import { cn } from "../lib/utils"
+import { Button } from "../components/ui/button"
+import { Card, CardContent } from "../components/ui/card"
+import { Input } from "../components/ui/input"
+import { Label } from "../components/ui/label"
 
 export default function Login() {
   const [password, setPassword] = useState('');
@@ -23,52 +26,70 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // First, authenticate the user
-      await apiRequest(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.LOGIN), {
+      const res = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.LOGIN), {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ email, password }),
+        credentials: 'include',
       });
 
-      // Get user data via simple callback
-      const userData = await apiRequest(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.SIMPLE_CALLBACK), {
-        method: 'POST',
-      });
-
-      console.log('User data:', userData);
-      
-      // Check if there's a redirect URL stored (from recommendation link)
-      const redirectUrl = localStorage.getItem('redirectAfterLogin');
-      console.log('🔍 Login: redirectUrl found:', redirectUrl);
-      
-      if (userData.role === 'admin') {
-        navigate('/admin');
-      } else if (redirectUrl) {
-        // Clear the stored URL
-        localStorage.removeItem('redirectAfterLogin');
+      if (res.ok) {
+        const result = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.SIMPLE_CALLBACK), {
+          method: 'POST',
+          credentials: 'include',
+        });
         
-        // Call the auth callback endpoint to associate recommendation with user
-        try {
-          const callbackData = await apiRequest(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
-            method: 'POST',
-          });
-          console.log('Auth callback successful:', callbackData);
-        } catch (callbackError) {
-          // Log but don't fail login for callback errors
-          console.warn('Auth callback failed:', callbackError);
+        if (result.ok) {
+          const userData = await result.json();
+          console.log('User data:', userData);
+          
+          // Check if there's a redirect URL stored (from recommendation link)
+          const redirectUrl = localStorage.getItem('redirectAfterLogin');
+          console.log('🔍 Login: redirectUrl found:', redirectUrl);
+          
+          if (userData.role === 'admin') {
+            navigate('/admin');
+          } else if (redirectUrl) {
+            // Clear the stored URL
+            localStorage.removeItem('redirectAfterLogin');
+            
+            // Call the auth callback endpoint to associate recommendation with user
+            try {
+              const callbackRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
+                method: 'POST',
+                credentials: 'include',
+              });
+              
+              if (callbackRes.ok) {
+                const callbackData = await callbackRes.json();
+                console.log('Auth callback successful:', callbackData);
+                // Redirect back to recommendation page
+                window.location.href = redirectUrl;
+              } else {
+                console.error('Auth callback failed:', callbackRes.status);
+                // Still redirect even if callback fails
+                window.location.href = redirectUrl;
+              }
+            } catch (err) {
+              console.error('Auth callback error:', err);
+              // Still redirect even if callback fails
+              window.location.href = redirectUrl;
+            }
+          } else {
+            navigate('/catalogue');
+          }
+        } else {
+          setError('Login failed. Please try again.');
         }
-        
-        // Redirect back to recommendation page
-        window.location.href = redirectUrl;
       } else {
-        navigate('/catalogue');
+        const errorData = await res.json();
+        setError(errorData.message || 'Login failed. Please try again.');
       }
-    } catch (error) {
-      handleAPIError(error, {
-        showAlert: false, // We'll use our own error state
-        customMessage: 'Login failed. Please check your credentials and try again.'
-      });
-      
-      setError(error.message || 'Login failed. Please try again.');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -82,18 +103,23 @@ export default function Login() {
 
     setIsSubmitting(true);
     try {
-      await apiRequest(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.FORGOT_PASSWORD), {
+      const res = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.FORGOT_PASSWORD), {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
 
-      alert('Reset password link has been sent to your email');
-      setShowForgotModal(false);
-      setForgotEmail('');
-    } catch (error) {
-      handleAPIError(error, {
-        customMessage: 'Failed to send reset email. Please try again.'
-      });
+      if (res.ok) {
+        alert('Reset password link has been sent to your email');
+        setShowForgotModal(false);
+        setForgotEmail('');
+      } else {
+        const errorText = await res.text();
+        alert('Failed to send reset email: ' + errorText);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to send reset email due to server error.');
     } finally {
       setIsSubmitting(false);
     }
@@ -113,433 +139,128 @@ export default function Login() {
     setForgotEmail('');
   };
 
-  const styles = {
-    container: {
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #ff8c42 0%, #ff6b1a 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px',
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
-    },
-    loginCard: {
-      background: 'white',
-      borderRadius: '20px',
-      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
-      padding: '40px',
-      width: '100%',
-      maxWidth: '400px',
-      position: 'relative',
-      overflow: 'hidden'
-    },
-    decorativeElement: {
-      position: 'absolute',
-      top: '-50px',
-      right: '-50px',
-      width: '100px',
-      height: '100px',
-      background: 'linear-gradient(45deg, #ff8c42, #ff6b1a)',
-      borderRadius: '50%',
-      opacity: '0.1'
-    },
-    logoContainer: {
-      textAlign: 'center',
-      marginBottom: '30px'
-    },
-    logo: {
-      width: '80px',
-      height: '80px',
-      margin: '0 auto 15px',
-      position: 'relative'
-    },
-    house: {
-      width: '100%',
-      height: '100%',
-      position: 'relative'
-    },
-    roof: {
-      width: '0',
-      height: '0',
-      borderLeft: '40px solid transparent',
-      borderRight: '40px solid transparent',
-      borderBottom: '30px solid #ff8c42',
-      position: 'absolute',
-      top: '0',
-      left: '0'
-    },
-    roofOutline: {
-      width: '0',
-      height: '0',
-      borderLeft: '42px solid transparent',
-      borderRight: '42px solid transparent',
-      borderBottom: '32px solid #ff6b1a',
-      position: 'absolute',
-      top: '-2px',
-      left: '-2px',
-      zIndex: '1'
-    },
-    chimney: {
-      width: '8px',
-      height: '15px',
-      background: '#ff8c42',
-      position: 'absolute',
-      top: '8px',
-      right: '15px',
-      zIndex: '2'
-    },
-    houseBody: {
-      width: '60px',
-      height: '40px',
-      background: 'white',
-      border: '3px solid #ff8c42',
-      borderRadius: '0 0 5px 5px',
-      position: 'absolute',
-      top: '25px',
-      left: '10px'
-    },
-    window: {
-      width: '16px',
-      height: '16px',
-      background: '#ff8c42',
-      position: 'absolute',
-      top: '8px',
-      left: '22px'
-    },
-    windowCross: {
-      position: 'absolute',
-      top: '6px',
-      left: '6px',
-      width: '4px',
-      height: '4px'
-    },
-    brandText: {
-      fontSize: '28px',
-      fontWeight: 'bold',
-      color: '#333',
-      margin: '0'
-    },
-    easyText: {
-      color: '#ff8c42'
-    },
-    hireText: {
-      color: '#333'
-    },
-    subtitle: {
-      fontSize: '14px',
-      color: '#666',
-      margin: '5px 0 0 0',
-      fontWeight: '400'
-    },
-    welcome: {
-      fontSize: '28px',
-      color: '#333',
-      fontWeight: '600',
-      textAlign: 'center',
-      marginBottom: '10px',
-      marginTop: '-40px'
-    },
-    description: {
-      fontSize: '14px',
-      color: '#666',
-      textAlign: 'center',
-      marginBottom: '30px',
-      lineHeight: '1.5'
-    },
-    logoImage: {
-      marginTop: '-30px'
-    },
-    inputGroup: {
-      position: 'relative',
-      marginBottom: '20px'
-    },
-    input: {
-      width: '100%',
-      padding: '15px 50px 15px 20px',
-      border: '2px solid #e0e0e0',
-      borderRadius: '10px',
-      fontSize: '16px',
-      outline: 'none',
-      transition: 'all 0.3s ease',
-      boxSizing: 'border-box'
-    },
-    inputIcon: {
-      position: 'absolute',
-      right: '15px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      color: '#999',
-      cursor: 'pointer'
-    },
-    button: {
-      width: '100%',
-      padding: '15px 20px',
-      background: 'linear-gradient(135deg, #ff8c42 0%, #ff6b1a 100%)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '10px',
-      fontSize: '16px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      marginTop: '10px'
-    },
-    forgotPassword: {
-      textAlign: 'center',
-      marginTop: '20px'
-    },
-    forgotLink: {
-      color: '#ff8c42',
-      textDecoration: 'none',
-      fontSize: '14px',
-      cursor: 'pointer'
-    },
-    // Modal styles
-    modalOverlay: {
-      position: 'fixed',
-      top: '0',
-      left: '0',
-      right: '0',
-      bottom: '0',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: '1000',
-      padding: '20px'
-    },
-    modal: {
-      background: 'white',
-      borderRadius: '20px',
-      padding: '30px',
-      width: '100%',
-      maxWidth: '400px',
-      position: 'relative',
-      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
-    },
-    modalHeader: {
-      textAlign: 'center',
-      marginBottom: '20px'
-    },
-    modalTitle: {
-      fontSize: '24px',
-      fontWeight: '600',
-      color: '#333',
-      margin: '0 0 10px 0'
-    },
-    modalSubtitle: {
-      fontSize: '14px',
-      color: '#666',
-      margin: '0'
-    },
-    closeButton: {
-      position: 'absolute',
-      top: '15px',
-      right: '15px',
-      background: 'none',
-      border: 'none',
-      fontSize: '24px',
-      cursor: 'pointer',
-      color: '#999',
-      width: '30px',
-      height: '30px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: '50%',
-      transition: 'all 0.3s ease'
-    },
-    modalInput: {
-      width: '100%',
-      padding: '15px 20px',
-      border: '2px solid #e0e0e0',
-      borderRadius: '10px',
-      fontSize: '16px',
-      outline: 'none',
-      transition: 'all 0.3s ease',
-      boxSizing: 'border-box',
-      marginBottom: '20px'
-    },
-    modalButtonGroup: {
-      display: 'flex',
-      gap: '10px'
-    },
-    cancelButton: {
-      flex: '1',
-      padding: '12px 20px',
-      background: '#f5f5f5',
-      color: '#666',
-      border: 'none',
-      borderRadius: '10px',
-      fontSize: '16px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease'
-    },
-    submitButton: {
-      flex: '1',
-      padding: '12px 20px',
-      background: 'linear-gradient(135deg, #ff8c42 0%, #ff6b1a 100%)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '10px',
-      fontSize: '16px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease'
-    },
-    disabledButton: {
-      opacity: '0.6',
-      cursor: 'not-allowed'
-    }
-  };
+  // Removed inline styles
 
   return (
-    <>
-      <div style={styles.container}>
-        <div style={styles.loginCard}>
-          <div style={styles.decorativeElement}></div>   
-          <img
-            src={logoBlack}
-            alt="EasyHire Logo"
-            style={styles.logoImage}
-          />
-          <h2 style={styles.welcome}>Welcome Back</h2>
-          <p style={styles.description}>
-            Welcome to EasyHire. Please enter your Email and Password below. 
-          </p>
-          <div>
-            <div style={styles.inputGroup}>
-              <input
-                type="text"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={styles.input}
-                onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
-                onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+    <div className="min-h-screen flex items-center justify-center p-5">
+      <div className="flex flex-col gap-6 w-full max-w-4xl">
+        <Card className="overflow-hidden bg-white">
+          <CardContent className="grid p-0 md:grid-cols-2">
+            <form className="p-6 md:p-8" onSubmit={handleSubmit}>
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col items-center text-center">
+                  <h1 className="text-2xl font-bold">Welcome back</h1>
+                  <p className="text-balance text-muted-foreground">Login to your EasyHire account</p>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="m@example.com" 
+                    required 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <div className="flex items-center">
+                    <Label htmlFor="password">Password</Label>
+                    <a href="#" className="ml-auto text-sm underline-offset-2 hover:underline" onClick={openForgotModal}>
+                      Forgot your password?
+                    </a>
+                  </div>
+                  <Input 
+                    id="password" 
+                    type={showPassword ? 'text' : 'password'} 
+                    required 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" className="w-full bg-primary-orange text-white hover:bg-primary-orange/90" disabled={loading}>
+                  {loading ? 'Signing in...' : 'Login'}
+                </Button>
+                <div className="text-center text-sm">
+                  Don&apos;t have an account?{" "}
+                  <Link to="/signup" className="text-primary-orange font-medium hover:underline">
+                    Sign up
+                  </Link>
+                </div>
+                {error && (
+                  <div className="text-red-500 text-sm text-center">
+                    {error}
+                  </div>
+                )}
+              </div>
+            </form>
+            <div className="hidden md:flex items-center justify-center p-8">
+              <img
+                src="/images/img_logo.png"
+                alt="EasyHire Logo"
+                className="max-w-xs max-h-64 object-contain dark:brightness-[0.2] dark:grayscale"
               />
-              <span style={styles.inputIcon}>👤</span>
             </div>
-
-            <div style={styles.inputGroup}>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={styles.input}
-                onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
-                onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-              />
-              <span 
-                style={styles.inputIcon}
-                onClick={togglePasswordVisibility}
-              >
-                {showPassword ? '👁️' : '🔒'}
-              </span>
-            </div>
-
-            <button
-              onClick={handleSubmit}
-              style={styles.button}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 10px 30px rgba(255, 107, 26, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = 'none';
-              }}
-            >
-              Sign In
-            </button>
-          </div>
-
-          <div style={styles.forgotPassword}>
-            <a href="#" style={styles.forgotLink} onClick={openForgotModal}>
-              Forgot your password?
-            </a>
-          </div>
+          </CardContent>
+        </Card>
+        <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
+          By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
         </div>
       </div>
-
+      
       {/* Forgot Password Modal */}
       {showForgotModal && ( 
-        <div style={styles.modalOverlay} onClick={closeForgotModal}>
-          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-5" onClick={closeForgotModal}>
+          <div className="bg-white rounded-lg p-6 w-full max-w-md relative" onClick={(e) => e.stopPropagation()}>
             <button 
-              style={styles.closeButton}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
               onClick={closeForgotModal}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#f5f5f5';
-                e.target.style.color = '#333';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-                e.target.style.color = '#999';
-              }}
             >
               ×
             </button>
             
-            <div style={styles.modalHeader}>
-              <h3 style={styles.modalTitle}>Reset Password</h3>
-              <p style={styles.modalSubtitle}>
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold mb-2">Reset Password</h3>
+              <p className="text-sm text-gray-600">
                 Enter your email address and we'll send you a link to reset your password.
               </p>
             </div>
 
-            <input
-              type="email"
-              placeholder="Enter your email address"
-              value={forgotEmail}
-              onChange={(e) => setForgotEmail(e.target.value)}
-              style={styles.modalInput}
-              onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
-              onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' && !isSubmitting) {
-                  handleForgotPassword();
-                }
-              }}
-            />
+            <div className="grid gap-2 mb-4">
+              <Label htmlFor="forgot-email">Email</Label>
+              <Input
+                id="forgot-email"
+                type="email"
+                placeholder="Enter your email address"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !isSubmitting) {
+                    handleForgotPassword();
+                  }
+                }}
+              />
+            </div>
 
-            <div style={styles.modalButtonGroup}>
-              <button
-                style={styles.cancelButton}
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
                 onClick={closeForgotModal}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#e0e0e0'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#f5f5f5'}
               >
                 Cancel
-              </button>
-              <button
-                style={{
-                  ...styles.submitButton,
-                  ...(isSubmitting ? styles.disabledButton : {})
-                }}
+              </Button>
+              <Button
+                className="flex-1"
                 onClick={handleForgotPassword}
                 disabled={isSubmitting}
-                onMouseEnter={(e) => {
-                  if (!isSubmitting) {
-                    e.target.style.transform = 'translateY(-1px)';
-                    e.target.style.boxShadow = '0 5px 15px rgba(255, 107, 26, 0.4)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSubmitting) {
-                    e.target.style.transform = 'translateY(0)';
-                    e.target.style.boxShadow = 'none';
-                  }
-                }}
               >
                 {isSubmitting ? 'Sending...' : 'Send Reset Link'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

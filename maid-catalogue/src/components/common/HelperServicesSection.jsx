@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { Button } from '../ui/button';
-import Card from '../ui/Card';
+import { Card } from '../ui/card';
 import { MapPin, Check } from 'lucide-react';
 import { useStaggeredAnimation } from '../../hooks/useAnimation';
 import { cn } from '../../lib/utils';

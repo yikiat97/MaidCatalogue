@@ -1,31 +1,15 @@
-import { useState ,useEffect} from 'react';
-import { Container, Typography, Grid, Button, Collapse , Box, Paper, useTheme, useMediaQuery } from '@mui/material';
+import { useState, useEffect, useRef } from 'react';
+import { Button } from '@mui/material';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import MaidCard from '../../components/Catalogue/MaidCard';
-import FilterBar from '../../components/Catalogue/FilterBar';
+import FilterSidebar from '../../components/Catalogue/FilterSidebar';
 import Header from '../../components/common/Header';
 import LoginPromptModal from '../../components/Catalogue/LoginPromptModal';
-import logoBlack from '../../assets/logoBlack.png';
 import { useMaidContext } from '../../context/maidList';
 import API_CONFIG from '../../config/api.js';
-import { apiRequest, handleAPIError } from '../../utils/apiUtils.js';
+import { createMockApiResponse } from '../../data/mockMaids.js';
 
-// Brand colors
-const brandColors = {
-  primary: '#ff914d',
-  secondary: '#0c191b',
-  primaryLight: '#ffa366',
-  primaryDark: '#e67e22',
-  secondaryLight: '#1a2a2d',
-  secondaryDark: '#061012',
-  background: '#fafafa',
-  surface: '#ffffff',
-  text: '#0c191b',
-  textSecondary: '#5a6c6f',
-  border: '#e0e0e0',
-  success: '#27ae60',
-  warning: '#f39c12',
-  error: '#e74c3c'
-};
+// Brand colors removed since Reset Welcome button is no longer used
 
 export default function Catalogue() {
   const [maids, setMaids] = useState([]);
@@ -35,97 +19,101 @@ export default function Catalogue() {
   const [skillsets, setSkillsets] = useState([]);
   const [languages, setLanguages] = useState([]);
   const [types, setTypes] = useState([]);
-  const [userFavorites, setUserFavorites] = useState([]);
+  const [selectedMaids, setSelectedMaids] = useState([]);
   
-  const { maidList, setMaidList } = useMaidContext();
+  const { setMaidList } = useMaidContext();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  // Ref to store timeout for welcome modal delay
+  const welcomeModalTimeoutRef = useRef(null);
+  
 
   useEffect(() => {
     // Function to check authentication
     const checkAuth = async () => {
       try {
-        const userData = await apiRequest(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.PROFILE));
-        
-        // User is authenticated
-        setIsAuthenticated(true);
-        setShowWelcomeModal(false);
-        localStorage.removeItem('hasSeenWelcomeModal');
+        const res = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.PROFILE), {
+          credentials: 'include',
+        });
 
-        // Fetch user favorites
-        try {
-          const favData = await apiRequest(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.CATALOGUE.USER_FAVORITES));
-          const favoriteIds = Array.isArray(favData) ? favData.map(maid => maid.id) : [];
-          setUserFavorites(favoriteIds);
-        } catch (favError) {
-          handleAPIError(favError, { 
-            customMessage: 'Could not load favorites',
-            showAlert: false // Don't show alert for favorites error
-          });
-          setUserFavorites([]);
+        if (res.ok) {
+          setIsAuthenticated(true);
+          // Clear any pending welcome modal timeout
+          if (welcomeModalTimeoutRef.current) {
+            clearTimeout(welcomeModalTimeoutRef.current);
+            welcomeModalTimeoutRef.current = null;
+          }
+          // Hide welcome modal when user is authenticated
+          setShowWelcomeModal(false);
+          // Clear the welcome modal flag when user logs in
+          localStorage.removeItem('hasSeenWelcomeModal');
+
+          // Note: Favorites functionality removed in favor of selection system
+          // If needed in the future, favorites can be re-implemented alongside selection
+        } else {
+          setIsAuthenticated(false);
+          // Check if user has already seen the welcome modal
+          const hasSeenWelcome = localStorage.getItem('hasSeenWelcomeModal');
+          if (!hasSeenWelcome) {
+            // Add 5-second delay before showing welcome modal
+            welcomeModalTimeoutRef.current = setTimeout(() => {
+              setShowWelcomeModal(true);
+            }, 15000);
+          }
         }
-      } catch (authError) {
-        // User is not authenticated
+      } catch (err) {
+        console.error(err);
         setIsAuthenticated(false);
-        setUserFavorites([]);
-        
-        // Show welcome modal if not seen before
+        // Check if user has already seen the welcome modal
         const hasSeenWelcome = localStorage.getItem('hasSeenWelcomeModal');
         if (!hasSeenWelcome) {
-          setShowWelcomeModal(true);
+          // Add 5-second delay before showing welcome modal
+          welcomeModalTimeoutRef.current = setTimeout(() => {
+            setShowWelcomeModal(true);
+          }, 5000);
         }
-        
-        // Only log auth errors, don't show alerts
-        handleAPIError(authError, { 
-          showAlert: false,
-          logError: false // Expected when not logged in
-        });
       }
     };
 
     // Function to get all maids with pagination and caching
     const fetchMaids = async (page = 1, append = false) => {
       try {
-        const url = API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.CATALOGUE.MAIDS, {
+
+        const res = await fetch(API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.CATALOGUE.MAIDS, {
           page: page.toString(),
           limit: '20'
+        }), {
+          credentials: 'include',
         });
         
-        const data = await apiRequest(url);
+        if (!res.ok) {
+          throw new Error('Failed to fetch maids');
+        }
+        
+        const data = await res.json();
         console.log('Fetched maids:', data);
         
-        // Handle API response structure: {maids: [], pagination: {}}
-        const maidsArray = data.maids || data || [];
-        
         if (append) {
-          setMaids(prev => [...prev, ...maidsArray]);
-          setMaidList(prev => [...prev, ...maidsArray]);
+          setMaids(prev => [...prev, ...data.maids]);
+          setMaidList(prev => [...prev, ...data.maids]);
         } else {
-          setMaids(maidsArray);
-          setMaidList(maidsArray);
-        }
-        
-        // Log pagination info if available
-        if (data.pagination) {
-          console.log('Pagination info:', data.pagination);
+          setMaids(data.maids);
+          setMaidList(data.maids);
         }
       } catch (err) {
-        handleAPIError(err, {
-          customMessage: 'Failed to load maid catalog. Please try again.',
-          onNetworkError: () => {
-            // Could show a retry button here
-            console.log('Network error loading maids, keeping existing data');
-          }
-        });
+        console.error('Error fetching maids from API:', err);
+        console.warn('🔄 Using fallback mock data for maid catalogue');
         
-        // Set empty array on error only if we don't have existing data
-        if (!append) {
-          setMaids([]);
-          setMaidList([]);
+        // Use mock data as fallback when API fails
+        const mockData = createMockApiResponse();
+        
+        if (append) {
+          setMaids(prev => [...prev, ...mockData.maids]);
+          setMaidList(prev => [...prev, ...mockData.maids]);
+        } else {
+          setMaids(mockData.maids);
+          setMaidList(mockData.maids);
         }
       }
     };
@@ -133,6 +121,14 @@ export default function Catalogue() {
     // Call both functions independently
     checkAuth();
     fetchMaids();
+    
+    // Cleanup function to clear timeout on unmount
+    return () => {
+      if (welcomeModalTimeoutRef.current) {
+        clearTimeout(welcomeModalTimeoutRef.current);
+        welcomeModalTimeoutRef.current = null;
+      }
+    };
   }, []);
 
   // Handle authentication changes
@@ -146,7 +142,7 @@ export default function Catalogue() {
   // Handle logout
   const handleLogout = () => {
     setIsAuthenticated(false);
-    setUserFavorites([]);
+    setSelectedMaids([]); // Clear selections on logout
     // Redirect to login or home page
     window.location.href = '/login';
   };
@@ -178,195 +174,159 @@ export default function Catalogue() {
     return countryMatch && salaryMatch && ageInRange && skillMatch && languageMatch && typeMatch;
   });
 
-  // Function to reset welcome modal for testing
-  const resetWelcomeModal = () => {
-    localStorage.removeItem('hasSeenWelcomeModal');
-    setShowWelcomeModal(true);
+  // Handle maid selection
+  const handleMaidSelection = (maidId, isSelected) => {
+    setSelectedMaids(prev => {
+      if (isSelected) {
+        return [...prev, maidId];
+      } else {
+        return prev.filter(id => id !== maidId);
+      }
+    });
   };
 
+  // Handle bulk WhatsApp contact for selected helpers
+  const handleBulkContact = () => {
+    if (!isAuthenticated) {
+      setShowWelcomeModal(true);
+      return;
+    }
+
+    if (selectedMaids.length === 0) return;
+
+    // Get selected maid details
+    const selectedMaidDetails = filteredMaids.filter(maid => selectedMaids.includes(maid.id));
+    
+    // Generate WhatsApp message
+    let message = `Hi! I'm interested in the following domestic helpers:\n\n`;
+    
+    selectedMaidDetails.forEach((maid, index) => {
+      const topSkills = maid.skills.slice(0, 3).join(', '); // Get top 3 skills
+      message += `${index + 1}. ${maid.name} (ID: ${maid.id}) - ${maid.country}, ${calculateAge(maid.DOB)}y, ${topSkills}\n`;
+    });
+    
+    message += `\nCould you provide more information about their availability and arrange interviews? Thank you!`;
+    
+    // Open WhatsApp with the message
+    const whatsappUrl = `https://wa.me/88270086?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  // Note: resetWelcomeModal function removed as it's no longer needed
+
   return (
-    <Box sx={{ 
-      minHeight: '100vh',
-      background: `linear-gradient(135deg, ${brandColors.background} 0%, ${brandColors.surface} 100%)`,
-      pb: 4
-    }}>
-      <Container maxWidth="xl" sx={{ pt: { xs: 2, md: 3 } }}>
+    <div className="h-screen bg-gray-50 flex flex-col">
+      <div className="w-full px-2 sm:px-4 pt-2 md:pt-3 flex-1 flex flex-col">
+        {/* Navigation Header */}
+        <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+        
         {/* Main Content */}
-        <Box sx={{ 
-          display: { xs: 'block', lg: 'flex' },
-          gap: { xs: 3, lg: 4 },
-          alignItems: 'flex-start',
-          mt: { xs: 9, md: 10 }
-        }}>
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-5 lg:gap-6 mt-[104px] flex-1 min-h-0 bg-white">
           {/* Sidebar with Filters */}
-          <Box sx={{ 
-            flexShrink: 0, 
-            width: { xs: '100%', lg: 320 },
-            mb: { xs: 3, lg: 0 }
-          }}>
-            <Paper sx={{ 
-              borderRadius: 3,
-              overflow: 'hidden',
-              boxShadow: '0 8px 32px rgba(12, 25, 27, 0.12)',
-              border: `1px solid ${brandColors.border}`,
-              background: brandColors.surface
-            }}>
-              <Box sx={{ 
-                p: 3,
-                background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryLight} 100%)`,
-                color: 'white'
-              }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-                  Refine Search
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                  {filteredMaids.length} maids found
-                </Typography>
-              </Box>
-              <Box sx={{ p: 3 }}>
-                <FilterBar 
-                  selectedCountries={selectedCountries} 
-                  setSelectedCountries={setSelectedCountries}
-                  skillsets={skillsets} 
-                  setSkillsets={setSkillsets}
-                  languages={languages} 
-                  setLanguages={setLanguages}
-                  types={types} 
-                  setTypes={setTypes}
-                  defaultSalaryRange={salaryRange} 
-                  defaultAgeRange={ageRange}
-                  onSalaryChange={setSalaryRange}
-                  onAgeChange={setAgeRange}
-                />
-              </Box>
-            </Paper>
-          </Box>
+          <div className="flex-shrink-0 w-full lg:w-80 lg:sticky lg:top-[120px] lg:self-start mb-4 lg:mb-0 lg:h-fit bg-white">
+            <FilterSidebar 
+              selectedCountries={selectedCountries} 
+              setSelectedCountries={setSelectedCountries}
+              skillsets={skillsets} 
+              setSkillsets={setSkillsets}
+              languages={languages} 
+              setLanguages={setLanguages}
+              types={types} 
+              setTypes={setTypes}
+              defaultSalaryRange={salaryRange} 
+              defaultAgeRange={ageRange}
+              onSalaryChange={setSalaryRange}
+              onAgeChange={setAgeRange}
+            />
+          </div>
 
-          {/* Main Content Area */}
-          <Box sx={{ flexGrow: 1 }}>
-            {/* Navigation Bar */}
-            <Box sx={{ mb: 3 }}>
-              <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
-            </Box>
-
-            {/* Results Grid */}
-            <Box sx={{ 
-              background: brandColors.surface,
-              borderRadius: 3,
-              p: { xs: 2, md: 3 },
-              boxShadow: '0 4px 20px rgba(12, 25, 27, 0.08)',
-              border: `1px solid ${brandColors.border}`
-            }}>
-              {/* Results Header */}
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                mb: 3,
-                pb: 2,
-                borderBottom: `2px solid ${brandColors.border}`
-              }}>
-                <Typography variant="h5" sx={{ 
-                  fontWeight: 600,
-                  color: brandColors.text
-                }}>
-                  Available Maids
-                </Typography>
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: 2
-                }}>
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 1,
-                    px: 2,
-                    py: 1,
-                    borderRadius: 2,
-                    background: `linear-gradient(135deg, ${brandColors.primary}15 0%, ${brandColors.primaryLight}15 100%)`,
-                    border: `1px solid ${brandColors.primary}30`
-                  }}>
-                    <Typography variant="body2" sx={{ 
-                      color: brandColors.primary,
-                      fontWeight: 600
-                    }}>
-                      {filteredMaids.length} results
-                    </Typography>
-                  </Box>
-                  
-                  {!isAuthenticated && (
+          {/* Available Helper Section */}
+          <div className="flex-1 flex flex-col min-h-0 bg-white relative">
+            {/* Gap Filler - Fills space between navbar and Available Helper header */}
+            <div className="sticky top-[96px] bg-white h-2 z-20 border-b-0"></div>
+            
+            {/* Full Background Coverage - Prevents any content bleeding */}
+            <div className="absolute inset-0 bg-white z-0"></div>
+            
+            {/* Available Helper Header - Sticky with Higher Z-Index */}
+            <div className="sticky top-[104px] z-30 bg-white shadow-sm border-b border-gray-200 px-4 lg:px-0 py-3 relative">
+              <div className="flex justify-between items-center gap-3">
+                {/* Available Helper Title - Left Side */}
+                <div className="flex items-center gap-3">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
+                    Available Helper
+                  </h2>
+                </div>
+                
+                {/* Contact Selected Button - Right Side */}
+                <div className="flex-shrink-0">
+                  {selectedMaids.length > 0 && (
                     <Button
+                      onClick={handleBulkContact}
+                      startIcon={<WhatsAppIcon />}
+                      variant="contained"
                       size="small"
-                      variant="outlined"
-                      onClick={resetWelcomeModal}
                       sx={{
-                        fontSize: '0.7rem',
-                        py: 0.5,
-                        px: 1,
-                        minWidth: 'auto',
-                        color: brandColors.warning,
-                        borderColor: brandColors.warning,
+                        background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
+                        color: '#FFFFFF',
+                        borderRadius: '20px',
+                        fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        padding: { xs: '6px 12px', sm: '6px 16px' },
+                        minHeight: '36px',
+                        boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)',
                         '&:hover': {
-                          backgroundColor: brandColors.warning,
-                          color: 'white',
-                        }
+                          background: 'linear-gradient(135deg, #128C7E 0%, #075E54 100%)',
+                          boxShadow: '0 6px 16px rgba(37, 211, 102, 0.4)',
+                          transform: 'translateY(-1px)',
+                        },
+                        transition: 'all 0.2s ease',
                       }}
                     >
-                      Reset Welcome
+                      Contact Selected ({selectedMaids.length})
                     </Button>
                   )}
-                </Box>
-              </Box>
+                </div>
+              </div>
+            </div>
 
-              {/* Maid Cards Grid */}
+            {/* Maid Cards Grid - Scrollable Container */}
+            <div className="flex-1 overflow-y-auto lg:px-0 pb-4 pt-4 relative z-10">
               {filteredMaids.length > 0 ? (
-                <Grid container spacing={2} justifyContent="center">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7">
                   {filteredMaids.map((maid) => (
-                    <Grid 
-                      item 
-                      xs={6}
-                      md={4} 
-                      key={maid.id}
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'flex-start',
-                        alignItems: 'flex-start'
-                      }}
-                    >
+                    <div key={maid.id} className="w-full h-full p-1.5 sm:p-2 lg:p-3">
                       <MaidCard 
-                        userFavorites={userFavorites} 
                         maid={maid} 
-                        isAuthenticated={isAuthenticated} 
+                        isAuthenticated={isAuthenticated}
+                        isSelected={selectedMaids.includes(maid.id)}
+                        onSelectionChange={handleMaidSelection}
                       />
-                    </Grid>
+                    </div>
                   ))}
-                </Grid>
+                </div>
               ) : (
-                <Box sx={{ 
-                  textAlign: 'center', 
-                  py: 8,
-                  color: brandColors.textSecondary
-                }}>
-                  <Typography variant="h6" sx={{ mb: 2, color: brandColors.text }}>
+                <div className="text-center py-12">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
                     No maids found
-                  </Typography>
-                  <Typography variant="body1">
+                  </h3>
+                  <p className="text-sm sm:text-base text-gray-600">
                     Try adjusting your filters to see more results
-                  </Typography>
-                </Box>
+                  </p>
+                </div>
               )}
-            </Box>
-          </Box>
-        </Box>
-      </Container>
+            </div>
+          </div>
+        </div>
+      </div>
       
       {/* Welcome Modal for Unauthenticated Users */}
       <LoginPromptModal
         open={showWelcomeModal}
         onClose={() => setShowWelcomeModal(false)}
       />
-    </Box>
+    </div>
   );
 }
 

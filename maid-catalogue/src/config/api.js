@@ -25,10 +25,13 @@ const API_CONFIG = {
       CALLBACK: '/api/admin/auth/callback',
       MAIDS: '/api/admin/maids',
       MAID: '/api/admin/maid',
-      USERS: '/api/admin/users',
+      USERS: '/api/user/users',
       GENERATE_LINK: '/api/admin/generate-link',
       SEARCH_MAIDS: '/api/admin/maids/search',
-      DELETE_USER_RECOMMENDATION: '/api/admin/users',
+      // Supplier endpoints
+      SUPPLIERS: '/api/admin/suppliers',
+      SUPPLIER: '/api/admin/supplier',
+      SEARCH_SUPPLIERS: '/api/admin/suppliers/search',
     },
     
     // Catalogue endpoints

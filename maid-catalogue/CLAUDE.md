@@ -63,9 +63,10 @@ src/
 - Structured endpoint organization for auth, admin, catalogue, and user operations
 
 ### Key Features
-- **User Features**: Maid catalogue browsing, favorites, recommendations
+- **User Features**: Maid catalogue browsing, favorites, recommendations, detailed popup views
 - **Admin Features**: Maid management, user management, link generation, S3 image uploads
 - **Image Upload**: S3 integration with drag-and-drop interface
+- **Interactive Elements**: Quick-view popups with maid details and direct contact options
 
 ## Environment Configuration
 
@@ -105,6 +106,53 @@ The application includes a sophisticated S3 image upload system:
 - Protected routes with authentication checks
 - Admin routes separate from user routes
 - Dynamic routes for maid details (`/maid/:id`)
+- Modal-based interactions for quick previews without navigation
+
+## New Features
+
+### Maid Details Popup (MaidDetailsPopup.jsx)
+
+A comprehensive quick-view modal that displays essential maid information without navigating away from the catalogue page.
+
+**Key Features:**
+- **Responsive Design**: Full-screen on mobile, dialog on desktop
+- **Authentication-Aware**: Blurs sensitive content for unauthenticated users
+- **Rich Information Display**: Personal details, skills, languages, work preferences
+- **Direct Actions**: WhatsApp contact and full profile navigation
+- **Image Protection**: Secure image handling with blur protection
+- **Performance Optimized**: Lazy loading and efficient rendering
+
+**Implementation Details:**
+- **Component**: `src/components/Catalogue/MaidDetailsPopup.jsx`
+- **Integration**: Seamlessly integrated with existing `MaidCard.jsx` components
+- **Props**:
+  - `open`: Boolean to control modal visibility
+  - `onClose`: Function to handle modal close
+  - `maid`: Maid data object
+  - `isAuthenticated`: Authentication status
+
+**Usage Pattern:**
+```jsx
+const [showDetailsPopup, setShowDetailsPopup] = useState(false);
+
+// In MaidCard component
+<Button onClick={() => setShowDetailsPopup(true)}>
+  View Details
+</Button>
+
+<MaidDetailsPopup
+  open={showDetailsPopup}
+  onClose={() => setShowDetailsPopup(false)}
+  maid={maid}
+  isAuthenticated={isAuthenticated}
+/>
+```
+
+**Design Consistency:**
+- Follows existing brand color scheme and typography
+- Uses Material-UI components for consistency
+- Maintains responsive design patterns
+- Implements same authentication blur logic as existing components
 
 ## Development Notes
 

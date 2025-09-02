@@ -370,7 +370,7 @@ const HelperFinderCard = () => {
         sx={{
           width: { xs: '100%', sm: '90%', lg: '70%' },
           mx: 'auto',
-          p: { xs: 2, lg: 5 },
+          p: { xs: 3, sm: 3.5, lg: 5 },
           borderRadius: { xs: '20px', lg: '24px' },
           background: 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%)',
           backdropFilter: 'blur(20px)',
@@ -399,7 +399,7 @@ const HelperFinderCard = () => {
             sx={{
               fontFamily: 'Inter, system-ui, sans-serif',
               letterSpacing: '-0.025em',
-              fontSize: { xs: '1.25rem', lg: '1.75rem' }
+              fontSize: { xs: '1.1rem', sm: '1.25rem', lg: '1.75rem' }
             }}
           >
             Find Your Perfect Helper
@@ -408,7 +408,7 @@ const HelperFinderCard = () => {
           <Typography 
             variant="body2" 
             color="#5a6c6f"
-            sx={{ fontSize: { xs: '0.8rem', lg: '1rem' } }}
+            sx={{ fontSize: { xs: '0.85rem', sm: '0.9rem', lg: '1rem' } }}
           >
             Choose your preferences to see instant pricing
           </Typography>
@@ -440,7 +440,7 @@ const HelperFinderCard = () => {
                   Helper Experience *
                 </Typography>
               </Box>
-              <Box sx={{ display: 'flex', gap: { xs: 1, lg: 1.5 } }}>
+              <Box sx={{ display: 'flex', gap: { xs: 0.75, sm: 1, lg: 1.5 } }}>
                 {experienceOptions.map((option) => (
                   <MuiButton
                     key={option.value}
@@ -451,11 +451,11 @@ const HelperFinderCard = () => {
                     variant={experience === option.value ? "contained" : "outlined"}
                     sx={{
                       flex: 1,
-                      py: { xs: 1, lg: 1.25 },
+                      py: { xs: 1.1, sm: 1.2, lg: 1.25 },
                       borderRadius: '12px',
                       fontWeight: 600,
                       textTransform: 'none',
-                      fontSize: { xs: '0.75rem', lg: '0.85rem' },
+                      fontSize: { xs: '0.7rem', sm: '0.8rem', lg: '0.9rem' },
                       borderWidth: '2px',
                       ...(experience === option.value ? {
                         background: 'linear-gradient(135deg, #ff690d 0%, #ff914d 100%)',
@@ -507,11 +507,11 @@ const HelperFinderCard = () => {
                     variant={nationality === option.value ? "contained" : "outlined"}
                     sx={{
                       flex: 1,
-                      py: { xs: 1, lg: 1.25 },
+                      py: { xs: 1.1, sm: 1.2, lg: 1.25 },
                       borderRadius: '12px',
                       fontWeight: 600,
                       textTransform: 'none',
-                      fontSize: { xs: '0.7rem', lg: '0.8rem' },
+                      fontSize: { xs: '0.8rem', sm: '0.85rem', lg: '0.85rem' },
                       borderWidth: '2px',
                       ...(nationality === option.value ? {
                         background: 'linear-gradient(135deg, #ff690d 0%, #ff914d 100%)',
@@ -693,7 +693,7 @@ const HelperFinderCard = () => {
                 size="large"
                 endIcon={<ArrowRightIcon sx={{ fontSize: { xs: '0.9rem', lg: '1rem' } }} />}
                 sx={{
-                  py: { xs: 1, lg: 1.25 },
+                  py: { xs: 1.1, sm: 1.2, lg: 1.25 },
                   borderRadius: '12px',
                   background: 'linear-gradient(135deg, #ff690d 0%, #ff914d 100%)',
                   boxShadow: '0 4px 16px rgba(255, 105, 13, 0.25)',

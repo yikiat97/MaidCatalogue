@@ -77,10 +77,8 @@ export default function Recommended() {
           if (recRes.ok) {
             const recData = await recRes.json();
             console.log('✅ Authenticated user recommendations:', recData);
-            // Handle both array response and object response
-            const maidsArray = Array.isArray(recData) ? recData : (recData.maids || []);
-            console.log('📊 Number of recommendations:', maidsArray.length);
-            setRecommendedMaids(maidsArray);
+            console.log('📊 Number of recommendations:', recData.length);
+            setRecommendedMaids(recData);
           } else {
             console.error('❌ Failed to fetch authenticated user recommendations:', recRes.status);
             const errorText = await recRes.text();
@@ -118,7 +116,7 @@ export default function Recommended() {
           // 4️⃣ If not authenticated and has token, fetch anonymous recommendations
           if (token) {
             console.log('👤 User not authenticated, fetching anonymous recommendations with token...');
-            const fetchURL = API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.USER.RECOMMENDED, { token });
+            const fetchURL = API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.USER.RECOMMENDED}/${token}`);
             console.log('🌐 Fetching from:', fetchURL);
             
             const recRes = await fetch(fetchURL, {
@@ -130,10 +128,8 @@ export default function Recommended() {
             if (recRes.ok) {
               const recData = await recRes.json();
               console.log('✅ Anonymous recommendations:', recData);
-              // Handle API response structure: {maids: [], token: "", expiresAt: ""}
-              const maidsArray = recData.maids || recData || [];
-              console.log('📊 Number of recommendations:', maidsArray.length);
-              setRecommendedMaids(maidsArray);
+              console.log('📊 Number of recommendations:', recData.length);
+              setRecommendedMaids(recData);
             } else {
               console.error('❌ Failed to fetch anonymous recommendations:', recRes.status);
               const errorText = await recRes.text();
@@ -350,7 +346,7 @@ export default function Recommended() {
                 </Typography>
                 {isAuthenticated && (
                   <Typography variant="body2" sx={{ color: brandColors.primary }}>
-                    You can also browse all available maids in the catalogue.
+                    You can also browse all available helper in the catalogue.
                   </Typography>
                 )}
               </Box>

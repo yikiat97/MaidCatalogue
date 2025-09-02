@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Star } from 'lucide-react';
-import Card from '../ui/Card';
+import { Card } from '../ui/card';
 import {
   Carousel,
   CarouselContent,
@@ -56,8 +56,8 @@ const testimonials = [
 const TestimonialCard = ({ testimonial }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
-  // Character limit for approximately 4 lines of text
-  const CHARACTER_LIMIT = 280;
+  // Character limit for approximately 3 lines of text
+  const CHARACTER_LIMIT = 200;
   const isLongText = testimonial.text.length > CHARACTER_LIMIT;
   
   // Get truncated text for collapsed state
@@ -74,7 +74,7 @@ const TestimonialCard = ({ testimonial }) => {
   };
 
   return (
-    <Card variant="elevated" padding="large" className="min-h-[300px] bg-white relative overflow-hidden flex flex-col transition-all duration-300 ease-in-out">
+    <Card variant="elevated" padding="large" className="h-[320px] md:h-[300px] bg-white relative overflow-hidden flex flex-col transition-all duration-300 ease-in-out p-6 md:p-8">
       {/* Opening quotation mark */}
       <img 
         src="/images/quotation-right-mark-svgrepo-com.svg" 
@@ -94,7 +94,7 @@ const TestimonialCard = ({ testimonial }) => {
       </div>
 
       {/* Testimonial Text */}
-      <div className="mb-6 flex-grow">
+      <div className="mb-6 flex-grow overflow-y-auto">
         <p className="text-gray-700 font-inter text-sm md:text-base leading-6 italic transition-all duration-300 ease-in-out">
           {isExpanded ? (
             <>
