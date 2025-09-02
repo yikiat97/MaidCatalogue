@@ -37,7 +37,7 @@ const LinkGeneratorModal = ({ generatedLink, onClose }) => {
           <button
             onClick={copyToClipboard}
             className={`px-4 py-2 rounded text-white text-sm font-medium transition-colors ${
-              copySuccess ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'
+              copySuccess ? 'bg-green-500 hover:bg-green-600' : 'bg-primary-orange hover:bg-primary-orange-dark'
             }`}
           >
             {copySuccess ? 'Copied!' : 'Copy'}

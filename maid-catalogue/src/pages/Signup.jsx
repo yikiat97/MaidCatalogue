@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import API_CONFIG from '../config/api.js';
+import { cn } from "../lib/utils";
+import { Button } from "../components/ui/button";
+import { Card, CardContent } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -156,455 +161,195 @@ export default function SignUp() {
     }
   };
 
-  const styles = {
-    container: {
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px',
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
-    },
-    signupCard: {
-      background: 'white',
-      borderRadius: '20px',
-      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
-      padding: '40px',
-      width: '100%',
-      maxWidth: '450px',
-      position: 'relative',
-      overflow: 'hidden'
-    },
-    decorativeElement: {
-      position: 'absolute',
-      top: '-50px',
-      right: '-50px',
-      width: '100px',
-      height: '100px',
-      background: 'linear-gradient(45deg, rgba(255, 140, 66, 0.1), rgba(255, 107, 26, 0.05))',
-      borderRadius: '50%',
-      opacity: '0.3'
-    },
-    logoContainer: {
-      textAlign: 'center',
-      marginBottom: '30px'
-    },
-    brandText: {
-      fontSize: '28px',
-      fontWeight: 'bold',
-      color: '#333',
-      margin: '0'
-    },
-    easyText: {
-      color: '#ff8c42'
-    },
-    hireText: {
-      color: '#333'
-    },
-    subtitle: {
-      fontSize: '14px',
-      color: '#666',
-      margin: '5px 0 0 0',
-      fontWeight: '400'
-    },
-    welcome: {
-      fontSize: '24px',
-      color: '#333',
-      fontWeight: '300',
-      textAlign: 'center',
-      marginBottom: '30px',
-      marginTop: '-50px'
-    },
-    userTypeSelector: {
-      display: 'flex',
-      gap: '10px',
-      marginBottom: '25px',
-      padding: '4px',
-      background: '#f8f9fa',
-      borderRadius: '12px'
-    },
-    userTypeButton: {
-      flex: 1,
-      padding: '12px 20px',
-      border: 'none',
-      borderRadius: '8px',
-      fontSize: '14px',
-      fontWeight: '500',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      background: 'transparent',
-      color: '#666'
-    },
-    userTypeButtonActive: {
-      background: '#ff8c42',
-      color: 'white',
-      boxShadow: '0 2px 8px rgba(255, 140, 66, 0.3)'
-    },
-    inputGroup: {
-      position: 'relative',
-      marginBottom: '20px',
-      flex: 1
-    },
-    label: {
-      display: 'block',
-      fontSize: '14px',
-      fontWeight: '500',
-      color: '#333',
-      marginBottom: '6px'
-    },
-    input: {
-      width: '100%',
-      padding: '15px 50px 15px 20px',
-      border: '2px solid #e0e0e0',
-      borderRadius: '10px',
-      fontSize: '16px',
-      outline: 'none',
-      transition: 'all 0.3s ease',
-      boxSizing: 'border-box'
-    },
-    inputError: {
-      borderColor: '#ff4757'
-    },
-    inputIcon: {
-      position: 'absolute',
-      right: '15px',
-      top: '36px',
-      transform: 'translateY(-50%)',
-      color: '#999',
-      cursor: 'pointer'
-    },
-    errorText: {
-      color: '#ff4757',
-      fontSize: '12px',
-      marginTop: '5px',
-      marginLeft: '5px'
-    },
-    submitError: {
-      color: '#ff4757',
-      fontSize: '14px',
-      textAlign: 'center',
-      marginTop: '10px',
-      marginBottom: '15px',
-      padding: '10px',
-      background: '#fff5f5',
-      borderRadius: '8px',
-      border: '1px solid #ffebee'
-    },
-    checkboxContainer: {
-      display: 'flex',
-      alignItems: 'flex-start',
-      gap: '12px',
-      marginBottom: '25px',
-      padding: '15px',
-      background: '#f8f9fa',
-      borderRadius: '10px',
-      border: '2px solid transparent'
-    },
-    checkboxContainerError: {
-      borderColor: '#ff4757',
-      background: '#fff5f5'
-    },
-    checkbox: {
-      width: '20px',
-      height: '20px',
-      borderRadius: '4px',
-      border: '2px solid #ddd',
-      cursor: 'pointer',
-      position: 'relative',
-      transition: 'all 0.3s ease',
-      background: 'white',
-      flexShrink: 0,
-      marginTop: '2px'
-    },
-    checkboxChecked: {
-      background: '#ff8c42',
-      borderColor: '#ff8c42'
-    },
-    checkmark: {
-      position: 'absolute',
-      top: '2px',
-      left: '5px',
-      width: '6px',
-      height: '10px',
-      border: 'solid white',
-      borderWidth: '0 2px 2px 0',
-      transform: 'rotate(45deg)'
-    },
-    termsText: {
-      fontSize: '14px',
-      color: '#666',
-      lineHeight: '1.5'
-    },
-    termsLink: {
-      color: '#ff8c42',
-      textDecoration: 'none',
-      fontWeight: '500'
-    },
-    button: {
-      width: '100%',
-      padding: '15px 20px',
-      background: 'linear-gradient(135deg, #ff8c42 0%, #ff6b1a 100%)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '10px',
-      fontSize: '16px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      marginTop: '10px',
-      opacity: isLoading ? '0.7' : '0.9',
-      position: 'relative'
-    },
-    buttonDisabled: {
-      cursor: 'not-allowed',
-      opacity: '0.5'
-    },
-    loginLink: {
-      textAlign: 'center',
-      marginTop: '20px'
-    },
-    loginText: {
-      color: '#666',
-      fontSize: '14px'
-    },
-    loginLinkText: {
-      color: '#ff8c42',
-      textDecoration: 'none',
-      fontWeight: '500',
-      cursor: 'pointer'
-    },
-    loading: {
-      display: 'inline-block',
-      width: '20px',
-      height: '20px',
-      border: '2px solid #ffffff40',
-      borderTop: '2px solid #ffffff',
-      borderRadius: '50%',
-      animation: 'spin 1s linear infinite',
-      marginRight: '10px'
-    }
-  };
-
-  // Add keyframes for loading animation
-  const spinKeyframes = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  `;
 
   return (
-    <div style={styles.container}>
-      <style>{spinKeyframes}</style>
-      <div style={styles.signupCard}>
-        <div style={styles.decorativeElement}></div>
+    <div className="min-h-screen flex items-center justify-center p-5">
+      <div className="flex flex-col gap-6 w-full max-w-4xl">
+        <Card className="overflow-hidden bg-white">
+          <CardContent className="grid p-0 md:grid-cols-2">
+            <form className="p-6 md:p-8" onSubmit={(e) => { e.preventDefault(); handleSignUp(); }}>
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col items-center text-center">
+                  <h1 className="text-2xl font-bold">Create Your Account</h1>
+                  <p className="text-balance text-muted-foreground">Join EasyHire today</p>
+                </div>
+                
+                {/* User Type Selector */}
+                <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
+                  <button
+                    type="button"
+                    className={cn(
+                      "flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all",
+                      formData.role === 131
+                        ? "bg-primary-orange text-white shadow-sm"
+                        : "bg-transparent text-gray-600 hover:text-gray-900"
+                    )}
+                    onClick={() => handleInputChange('role', 131)}
+                    disabled={isLoading}
+                  >
+                    👨‍💼 I'm an Employer
+                  </button>
+                  <button
+                    type="button"
+                    className={cn(
+                      "flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all",
+                      formData.role === 'helper'
+                        ? "bg-primary-orange text-white shadow-sm"
+                        : "bg-transparent text-gray-600 hover:text-gray-900"
+                    )}
+                    onClick={() => handleInputChange('role', 'helper')}
+                    disabled={isLoading}
+                  >
+                    👩‍🏠 I'm a Helper
+                  </button>
+                </div>
+
+                {/* Full Name */}
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    className={errors.name ? "border-red-500" : ""}
+                    disabled={isLoading}
+                    required
+                  />
+                  {errors.name && <div className="text-red-500 text-sm">{errors.name}</div>}
+                </div>
+
+                {/* Email */}
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className={errors.email ? "border-red-500" : ""}
+                    disabled={isLoading}
+                    required
+                  />
+                  {errors.email && <div className="text-red-500 text-sm">{errors.email}</div>}
+                </div>
+
+                {/* Password */}
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Create a password"
+                      value={formData.password}
+                      onChange={(e) => handleInputChange('password', e.target.value)}
+                      className={cn("pr-10", errors.password ? "border-red-500" : "")}
+                      disabled={isLoading}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? '👁️' : '🔒'}
+                    </button>
+                  </div>
+                  {errors.password && <div className="text-red-500 text-sm">{errors.password}</div>}
+                </div>
+
+                {/* Confirm Password */}
+                <div className="grid gap-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder="Confirm your password"
+                      value={formData.confirmPassword}
+                      onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                      className={cn("pr-10", errors.confirmPassword ? "border-red-500" : "")}
+                      disabled={isLoading}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? '👁️' : '🔒'}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && <div className="text-red-500 text-sm">{errors.confirmPassword}</div>}
+                </div>
+
+                {/* Terms and Conditions */}
+                <div className={cn("flex items-start gap-3 p-4 rounded-lg border-2 transition-colors", 
+                  errors.agreeToTerms ? "border-red-500 bg-red-50" : "border-gray-200 bg-gray-50")}>
+                  <button
+                    type="button"
+                    className={cn(
+                      "w-5 h-5 rounded border-2 flex items-center justify-center text-xs font-bold transition-all mt-0.5",
+                      formData.agreeToTerms
+                        ? "bg-primary-orange border-primary-orange text-white"
+                        : "bg-white border-gray-300"
+                    )}
+                    onClick={() => handleInputChange('agreeToTerms', !formData.agreeToTerms)}
+                  >
+                    {formData.agreeToTerms && '✓'}
+                  </button>
+                  <div className="text-sm text-gray-600 leading-relaxed">
+                    I agree to the <a href="#" className="text-primary-orange font-medium hover:underline">Terms and Conditions</a> and <a href="#" className="text-primary-orange font-medium hover:underline">Privacy Policy</a>
+                    {errors.agreeToTerms && <div className="text-red-500 text-sm mt-1">{errors.agreeToTerms}</div>}
+                  </div>
+                </div>
+
+                {/* Submit Error */}
+                {errors.submit && (
+                  <div className="text-red-500 text-sm text-center p-3 bg-red-50 border border-red-200 rounded-lg">
+                    {errors.submit}
+                  </div>
+                )}
+
+                <Button 
+                  type="submit" 
+                  className="w-full bg-primary-orange text-white hover:bg-primary-orange/90" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                      Creating Account...
+                    </>
+                  ) : (
+                    'Create Account'
+                  )}
+                </Button>
+                
+                <div className="text-center text-sm">
+                  Already have an account?{" "}
+                  <Link to="/login" className="text-primary-orange font-medium hover:underline">
+                    Sign in
+                  </Link>
+                </div>
+              </div>
+            </form>
+            
+            <div className="hidden md:flex items-center justify-center p-8">
+              <img
+                src="/images/img_logo.png"
+                alt="EasyHire Logo"
+                className="max-w-xs max-h-64 object-contain"
+              />
+            </div>
+          </CardContent>
+        </Card>
         
-        <div style={styles.logoContainer}>
-          <img 
-            src="/assets/logoBlack.png"  
-            alt="EasyHire Logo"
-            style={{
-              width: '250px',
-              height: 'auto',
-              display: 'block',
-              margin: '0 auto 20px auto'
-            }}
-            onError={(e) => {
-              e.target.style.display = 'none';
-              e.target.nextSibling.style.display = 'block';
-            }}
-          />
-          <div style={{display: 'none'}}>
-            <h1 style={styles.brandText}>
-              <span style={styles.easyText}>EASY</span>
-              <span style={styles.hireText}>HIRE</span>
-            </h1>
-            <p style={styles.subtitle}>MAID SOLUTIONS</p>
-          </div>
-        </div>
-
-        <h2 style={styles.welcome}>Create Your Account</h2>
-
-        {/* User Type Selector */}
-        <div style={styles.userTypeSelector}>
-          <button
-            style={{
-              ...styles.userTypeButton,
-              ...(formData.role === 131 ? styles.userTypeButtonActive : {})
-            }}
-            onClick={() => handleInputChange('role', 131)}
-            disabled={isLoading}
-          >
-            👨‍💼 I'm an Employer
-          </button>
-          <button
-            style={{
-              ...styles.userTypeButton,
-              ...(formData.role === 'helper' ? styles.userTypeButtonActive : {})
-            }}
-            onClick={() => handleInputChange('role', 'helper')}
-            disabled={isLoading}
-          >
-            👩‍🏠 I'm a Helper
-          </button>
-        </div>
-
-        {/* Full Name */}
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Full Name</label>
-          <input
-            type="text"
-            placeholder="Enter your full name"
-            value={formData.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
-            style={{
-              ...styles.input,
-              padding: '15px 50px 15px 20px',
-              ...(errors.name ? styles.inputError : {})
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
-            onBlur={(e) => !errors.name && (e.target.style.borderColor = '#e0e0e0')}
-            disabled={isLoading}
-          />
-          <span style={styles.inputIcon}>👤</span>
-          {errors.name && <div style={styles.errorText}>{errors.name}</div>}
-        </div>
-
-        {/* Email */}
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Email Address</label>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={formData.email}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-            style={{
-              ...styles.input,
-              ...(errors.email ? styles.inputError : {})
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
-            onBlur={(e) => !errors.email && (e.target.style.borderColor = '#e0e0e0')}
-            disabled={isLoading}
-          />
-          <span style={styles.inputIcon}>📧</span>
-          {errors.email && <div style={styles.errorText}>{errors.email}</div>}
-        </div>
-
-        {/* Password */}
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Password</label>
-          <input
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Create a password"
-            value={formData.password}
-            onChange={(e) => handleInputChange('password', e.target.value)}
-            style={{
-              ...styles.input,
-              ...(errors.password ? styles.inputError : {})
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
-            onBlur={(e) => !errors.password && (e.target.style.borderColor = '#e0e0e0')}
-            disabled={isLoading}
-          />
-          <span 
-            style={styles.inputIcon}
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? '👁️' : '🔒'}
-          </span>
-          {errors.password && <div style={styles.errorText}>{errors.password}</div>}
-        </div>
-
-        {/* Confirm Password */}
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Confirm Password</label>
-          <input
-            type={showConfirmPassword ? 'text' : 'password'}
-            placeholder="Confirm your password"
-            value={formData.confirmPassword}
-            onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-            style={{
-              ...styles.input,
-              ...(errors.confirmPassword ? styles.inputError : {})
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#ff8c42'}
-            onBlur={(e) => !errors.confirmPassword && (e.target.style.borderColor = '#e0e0e0')}
-            disabled={isLoading}
-          />
-          <span 
-            style={styles.inputIcon}
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-          >
-            {showConfirmPassword ? '👁️' : '🔒'}
-          </span>
-          {errors.confirmPassword && <div style={styles.errorText}>{errors.confirmPassword}</div>}
-        </div>
-
-        {/* Terms and Conditions */}
-        <div style={{
-          ...styles.checkboxContainer,
-          ...(errors.agreeToTerms ? styles.checkboxContainerError : {})
-        }}>
-          <div 
-            style={{
-              ...styles.checkbox,
-              ...(formData.agreeToTerms ? styles.checkboxChecked : {})
-            }}
-            onClick={() => handleInputChange('agreeToTerms', !formData.agreeToTerms)}
-          >
-            {formData.agreeToTerms && <div style={styles.checkmark}></div>}
-          </div>
-          <div style={styles.termsText}>
-            I agree to the <a href="#" style={styles.termsLink}>Terms and Conditions</a> and <a href="#" style={styles.termsLink}>Privacy Policy</a>
-            {errors.agreeToTerms && <div style={styles.errorText}>{errors.agreeToTerms}</div>}
-          </div>
-        </div>
-
-        {/* Submit Error */}
-        {errors.submit && (
-          <div style={styles.submitError}>
-            {errors.submit}
-          </div>
-        )}
-
-        <button
-          onClick={handleSignUp}
-          disabled={isLoading}
-          style={{
-            ...styles.button,
-            ...(isLoading ? styles.buttonDisabled : {})
-          }}
-          onMouseEnter={(e) => {
-            if (!isLoading) {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 10px 30px rgba(255, 107, 26, 0.25)';
-              e.target.style.opacity = '1';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isLoading) {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
-              e.target.style.opacity = '0.9';
-            }
-          }}
-        >
-          {isLoading ? (
-            <>
-              <span style={styles.loading}></span>
-              Creating Account...
-            </>
-          ) : (
-            'Create Account'
-          )}
-        </button>
-
-        <div style={styles.loginLink}>
-          <span style={styles.loginText}>
-            Already have an account? 
-            <a href="/login" style={styles.loginLinkText}> Sign in</a>
-          </span>
+        <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
+          By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
         </div>
       </div>
     </div>

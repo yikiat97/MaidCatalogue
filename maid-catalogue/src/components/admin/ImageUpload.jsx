@@ -114,7 +114,7 @@ const ImageUpload = ({
         <div
           className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 ${
             dragActive 
-              ? 'border-blue-500 bg-blue-50' 
+              ? 'border-primary-orange bg-primary-orange bg-opacity-10' 
               : 'border-gray-300 hover:border-gray-400'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           onDragEnter={handleDrag}
@@ -135,7 +135,7 @@ const ImageUpload = ({
           <div className="space-y-4">
             <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
               {dragActive ? (
-                <Upload className="w-8 h-8 text-blue-500" />
+                <Upload className="w-8 h-8 text-primary-orange" />
               ) : (
                 <Camera className="w-8 h-8 text-gray-400" />
               )}
@@ -165,7 +165,7 @@ const ImageUpload = ({
           type="button"
           onClick={openFileDialog}
           disabled={disabled}
-          className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+          className="w-full py-3 px-4 bg-primary-orange text-white rounded-lg hover:bg-primary-orange-dark focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
         >
           <div className="flex items-center justify-center space-x-2">
             <ImageIcon className="w-5 h-5" />

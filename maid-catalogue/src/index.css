@@ -268,7 +268,7 @@ html {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-8px);
+    transform: translateY(-12px);
   }
 }
 
@@ -281,7 +281,7 @@ html {
 /* WhatsApp responsive adjustments */
 @media (max-width: 640px) {
   .whatsapp-float-animated img {
-    width: 2.5rem !important;
-    height: 2.5rem !important;
+    width: 4rem !important;
+    height: 4rem !important;
   }
 }

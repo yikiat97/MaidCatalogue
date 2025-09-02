@@ -296,7 +296,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
               onClick={() => setActiveTab(tab.id)}
               className={`px-6 py-3 text-sm font-medium transition-all ${
                 activeTab === tab.id
-                  ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
+                  ? 'text-white bg-primary-orange border-b-2 border-primary-orange'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
@@ -361,7 +361,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       value={formData.name} 
                       onChange={handleInputChange} 
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent" 
                     />
                   </div>
                   <div>
@@ -371,7 +371,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       value={formData.country} 
                       onChange={handleInputChange}
                       required 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                     >
                       <option value="">Select Country</option>
                       <option value="Indonesia">Indonesia</option>
@@ -389,7 +389,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       value={formData.DOB ? formData.DOB.slice(0, 10) : ''} 
                       onChange={handleInputChange}
                       required 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent" 
                     />
                   </div>
                   <div>
@@ -401,7 +401,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       max="200"
                       value={formData.height} 
                       onChange={handleInputChange} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent" 
                     />
                   </div>
                   <div>
@@ -413,7 +413,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       max="150" 
                       value={formData.weight} 
                       onChange={handleInputChange} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent" 
                     />
                   </div>
                   <div>
@@ -422,7 +422,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       name="Religion" 
                       value={formData.Religion} 
                       onChange={handleInputChange} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                     >
                       <option value="">Select Religion</option>
                       <option value="Muslim">Muslim</option>
@@ -438,7 +438,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       name="maritalStatus" 
                       value={formData.maritalStatus} 
                       onChange={handleInputChange} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                     >
                       <option value="">Select Status</option>
                       <option value="Single">Single</option>
@@ -456,7 +456,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       max="20" 
                       value={formData.NumChildren} 
                       onChange={handleInputChange} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent" 
                     />
                   </div>
                   <div>
@@ -468,7 +468,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       value={formData.salary} 
                       onChange={handleInputChange}
                       required 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent" 
                     />
                   </div>
                   <div>
@@ -480,7 +480,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       onChange={handleInputChange}
                       required
                       min="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                     />
                   </div>
                   <div>
@@ -489,7 +489,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       name="supplier" 
                       value={formData.supplier || ''} 
                       onChange={handleInputChange} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent" 
                       placeholder="e.g., ID-2"
                     />
                   </div>
@@ -503,7 +503,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       name="isActive"
                       checked={formData.isActive}
                       onChange={handleInputChange}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      className="h-4 w-4 text-primary-orange border-gray-300 rounded focus:ring-primary-orange"
                     />
                     <span className="ml-2 text-sm text-gray-700">Is Active</span>
                   </label>
@@ -513,7 +513,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       name="isEmployed"
                       checked={formData.isEmployed}
                       onChange={handleInputChange}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      className="h-4 w-4 text-primary-orange border-gray-300 rounded focus:ring-primary-orange"
                     />
                     <span className="ml-2 text-sm text-gray-700">Is Employed</span>
                   </label>
@@ -531,7 +531,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                     <button
                       type="button"
                       onClick={() => addArrayItem('skills')}
-                      className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                      className="text-sm text-primary-orange hover:text-primary-orange-dark flex items-center gap-1"
                     >
                       <Plus className="w-4 h-4" /> Add Skill
                     </button>
@@ -544,7 +544,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                           list="skills-list"
                           value={skill}
                           onChange={(e) => handleArrayChange('skills', index, e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                           placeholder="Select or type a skill"
                         />
                         {formData.skills.length > 1 && (
@@ -579,7 +579,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                     <button
                       type="button"
                       onClick={() => addArrayItem('languages')}
-                      className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                      className="text-sm text-primary-orange hover:text-primary-orange-dark flex items-center gap-1"
                     >
                       <Plus className="w-4 h-4" /> Add Language
                     </button>
@@ -593,7 +593,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                             list="languages-list"
                             value={language}
                             onChange={(e) => handleLanguageChange(index, e.target.value)}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                             placeholder="Select a language"
                           />
                           {formData.languages.length > 1 && (
@@ -627,7 +627,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                                   e.target.value
                                 )
                               }
-                              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange"
                             >
                               <option value={0}>Select rating</option>
                               {[1, 2, 3, 4, 5].map((r) => (
@@ -658,7 +658,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                     <button
                       type="button"
                       onClick={() => addArrayItem('type')}
-                      className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                      className="text-sm text-primary-orange hover:text-primary-orange-dark flex items-center gap-1"
                     >
                       <Plus className="w-4 h-4" /> Add Type
                     </button>
@@ -669,7 +669,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                         <select
                           value={type}
                           onChange={(e) => handleArrayChange('type', index, e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                         >
                           <option value="">Select Type</option>
                           <option value="Transfer">Transfer</option>
@@ -705,7 +705,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                     value={formData.maidDetails.description || ''} 
                     onChange={handleDetailChange} 
                     rows="4"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent" 
                     placeholder="Brief description about the maid..."
                   />
                 </div>
@@ -719,7 +719,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       max="31" 
                       value={formData.maidDetails.restDay || ''} 
                       onChange={handleDetailChange} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent" 
                     />
                   </div>
                   <div>
@@ -728,7 +728,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       name="highestEducation" 
                       value={formData.maidDetails.highestEducation || ''} 
                       onChange={handleDetailChange} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                     >
                       <option value="">Select Education</option>
                       <option value="Primary School">Primary School</option>
@@ -744,7 +744,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                       name="religion" 
                       value={formData.maidDetails.religion || ''} 
                       onChange={handleDetailChange} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                       placeholder="Additional religious information" 
                     />
                   </div>
@@ -756,7 +756,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                     value={formData.maidDetails.employmentHistory || ''} 
                     onChange={handleDetailChange} 
                     rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent" 
                     placeholder="Brief employment history..."
                   />
                 </div>
@@ -771,7 +771,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                   <button
                     type="button"
                     onClick={addEmploymentDetail}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2 text-sm"
+                    className="px-4 py-2 bg-primary-orange text-white rounded-md hover:bg-primary-orange-dark flex items-center gap-2 text-sm"
                   >
                     <Plus className="w-4 h-4" /> Add Employment
                   </button>
@@ -803,7 +803,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                             type="text"
                             value={employment.country || ''}
                             onChange={(e) => handleEmploymentDetailChange(index, 'country', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                             placeholder="e.g., Singapore"
                           />
                         </div>
@@ -814,7 +814,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                             value={employment.noOfFamilyMember || ''}
                             onChange={(e) => handleEmploymentDetailChange(index, 'noOfFamilyMember', e.target.value)}
                             min="0"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                           />
                         </div>
                         <div>
@@ -823,7 +823,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                             type="date"
                             value={employment.startDate ? employment.startDate.slice(0, 10) : ''}
                             onChange={(e) => handleEmploymentDetailChange(index, 'startDate', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                           />
                         </div>
                         <div>
@@ -832,7 +832,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                             type="date"
                             value={employment.endDate ? employment.endDate.slice(0, 10) : ''}
                             onChange={(e) => handleEmploymentDetailChange(index, 'endDate', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                           />
                         </div>
                         <div className="md:col-span-2">
@@ -842,7 +842,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                             value={employment.employerDescription || ''}
                             onChange={(e) => handleEmploymentDetailChange(index, 'employerDescription', e.target.value)}
                             placeholder="e.g., 2 kids (ages 5 and 8), elderly parents"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                           />
                         </div>
                         <div className="md:col-span-2">
@@ -852,7 +852,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                             value={employment.reasonOfLeaving || ''}
                             onChange={(e) => handleEmploymentDetailChange(index, 'reasonOfLeaving', e.target.value)}
                             placeholder="e.g., Contract finished, Family reasons"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                           />
                         </div>
                         <div className="md:col-span-2">
@@ -861,7 +861,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                             value={employment.mainJobScope || ''}
                             onChange={(e) => handleEmploymentDetailChange(index, 'mainJobScope', e.target.value)}
                             rows="3"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-orange focus:border-transparent"
                             placeholder="Describe main responsibilities..."
                           />
                         </div>
@@ -889,7 +889,7 @@ const MaidDetailModal = ({ maidId, onClose }) => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                className="px-6 py-2 bg-primary-orange text-white rounded-md hover:bg-primary-orange-dark disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
               >
                 {isSubmitting ? (
                   <>

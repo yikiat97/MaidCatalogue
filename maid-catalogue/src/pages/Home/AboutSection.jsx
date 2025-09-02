@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
-import Card from '../../components/ui/Card';
+import { Card } from '../../components/ui/card';
 import { useAnimation } from '../../hooks/useAnimation';
 
 const AboutSection = () => {
@@ -171,7 +171,7 @@ const AboutSection = () => {
           variant="flat" 
           padding="none"
           shadow={false}
-          className={`!bg-transparent relative z-10 transition-all duration-1000 ease-out ${
+          className={`!bg-transparent border-0 relative z-10 transition-all duration-1000 ease-out ${
             isCardVisible 
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'

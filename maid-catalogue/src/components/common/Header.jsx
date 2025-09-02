@@ -60,16 +60,6 @@ export default function Header({ isAuthenticated, onLogout }){
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6">
           <Link
-            to="/"
-            className={`text-lg font-semibold transition-all duration-300 hover:scale-105 ${
-              isActive('/') 
-                ? (isHomePage && !isScrolled ? 'text-white' : 'text-[#ff914d]')
-                : (isHomePage && !isScrolled ? 'text-white' : 'text-[#585757]')
-            } hover:text-[#ff914d]`}
-          >
-            Home
-          </Link>
-          <Link
             to="/about"
             className={`text-lg font-semibold transition-all duration-300 hover:scale-105 ${
               isActive('/about') 
@@ -115,7 +105,7 @@ export default function Header({ isAuthenticated, onLogout }){
         <div className="hidden md:flex items-center gap-3 ml-6">
           <Link
             to="/catalogue"
-            className="px-6 py-3 bg-gradient-to-r from-[#ff914d] to-[#ffa366] text-white rounded-lg font-bold text-lg hover:from-[#e67e22] hover:to-[#ff914d] hover:scale-105 transition-all duration-300 shadow-lg"
+            className="px-6 py-3 bg-gradient-to-r from-[#ff914d] to-[#ffa366] text-white rounded-lg font-bold text-base sm:text-lg lg:text-xl hover:from-[#e67e22] hover:to-[#ff914d] hover:scale-105 transition-all duration-300 shadow-lg"
           >
             FIND A HELPER
           </Link>
@@ -127,7 +117,7 @@ export default function Header({ isAuthenticated, onLogout }){
             className="px-4 py-3 bg-gradient-to-r from-[#25D366] to-[#1aab54] text-white rounded-lg font-bold text-lg hover:from-[#1aab54] hover:to-[#128c42] hover:scale-105 transition-all duration-300 shadow-lg flex items-center gap-2"
           >
             <WhatsAppIcon sx={{ fontSize: 20 }} />
-            88270086
+            <span className="max-[940px]:hidden">88270086</span>
           </button>
         </div>
 
@@ -173,23 +163,12 @@ export default function Header({ isAuthenticated, onLogout }){
         >
           <div className="flex flex-col items-center gap-4 py-4">
             <Link
-              to="/"
-              onClick={() => setMenuOpen(false)}
-              className={`text-base font-semibold transition-all duration-300 hover:scale-105 ${
-                isActive('/')
-                  ? (isHomePage && !isScrolled ? 'text-white' : 'text-[#ff914d]')
-                  : (isHomePage && !isScrolled ? 'text-white' : 'text-[#585757]')
-              } hover:text-[#ff914d]`}
-            >
-              Home
-            </Link>
-            <Link
               to="/about"
               onClick={() => setMenuOpen(false)}
               className={`text-base font-semibold transition-all duration-300 hover:scale-105 ${
                 isActive('/about')
-                  ? (isHomePage && !isScrolled ? 'text-white' : 'text-[#ff914d]')
-                  : (isHomePage && !isScrolled ? 'text-white' : 'text-[#585757]')
+                  ? 'text-[#ff914d]'
+                  : 'text-[#585757]'
               } hover:text-[#ff914d]`}
             >
               About Us
@@ -199,8 +178,8 @@ export default function Header({ isAuthenticated, onLogout }){
               onClick={() => setMenuOpen(false)}
               className={`text-base font-semibold transition-all duration-300 hover:scale-105 ${
                 isActive('/services')
-                  ? (isHomePage && !isScrolled ? 'text-white' : 'text-[#ff914d]')
-                  : (isHomePage && !isScrolled ? 'text-white' : 'text-[#585757]')
+                  ? 'text-[#ff914d]'
+                  : 'text-[#585757]'
               } hover:text-[#ff914d]`}
             >
               Services
@@ -210,8 +189,8 @@ export default function Header({ isAuthenticated, onLogout }){
               onClick={() => setMenuOpen(false)}
               className={`text-base font-semibold transition-all duration-300 hover:scale-105 ${
                 isActive('/faqs')
-                  ? (isHomePage && !isScrolled ? 'text-white' : 'text-[#ff914d]')
-                  : (isHomePage && !isScrolled ? 'text-white' : 'text-[#585757]')
+                  ? 'text-[#ff914d]'
+                  : 'text-[#585757]'
               } hover:text-[#ff914d]`}
             >
               FAQs
@@ -221,8 +200,8 @@ export default function Header({ isAuthenticated, onLogout }){
               onClick={() => setMenuOpen(false)}
               className={`text-base font-semibold transition-all duration-300 hover:scale-105 ${
                 isActive('/contact')
-                  ? (isHomePage && !isScrolled ? 'text-white' : 'text-[#ff914d]')
-                  : (isHomePage && !isScrolled ? 'text-white' : 'text-[#585757]')
+                  ? 'text-[#ff914d]'
+                  : 'text-[#585757]'
               } hover:text-[#ff914d]`}
             >
               Contact us
@@ -233,7 +212,7 @@ export default function Header({ isAuthenticated, onLogout }){
             <Link
               to="/catalogue"
               onClick={() => setMenuOpen(false)}
-              className="w-full px-4 py-3 text-center bg-gradient-to-r from-[#ff914d] to-[#ffa366] text-white rounded-lg font-bold text-lg hover:from-[#e67e22] hover:to-[#ff914d] transition-all duration-300 shadow-lg"
+              className="w-full px-4 py-3 text-center bg-gradient-to-r from-[#ff914d] to-[#ffa366] text-white rounded-lg font-bold text-sm sm:text-base hover:from-[#e67e22] hover:to-[#ff914d] transition-all duration-300 shadow-lg"
             >
               FIND A HELPER
             </Link>
@@ -247,7 +226,7 @@ export default function Header({ isAuthenticated, onLogout }){
               className="w-full px-4 py-3 bg-gradient-to-r from-[#25D366] to-[#1aab54] text-white rounded-lg font-bold text-lg hover:from-[#1aab54] hover:to-[#128c42] transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
             >
               <WhatsAppIcon sx={{ fontSize: 20 }} />
-              88270086
+              <span>88270086</span>
             </button>
           </div>
         </nav>

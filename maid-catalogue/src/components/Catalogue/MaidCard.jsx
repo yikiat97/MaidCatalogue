@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Card, 
   CardContent, 
@@ -14,7 +14,8 @@ import {
   Avatar,
   useTheme,
   useMediaQuery,
-  Skeleton
+  Skeleton,
+  Checkbox
 } from '@mui/material';
 import maidPic from '../../assets/maidPic.jpg';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
@@ -26,8 +27,6 @@ import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import PersonIcon from '@mui/icons-material/Person';
 import HeightIcon from '@mui/icons-material/Height';
 import LockIcon from '@mui/icons-material/Lock';
-import LoginPromptModal from './LoginPromptModal';
-
 // Skill icons
 import KitchenIcon from '@mui/icons-material/Kitchen';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
@@ -36,9 +35,11 @@ import CribIcon from '@mui/icons-material/Crib';
 import ElderlyIcon from '@mui/icons-material/Elderly';
 import PetsIcon from '@mui/icons-material/Pets';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import LoginPromptModal from './LoginPromptModal';
+import MaidDetailsPopup from './MaidDetailsPopup';
+
 import Tooltip from '@mui/material/Tooltip';
 import API_CONFIG from '../../config/api.js';
-import { apiRequest, handleAPIError } from '../../utils/apiUtils.js';
 
 // Brand colors
 const brandColors = {
@@ -66,28 +67,42 @@ const professionalFonts = {
   mono: "'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace"
 };
 
-export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) {
+// Skill icons mapping
+const skillIcons = {
+  Cooking: KitchenIcon,
+  Housekeeping: CleaningServicesIcon,
+  Childcare: ChildCareIcon,
+  Babysitting: CribIcon,
+  'Elderly Care': ElderlyIcon,
+  'Dog(s)': PetsIcon,
+  'Cat(s)': PetsIcon,
+  Caregiving: FavoriteIcon,
+};
+
+export default function MaidCard({ maid, isAuthenticated, isSelected = false, onSelectionChange }) {
   console.log(maid)
-  const navigate = useNavigate();
   const theme = useTheme();
+  const navigate = useNavigate();
   
   // Responsive breakpoints
   const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // 0-599px
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 600-899px
-  const isDesktop = useMediaQuery(theme.breakpoints.up('md')); // 900px+
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'lg')); // 600-1199px
   
-  const [isFavorited, setIsFavorited] = useState(
-    Array.isArray(userFavorites) && userFavorites.includes(maid.id)
-  );
+  // Remove unused favorites state since we replaced with selection
+  // const [isFavorited, setIsFavorited] = useState(
+  //   Array.isArray(userFavorites) && userFavorites.includes(maid.id)
+  // );
   
   // Add image loading state
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [showDetailsPopup, setShowDetailsPopup] = useState(false);
 
-  useEffect(() => {
-    setIsFavorited(Array.isArray(userFavorites) && userFavorites.includes(maid.id));
-  }, [userFavorites, maid.id]);
+  // Remove unused favorites effect since we replaced with selection
+  // useEffect(() => {
+  //   setIsFavorited(Array.isArray(userFavorites) && userFavorites.includes(maid.id));
+  // }, [userFavorites, maid.id]);
 
   // Reset image loading state when maid changes
   useEffect(() => {
@@ -197,6 +212,7 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
     }
   }, [isAuthenticated, maid.id]);
 
+
   // Image optimization function
   const getOptimizedImageUrl = (originalUrl) => {
     if (!originalUrl) return maidPic;
@@ -208,43 +224,14 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
     return finalUrl;
   };
 
-  const toggleFavorite = async () => {
-    if (!isAuthenticated) {
-      // Show login prompt
-      setShowLoginPrompt(true);
-      return;
-    }
-
-    const maidId = maid.id;
-    const action = isFavorited ? 'remove' : 'add';
-    
-    try {
-      await apiRequest(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.USER.FAVORITES), {
-        method: 'POST',
-        body: JSON.stringify({
-          maidId: maidId,
-          action: action
-        }),
-      });
-
-      setIsFavorited(!isFavorited);
-      console.log(`Maid ${maidId} ${action === 'add' ? 'added to' : 'removed from'} favorites`);
-    } catch (error) {
-      handleAPIError(error, {
-        customMessage: `Failed to ${action} favorite. Please try again.`,
-        onAuthError: () => {
-          // User session expired
-          setShowLoginPrompt(true);
-        }
-      });
-      
-      // Revert the optimistic update on error
-      // The state should remain unchanged if the API call failed
+  const toggleSelection = () => {
+    if (onSelectionChange) {
+      onSelectionChange(maid.id, !isSelected);
     }
   };
 
   const handleView = () => {
-    navigate(`/maid/${maid.id}`);
+    setShowDetailsPopup(true);
   };
 
   const displayLabel = maid.type.includes("Transfer")
@@ -253,25 +240,7 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
     ? "New/Fresh"
     : "Experienced";
 
-  const getChipColor = (type) => {
-    switch(type) {
-      case "Transfer": return { bg: brandColors.primary, text: '#FFFFFF' };
-      case "New/Fresh": return { bg: brandColors.success, text: '#FFFFFF' };
-      case "Experienced": return { bg: brandColors.warning, text: '#FFFFFF' };
-      default: return { bg: brandColors.textSecondary, text: '#FFFFFF' };
-    }
-  };
 
-  const skillIcons = {
-    Cooking: KitchenIcon,
-    Housekeeping: CleaningServicesIcon,
-    Childcare: ChildCareIcon,
-    Babysitting: CribIcon,
-    'Elderly Care': ElderlyIcon,
-    'Dog(s)': PetsIcon,
-    'Cat(s)': PetsIcon,
-    Caregiving: FavoriteIcon,
-  };
 
   // Function to calculate age from DOB
   const calculateAge = (dob) => {
@@ -308,67 +277,57 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
     return `https://flagcdn.com/${countryCode}.svg`;
   };
 
-  const chipColor = getChipColor(displayLabel);
   const maidAge = calculateAge(maid.DOB); // Calculate age from DOB
 
-  // Responsive dimensions and styles
+  // Responsive dimensions and styles - Portrait layout with proper button spacing
   const getResponsiveStyles = () => {
     if (isMobile) {
       return {
-        cardHeight: 380, // Reduced height for mobile
-        imageHeight: 120, // Smaller image for mobile
-        chipFontSize: '0.55rem',
-        chipHeight: '16px',
-        nameFontSize: '0.75rem',
-        captionFontSize: '0.6rem',
-        bodyFontSize: '0.6rem',
-        salaryFontSize: '0.8rem',
-        iconSize: 10,
-        skillIconSize: 10, // Smaller skill icons
-        skillBoxSize: 18, // Smaller skill boxes
-        buttonPadding: '3px 8px',
-        contentPadding: 1, // Reduced padding
-        spacing: 0.5, // Tighter spacing
-        flagSize: { width: 12, height: 8 },
-        maxSkills: 2 // Show fewer skills on mobile
+        cardHeight: 420,
+        imageHeight: 180,
+        maxImageHeight: 180,
+        chipFontSize: '0.65rem',
+        chipHeight: '20px',
+        nameFontSize: '1rem',
+        bodyFontSize: '0.8rem',
+        contentPadding: 1.4,
+        spacing: 1,
+        flagSize: { width: 16, height: 12 },
+        iconSize: 14,
+        buttonHeight: 36,
+        buttonPadding: '8px'
       };
     } else if (isTablet) {
       return {
-        cardHeight: 480, // Adjusted height for tablet
-        imageHeight: 180, // Adjusted image height
-        chipFontSize: '0.68rem',
+        cardHeight: 480,
+        imageHeight: 220,
+        maxImageHeight: 220,
+        chipFontSize: '0.7rem',
         chipHeight: '22px',
-        nameFontSize: '0.95rem',
-        captionFontSize: '0.72rem',
-        bodyFontSize: '0.73rem',
-        salaryFontSize: '1.05rem',
-        iconSize: 13,
-        skillIconSize: 15,
-        skillBoxSize: 26,
-        buttonPadding: '5px 14px',
-        contentPadding: 1.75,
+        nameFontSize: '1.1rem',
+        bodyFontSize: '0.85rem',
+        contentPadding: 1.6,
         spacing: 1.25,
         flagSize: { width: 18, height: 13 },
-        maxSkills: 4
+        iconSize: 15,
+        buttonHeight: 40,
+        buttonPadding: '10px'
       };
     } else {
       return {
-        cardHeight: 520, // Taller for more content
-        imageHeight: 200, // Larger image
+        cardHeight: 520,
+        imageHeight: 260,
+        maxImageHeight: 260,
         chipFontSize: '0.75rem',
-        chipHeight: '26px',
-        nameFontSize: '1.1rem', // Larger name
-        captionFontSize: '0.8rem',
-        bodyFontSize: '0.8rem',
-        salaryFontSize: '1.2rem', // Larger salary
-        iconSize: 15,
-        skillIconSize: 18, // Larger skill icons
-        skillBoxSize: 32, // Larger skill boxes
-        buttonPadding: '8px 20px', // Larger button
-        contentPadding: 2.25, // More padding
-        spacing: 1.75, // More spacing
-        flagSize: { width: 22, height: 16 },
-        maxSkills: 6 // Show more skills
+        chipHeight: '24px',
+        nameFontSize: '1.2rem',
+        bodyFontSize: '0.9rem',
+        contentPadding: 1.6,
+        spacing: 1.5,
+        flagSize: { width: 20, height: 15 },
+        iconSize: 16,
+        buttonHeight: 42,
+        buttonPadding: '12px'
       };
     }
   };
@@ -399,29 +358,22 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
              <Card  
          data-maid-id={maid.id}
          sx={{
-        width: '100%', // Always 100% width
-        maxWidth: '100%', // Always 100% max width
+        width: '100%',
         height: styles.cardHeight,
-        borderRadius: isMobile ? '12px' : '16px',
+        borderRadius: isMobile ? '12px' : isTablet ? '14px' : '16px',
         overflow: 'hidden',
-        boxShadow: isMobile ? 'none' : '0 4px 16px rgba(12, 25, 27, 0.12)',
+        boxShadow: isMobile ? '0 2px 8px rgba(12, 25, 27, 0.08)' : isTablet ? '0 3px 12px rgba(12, 25, 27, 0.1)' : '0 4px 16px rgba(12, 25, 27, 0.12)',
         position: 'relative',
         background: brandColors.surface,
         border: `1px solid ${brandColors.border}`,
         filter: !isAuthenticated ? 'grayscale(20%)' : 'none',
-        // Responsive sizing that works with grid
-        ...(isMobile && {
-          maxWidth: '160px', // Smaller width for mobile 2-column layout
-          minWidth: '140px'  // Minimum width on mobile
-        }),
-        ...(isTablet && {
-          maxWidth: '280px', // Maximum width on tablet
-          minWidth: '250px'  // Minimum width on tablet
-        }),
-        ...(!isMobile && !isTablet && {
-          maxWidth: '320px', // Maximum width on desktop (3 columns)
-          minWidth: '280px'  // Minimum width on desktop
-        })
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'all 0.2s ease',
+        '&:hover': {
+          transform: isMobile ? 'none' : 'translateY(-2px)',
+          boxShadow: isMobile ? '0 2px 8px rgba(12, 25, 27, 0.08)' : isTablet ? '0 6px 20px rgba(12, 25, 27, 0.15)' : '0 8px 24px rgba(12, 25, 27, 0.18)'
+        }
       }}
     >
       {/* Image Container with Overlay */}
@@ -429,12 +381,8 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
         position: 'relative', 
         overflow: 'hidden', 
         height: styles.imageHeight,
-        // Fixed dimensions for mobile consistency
-        ...(isMobile && {
-          width: '140px',
-          height: '120px',
-          flexShrink: 0
-        })
+        maxHeight: styles.maxImageHeight,
+        flexShrink: 0
       }}>
         {/* Loading skeleton */}
         {!imageLoaded && !imageError && (
@@ -464,7 +412,7 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
         )}
         
         <Tooltip
-          title={!isAuthenticated ? "Click to view details (photos will remain blurred)" : "Click to view details"}
+          title={!isAuthenticated ? "Click to view details (sign in for full access)" : "Click to view details"}
           arrow
           placement="top"
           enterTouchDelay={0}
@@ -498,13 +446,12 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
             sx={{
               width: '100%',
               height: styles.imageHeight,
+              maxHeight: styles.maxImageHeight,
               objectFit: 'cover',
               filter: isAuthenticated ? 'none' : 'blur(12px)',
               transform: isAuthenticated ? 'none' : 'scale(1.1)',
               transition: 'all 0.3s ease',
-              
               opacity: imageLoaded ? 1 : 0, // Use opacity instead of display
-              
             }}
 
             onLoad={() => {
@@ -535,6 +482,7 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
         {/* Lock Icon Overlay for Unauthenticated Users */}
         {!isAuthenticated && (
           <Box
+            onClick={() => navigate('/login')}
             sx={{
               position: 'absolute',
               top: '50%',
@@ -544,8 +492,13 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
               flexDirection: 'column',
               alignItems: 'center',
               gap: 1,
-              pointerEvents: 'none',
-              zIndex: 1
+              pointerEvents: 'auto',
+              zIndex: 1,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                transform: 'translate(-50%, -50%) scale(1.05)',
+              }
             }}
           >
             <Box
@@ -558,7 +511,13 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
                 alignItems: 'center',
                 justifyContent: 'center',
                 backdropFilter: 'blur(10px)',
-                border: '2px solid rgba(255, 255, 255, 0.2)'
+                border: '2px solid rgba(255, 255, 255, 0.2)',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  background: 'rgba(12, 25, 27, 0.95)',
+                  border: '2px solid rgba(255, 255, 255, 0.4)',
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
+                }
               }}
             >
               <LockIcon sx={{ fontSize: 30, color: 'white' }} />
@@ -570,17 +529,22 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
                 fontWeight: 600,
                 textShadow: '0 2px 4px rgba(0,0,0,0.8)',
                 textAlign: 'center',
-                fontSize: '0.8rem'
+                fontSize: '0.8rem',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  color: '#ffa366',
+                  textShadow: '0 2px 8px rgba(255, 163, 102, 0.3)'
+                }
               }}
             >
-              Photos Blurred
+              Sign in to view
             </Typography>
           </Box>
         )}
 
         
         
-        {/* Status Badge - moved to left top */}
+        {/* Glassmorphism Status Badge - top left */}
         <Chip
           label={displayLabel}
           size="small"
@@ -588,103 +552,68 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
             position: 'absolute',
             top: isMobile ? 8 : 12,
             left: isMobile ? 8 : 12,
-            background: `linear-gradient(135deg, ${chipColor.bg} 0%, ${chipColor.bg}80 100%)`,
-            color: chipColor.text,
+            background: 'rgba(255, 255, 255, 0.25)',
+            backdropFilter: 'blur(15px)',
+            WebkitBackdropFilter: 'blur(15px)', // Safari support
+            color: brandColors.text,
             fontFamily: professionalFonts.accent,
             fontWeight: 700,
             fontSize: styles.chipFontSize,
             height: styles.chipHeight,
             letterSpacing: '0.02em',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            zIndex: 3
+            boxShadow: '0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            zIndex: 3,
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%)',
+              borderRadius: 'inherit',
+              zIndex: -1
+            }
           }}
         />
         
-        {/* Favorite Button - moved to right top */}
-        <IconButton
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleFavorite();
-          }}
-          sx={{
-            position: 'absolute',
-            top: isMobile ? 8 : 12,
-            right: isMobile ? 8 : 12,
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            padding: isMobile ? '6px' : '8px',
-            width: isMobile ? 32 : 36,
-            height: isMobile ? 32 : 36,
-            border: `1px solid ${brandColors.border}`,
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 1)',
-              transform: isMobile ? 'none' : 'scale(1.1)',
-              boxShadow: '0 4px 12px rgba(255, 145, 77, 0.3)',
-            },
-            transition: 'all 0.2s ease',
-          }}
-        >
-          {isFavorited ? (
-            <FavoriteIcon sx={{ color: brandColors.error, fontSize: isMobile ? 18 : 20 }} />
-          ) : (
-            <FavoriteBorderIcon sx={{ color: brandColors.error, fontSize: isMobile ? 18 : 20 }} />
-          )}
-        </IconButton>
       </Box>
 
-      {/* Content - No longer clickable */}
+      {/* Content - Minimalist Layout */}
       <CardContent 
         sx={{ 
           p: styles.contentPadding, 
-          pb: styles.contentPadding - 0.5,
+          pb: styles.contentPadding * 0.75,
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-start'
         }}
       >
-                  {/* Name only */}
-          <Box sx={{ mb: styles.spacing }}>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontFamily: professionalFonts.primary,
-                fontWeight: 700,
-                fontSize: styles.nameFontSize,
-                color: brandColors.text,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                letterSpacing: '-0.02em',
-                lineHeight: 1.3,
-              }}
-            >
-              {maid.name}
-            </Typography>
-            
-            {/* Login Hint for Unauthenticated Users */}
-            {/* {!isAuthenticated && (
-              <Typography
-                variant="caption"
-                sx={{
-                  color: brandColors.warning,
-                  fontStyle: 'italic',
-                  fontSize: '0.7rem',
-                  fontWeight: 500,
-                  textAlign: 'center',
-                  mt: 0.5
-                }}
-              >
-                Login to see unblurred photos
-              </Typography>
-            )} */}
-        </Box>
-
-        {/* Country Flag, Age, and Physical Stats */}
-        <Stack 
-          direction="row" 
-          spacing={isMobile ? 1 : 1.5} 
-          sx={{ mb: styles.spacing, alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}
-        >
+        {/* Top Section - Name and Country */}
+        <Box>
+          {/* Name */}
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontFamily: professionalFonts.primary,
+              fontWeight: 700,
+              fontSize: styles.nameFontSize,
+              color: brandColors.text,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              letterSpacing: '-0.02em',
+              lineHeight: 1.2,
+              mb: 1.5
+            }}
+          >
+            {maid.name}
+          </Typography>
+          
           {/* Country with Flag */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.25 }}>
             <img 
               src={getCountryFlag(maid.country)} 
               alt={`${maid.country} flag`}
@@ -699,204 +628,58 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
               fontFamily: professionalFonts.secondary,
               color: brandColors.textSecondary, 
               fontSize: styles.bodyFontSize,
-              fontWeight: 600,
+              fontWeight: 500,
               letterSpacing: '0.01em'
             }}>
-              {isMobile ? maid.country.substring(0, 2) : maid.country}
+              {maid.country}
             </Typography>
           </Box>
           
           {/* Age */}
           {maidAge && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <PersonIcon sx={{ fontSize: styles.iconSize, color: brandColors.primary }} />
-              <Typography variant="body2" sx={{ 
-                fontFamily: professionalFonts.secondary,
-                color: brandColors.textSecondary, 
-                fontSize: styles.bodyFontSize,
-                fontWeight: 600
-              }}>
-                {maidAge}y
-              </Typography>
-            </Box>
+            <Typography variant="body2" sx={{ 
+              fontFamily: professionalFonts.secondary,
+              color: brandColors.primary, 
+              fontSize: styles.bodyFontSize,
+              fontWeight: 600,
+              letterSpacing: '0.01em',
+              mb: 0.75
+            }}>
+              {maidAge} years old
+            </Typography>
           )}
           
-          {/* Height and Weight - Show only on tablet and desktop, or conditionally on mobile */}
-          {(maid.height || maid.weight) && !isMobile && (
-            <>
-              {maid.height && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <HeightIcon sx={{ fontSize: styles.iconSize, color: brandColors.warning }} />
-                  <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: styles.bodyFontSize, fontWeight: 600 }}>
-                    {maid.height}cm
-                  </Typography>
-                </Box>
-              )}
-              
-              {maid.weight && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: styles.bodyFontSize, fontWeight: 600 }}>
-                    {maid.weight}kg
-                  </Typography>
-                </Box>
-              )}
-            </>
-          )}
-        </Stack>
-
-        {/* Mobile Height/Weight Row - Only show if space allows */}
-        {isMobile && (maid.height || maid.weight) && (
-          <Stack direction="row" spacing={1} sx={{ mb: styles.spacing, alignItems: 'center' }}>
-            {maid.height && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <HeightIcon sx={{ fontSize: styles.iconSize, color: brandColors.warning }} />
-                <Typography variant="body2" sx={{ 
-                  fontFamily: professionalFonts.secondary,
-                  color: brandColors.textSecondary, 
-                  fontSize: styles.bodyFontSize,
-                  fontWeight: 600
-                }}>
-                  {maid.height}cm
-                </Typography>
-              </Box>
-            )}
-            
-            {maid.weight && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Typography variant="body2" sx={{ 
-                  fontFamily: professionalFonts.secondary,
-                  color: brandColors.textSecondary, 
-                  fontSize: styles.bodyFontSize, 
-                  fontWeight: 600 
-                }}>
-                  {maid.weight}kg
-                </Typography>
-              </Box>
-            )}
-          </Stack>
-        )}
-
-        {/* Skills Section */}
-        <Box sx={{ mb: styles.spacing }}>
-          <Typography 
-            variant="caption" 
-            sx={{ 
-              fontFamily: professionalFonts.accent,
-              color: brandColors.textSecondary, 
+          {/* Monthly Salary */}
+          {maid.salary && (
+            <Typography variant="body2" sx={{ 
+              fontFamily: professionalFonts.secondary,
+              color: brandColors.secondary, 
+              fontSize: styles.bodyFontSize,
               fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              fontSize: isMobile ? '0.55rem' : '0.65rem',
+              letterSpacing: '0.01em'
+            }}>
+              ${maid.salary}/month
+            </Typography>
+          )}
+          
+          {/* Skills Icons */}
+          {maid.skills && maid.skills.length > 0 && (
+            <Box sx={{ 
+              display: 'flex', 
+              gap: 0.5, 
+              mt: 1.25,
               mb: 0.5,
-              display: 'block'
-            }}
-          >
-            Skills
-          </Typography>
-          <Stack 
-            direction="row" 
-            sx={{ 
-              flexWrap: 'wrap', 
-              gap: isMobile ? 0.25 : 0.5, // Tighter gap on mobile
-              minHeight: styles.skillBoxSize,
-              overflow: 'hidden', // Prevent overflow
-            }}
-          >
-            {maid.skills.slice(0, styles.maxSkills).map((skill, idx) => {
-              const IconComponent = skillIcons[skill];
-              if (!IconComponent) return null;
-
-              return (
-                <Tooltip title={skill} key={idx} arrow>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: `${brandColors.primary}10`,
-                      color: brandColors.primary,
-                      borderRadius: isMobile ? '6px' : '8px',
-                      width: styles.skillBoxSize,
-                      height: styles.skillBoxSize,
-                      flexShrink: 0, // Prevent shrinking
-                      transition: 'all 0.2s ease',
-                      border: `1px solid ${brandColors.primary}20`,
-                      '&:hover': {
-                        backgroundColor: brandColors.primary,
-                        color: '#FFFFFF',
-                        transform: isMobile ? 'none' : 'scale(1.1)',
-                        boxShadow: `0 4px 12px ${brandColors.primary}40`,
-                      },
-                    }}
-                  >
-                    <IconComponent sx={{ fontSize: styles.skillIconSize }} />
-                  </Box>
-                </Tooltip>
-              );
-            })}
-            {maid.skills.length > styles.maxSkills && (
-              <Tooltip title={`+${maid.skills.length - styles.maxSkills} more skills`} arrow>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: brandColors.textSecondary,
-                    color: '#FFFFFF',
-                    borderRadius: isMobile ? '6px' : '8px',
-                    width: styles.skillBoxSize,
-                    height: styles.skillBoxSize,
-                    fontSize: isMobile ? '0.6rem' : '0.7rem',
-                    fontWeight: 700,
-                    flexShrink: 0, // Prevent shrinking
-                    border: `1px solid ${brandColors.textSecondary}20`,
-                  }}
-                >
-                  +{maid.skills.length - styles.maxSkills}
-                </Box>
-              </Tooltip>
-            )}
-          </Stack>
-        </Box>
-
-        <Divider sx={{ 
-          my: styles.spacing,
-          borderColor: brandColors.border,
-          opacity: 0.6
-        }} />
-
-        {/* Bottom Section - Updated Layout */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 1 : 1.5 }}>
-          {/* Salary and Compare Row */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            {/* Salary with Info Tooltip */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box>
-                <Typography variant="caption" sx={{ 
-                  fontFamily: professionalFonts.accent,
-                  color: brandColors.textSecondary, 
-                  fontSize: styles.captionFontSize,
-                  fontWeight: 600,
-                  letterSpacing: '0.02em'
-                }}>
-                  Monthly Salary
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Typography
-                    variant="h6"
-                    sx={{ 
-                      fontFamily: professionalFonts.primary,
-                      fontWeight: 800,
-                      color: brandColors.success,
-                      fontSize: styles.salaryFontSize,
-                      lineHeight: 1.2,
-                      letterSpacing: '-0.01em'
-                    }}
-                  >
-                    ${maid.salary}
-                  </Typography>
-                                     <Tooltip 
-                     title="Total salary = Basic salary + off day compensation"
+              flexWrap: 'wrap',
+              maxWidth: '100%'
+            }}>
+              {maid.skills.slice(0, 5).map((skill, idx) => {
+                const IconComponent = skillIcons[skill];
+                if (!IconComponent) return null;
+                
+                return (
+                  <Tooltip 
+                    key={idx} 
+                    title={skill} 
                     arrow
                     placement="top"
                     enterTouchDelay={0}
@@ -908,12 +691,9 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
                         '& .MuiTooltip-tooltip': {
                           backgroundColor: brandColors.secondary,
                           color: '#FFFFFF',
-                          fontSize: isMobile ? '0.75rem' : '0.875rem',
-                          maxWidth: isMobile ? '260px' : '320px',
-                          padding: isMobile ? '8px' : '12px',
-                          borderRadius: '8px',
-                          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                          border: `1px solid ${brandColors.border}`,
+                          fontSize: isMobile ? '0.7rem' : '0.75rem',
+                          padding: '6px 8px',
+                          borderRadius: '6px',
                         },
                         '& .MuiTooltip-arrow': {
                           color: brandColors.secondary,
@@ -921,162 +701,146 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
                       },
                     }}
                   >
-                    <InfoOutlinedIcon 
-                      sx={{ 
-                        fontSize: isMobile ? 14 : 16, 
-                        color: brandColors.textSecondary,
-                        cursor: 'help',
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: isMobile ? 22 : isTablet ? 24 : 26,
+                        height: isMobile ? 22 : isTablet ? 24 : 26,
+                        borderRadius: '6px',
+                        backgroundColor: `${brandColors.primary}15`,
+                        color: brandColors.primary,
+                        border: `1px solid ${brandColors.primary}30`,
+                        transition: 'all 0.2s ease',
                         '&:hover': {
-                          color: brandColors.primary,
-                        }
-                      }} 
-                    />
+                          backgroundColor: `${brandColors.primary}25`,
+                          transform: isMobile ? 'none' : 'scale(1.1)',
+                          borderColor: `${brandColors.primary}50`,
+                        },
+                      }}
+                    >
+                      <IconComponent sx={{ 
+                        fontSize: isMobile ? 14 : isTablet ? 15 : 16 
+                      }} />
+                    </Box>
                   </Tooltip>
-                </Box>
-              </Box>
+                );
+              })}
+              {maid.skills.length > 5 && (
+                <Tooltip 
+                  title={`+${maid.skills.length - 5} more skills`}
+                  arrow
+                  placement="top"
+                  PopperProps={{
+                    sx: {
+                      '& .MuiTooltip-tooltip': {
+                        backgroundColor: brandColors.secondary,
+                        color: '#FFFFFF',
+                        fontSize: isMobile ? '0.7rem' : '0.75rem',
+                        padding: '6px 8px',
+                        borderRadius: '6px',
+                      },
+                      '& .MuiTooltip-arrow': {
+                        color: brandColors.secondary,
+                      },
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: isMobile ? 22 : isTablet ? 24 : 26,
+                      height: isMobile ? 22 : isTablet ? 24 : 26,
+                      borderRadius: '6px',
+                      backgroundColor: `${brandColors.textSecondary}15`,
+                      color: brandColors.textSecondary,
+                      border: `1px solid ${brandColors.textSecondary}30`,
+                      fontSize: isMobile ? '0.7rem' : '0.75rem',
+                      fontWeight: 600,
+                    }}
+                  >
+                    +{maid.skills.length - 5}
+                  </Box>
+                </Tooltip>
+              )}
             </Box>
-
-            {/* Compare Button */}
-            {/* <Tooltip 
-              title={
-                <Box sx={{ p: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    Add to Compare
-                  </Typography>
-                  <Typography variant="caption" sx={{ opacity: 0.8 }}>
-                    Compare this maid with others
-                  </Typography>
-                </Box>
-              }
-              arrow
-              enterTouchDelay={0}
-              leaveTouchDelay={1500}
-              disableFocusListener={isMobile}
-              disableHoverListener={isMobile}
-              PopperProps={{
-                sx: {
-                  '& .MuiTooltip-tooltip': {
-                    backgroundColor: brandColors.secondary,
-                    color: '#FFFFFF',
-                    fontSize: isMobile ? '0.75rem' : '0.875rem',
-                    maxWidth: isMobile ? '180px' : '240px',
-                    padding: isMobile ? '6px 8px' : '8px 12px',
-                    borderRadius: '6px',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-                    border: `1px solid ${brandColors.border}`,
-                  },
-                  '& .MuiTooltip-arrow': {
-                    color: brandColors.secondary,
-                  },
-                },
-              }}
-            >
-              <IconButton
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (!isAuthenticated) {
-                    setShowLoginPrompt(true);
-                  } else {
-                    console.log('Added to compare:', maid.id);
-                  }
-                }}
-                size="small"
-                sx={{
-                  backgroundColor: brandColors.warning,
-                  color: '#FFFFFF',
-                  width: isMobile ? 32 : 36,
-                  height: isMobile ? 32 : 36,
-                  border: `1px solid ${brandColors.warning}20`,
-                  '&:hover': {
-                    backgroundColor: brandColors.warning,
-                    transform: isMobile ? 'none' : 'scale(1.05)',
-                    boxShadow: `0 4px 12px ${brandColors.warning}40`,
-                  },
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <CompareArrowsIcon sx={{ fontSize: isMobile ? 16 : 18 }} />
-              </IconButton>
-            </Tooltip> */}
-          </Box>
-
-          {/* Action Buttons Row */}
+          )}
+        </Box>
+        
+        {/* Bottom Section - Checkbox and Action Button */}
+        <Box sx={{ mt: 'auto', pt: 2 }}>
           <Box sx={{ 
             display: 'flex', 
-            gap: 1, 
-            mt: 0.5,
-            flexDirection: isMobile ? 'column' : 'row'
+            alignItems: 'center', 
+            gap: isMobile ? 1 : 1.5 
           }}>
-            {/* WhatsApp Button - Left/Top */}
-            <Button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (!isAuthenticated) {
-                  setShowLoginPrompt(true);
-                } else {
-                  const message = `Hi, I'm interested in maid ID ${maid.id}.`;
-                  window.open(`https://wa.me/88270086?text=${encodeURIComponent(message)}`, '_blank');
-                }
-              }}
-              startIcon={<WhatsAppIcon sx={{ fontSize: isMobile ? 12 : 16 }} />}
-              variant="contained"
-              size="small"
+            {/* Contact Checkbox */}
+            <Box
               sx={{
-                fontFamily: professionalFonts.accent,
-                background: `linear-gradient(135deg, #25D366 0%, #128C7E 100%)`,
-                color: '#FFFFFF',
-                borderRadius: isMobile ? '12px' : '20px',
-                fontSize: isMobile ? '0.65rem' : '0.75rem',
-                fontWeight: 600,
-                textTransform: 'none',
-                padding: isMobile ? '4px 8px' : '8px 16px',
-                minHeight: isMobile ? '32px' : 'auto',
-                flex: isMobile ? 'none' : 1,
-                width: isMobile ? '100%' : 'auto',
-                letterSpacing: '0.02em',
-                boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)',
-                '&:hover': {
-                  background: `linear-gradient(135deg, #128C7E 0%, #075E54 100%)`,
-                  boxShadow: '0 6px 16px rgba(37, 211, 102, 0.4)',
-                  transform: 'translateY(-1px)',
-                },
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                backdropFilter: 'blur(15px)',
+                WebkitBackdropFilter: 'blur(15px)', // Safari support
+                borderRadius: '8px',
+                border: `1px solid rgba(255, 255, 255, 0.3)`,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.3)',
                 transition: 'all 0.2s ease',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.4)',
+                  transform: isMobile ? 'none' : 'scale(1.05)',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.4)',
+                },
+                flexShrink: 0,
               }}
             >
-              Contact
-            </Button>
-
-            {/* View Details Button - Right/Bottom */}
+              <Checkbox
+                checked={isSelected}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  toggleSelection();
+                }}
+                sx={{
+                  padding: isMobile ? '6px' : '8px',
+                  color: '#666666',
+                  '&.Mui-checked': {
+                    color: '#25D366',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    fontSize: isMobile ? 20 : 22,
+                  },
+                }}
+              />
+            </Box>
+            
+            {/* View Details Button */}
             <Button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleView(); // Allow all users to view details
+                handleView();
               }}
-              variant="outlined"
-              size="small"
+              variant="contained"
               sx={{
+                flex: 1,
                 fontFamily: professionalFonts.accent,
-                color: brandColors.primary,
-                borderColor: brandColors.primary,
-                borderRadius: isMobile ? '12px' : '20px',
-                fontSize: isMobile ? '0.65rem' : '0.75rem',
+                background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryDark} 100%)`,
+                color: '#FFFFFF',
+                borderRadius: isMobile ? '10px' : '12px',
+                fontSize: isMobile ? '0.75rem' : '0.8rem',
                 fontWeight: 600,
                 textTransform: 'none',
-                padding: isMobile ? '4px 8px' : '8px 16px',
-                minHeight: isMobile ? '32px' : 'auto',
-                flex: isMobile ? 'none' : 1,
-                width: isMobile ? '100%' : 'auto',
+                padding: styles.buttonPadding,
+                minHeight: `${styles.buttonHeight}px`,
+                letterSpacing: '0.02em',
+                boxShadow: `0 4px 16px rgba(255, 145, 77, 0.25)`,
                 '&:hover': {
-                  backgroundColor: brandColors.primary,
-                  color: '#FFFFFF',
-                  borderColor: brandColors.primary,
-                  transform: 'translateY(-1px)',
-                  boxShadow: '0 4px 12px rgba(255, 145, 77, 0.3)',
+                  background: `linear-gradient(135deg, ${brandColors.primaryDark} 0%, #d35400 100%)`,
+                  boxShadow: `0 6px 20px rgba(255, 145, 77, 0.35)`,
+                  transform: isMobile ? 'none' : 'translateY(-1px)',
                 },
-                transition: 'all 0.2s ease',
+                transition: 'all 0.3s ease',
               }}
             >
               View Details
@@ -1089,6 +853,14 @@ export default function MaidCard({ userFavorites = [], maid, isAuthenticated }) 
       <LoginPromptModal
         open={showLoginPrompt}
         onClose={() => setShowLoginPrompt(false)}
+      />
+      
+      {/* Maid Details Popup */}
+      <MaidDetailsPopup
+        open={showDetailsPopup}
+        onClose={() => setShowDetailsPopup(false)}
+        maid={maid}
+        isAuthenticated={isAuthenticated}
       />
     </Card>
     </>

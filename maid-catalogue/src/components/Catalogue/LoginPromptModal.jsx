@@ -149,13 +149,25 @@ export default function LoginPromptModal({ open, onClose }) {
             gap: 2,
             mt: 3
           }}>
-            <Box sx={{
-              p: 2,
-              borderRadius: 2,
-              background: `linear-gradient(135deg, ${brandColors.primary}10 0%, ${brandColors.primaryLight}10 100%)`,
-              border: `1px solid ${brandColors.primary}30`,
-              textAlign: 'left'
-            }}>
+            <Button
+              onClick={handleSignup}
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                background: `linear-gradient(135deg, ${brandColors.primary}10 0%, ${brandColors.primaryLight}10 100%)`,
+                border: `1px solid ${brandColors.primary}30`,
+                textAlign: 'left',
+                textTransform: 'none',
+                display: 'block',
+                width: '100%',
+                '&:hover': {
+                  background: `linear-gradient(135deg, ${brandColors.primary}20 0%, ${brandColors.primaryLight}20 100%)`,
+                  border: `1px solid ${brandColors.primary}50`,
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(255, 145, 77, 0.2)'
+                }
+              }}
+            >
               <Typography variant="subtitle1" sx={{ 
                 fontWeight: 600, 
                 color: brandColors.primary,
@@ -170,15 +182,27 @@ export default function LoginPromptModal({ open, onClose }) {
               <Typography variant="body2" sx={{ color: brandColors.textSecondary }}>
                 Create a free account to browse maid profiles, save favorites, and contact helpers directly.
               </Typography>
-            </Box>
+            </Button>
             
-            <Box sx={{
-              p: 2,
-              borderRadius: 2,
-              background: `linear-gradient(135deg, ${brandColors.secondary}10 0%, ${brandColors.secondaryLight}10 100%)`,
-              border: `1px solid ${brandColors.secondary}30`,
-              textAlign: 'left'
-            }}>
+            <Button
+              onClick={handleLogin}
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                background: `linear-gradient(135deg, ${brandColors.secondary}10 0%, ${brandColors.secondaryLight}10 100%)`,
+                border: `1px solid ${brandColors.secondary}30`,
+                textAlign: 'left',
+                textTransform: 'none',
+                display: 'block',
+                width: '100%',
+                '&:hover': {
+                  background: `linear-gradient(135deg, ${brandColors.secondary}20 0%, ${brandColors.secondaryLight}20 100%)`,
+                  border: `1px solid ${brandColors.secondary}50`,
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(12, 25, 27, 0.2)'
+                }
+              }}
+            >
               <Typography variant="subtitle1" sx={{ 
                 fontWeight: 600, 
                 color: brandColors.secondary,
@@ -193,7 +217,7 @@ export default function LoginPromptModal({ open, onClose }) {
               <Typography variant="body2" sx={{ color: brandColors.textSecondary }}>
                 Sign in to access your saved favorites and continue browsing with full access.
               </Typography>
-            </Box>
+            </Button>
           </Box>
         </Box>
       </DialogContent>
@@ -202,8 +226,7 @@ export default function LoginPromptModal({ open, onClose }) {
       <DialogActions sx={{ 
         p: 3, 
         pt: 1,
-        flexDirection: isMobile ? 'column' : 'row',
-        gap: 2
+        justifyContent: 'center'
       }}>
         <Button
           variant="outlined"
@@ -219,44 +242,6 @@ export default function LoginPromptModal({ open, onClose }) {
           }}
         >
           Continue Browsing
-        </Button>
-        
-        <Button
-          variant="contained"
-          onClick={handleSignup}
-          fullWidth={isMobile}
-          startIcon={<PersonAddIcon />}
-          sx={{
-            background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryLight} 100%)`,
-            color: 'white',
-            fontWeight: 600,
-            '&:hover': {
-              background: `linear-gradient(135deg, ${brandColors.primaryDark} 0%, ${brandColors.primary} 100%)`,
-              transform: 'translateY(-1px)',
-              boxShadow: '0 8px 25px rgba(255, 145, 77, 0.4)'
-            }
-          }}
-        >
-          Create Account
-        </Button>
-        
-        <Button
-          variant="contained"
-          onClick={handleLogin}
-          fullWidth={isMobile}
-          startIcon={<LoginIcon />}
-          sx={{
-            background: `linear-gradient(135deg, ${brandColors.secondary} 0%, ${brandColors.secondaryLight} 100%)`,
-            color: 'white',
-            fontWeight: 600,
-            '&:hover': {
-              background: `linear-gradient(135deg, ${brandColors.secondaryDark} 0%, ${brandColors.secondary} 100%)`,
-              transform: 'translateY(-1px)',
-              boxShadow: '0 8px 25px rgba(12, 25, 27, 0.4)'
-            }
-          }}
-        >
-          Sign In
         </Button>
       </DialogActions>
     </Dialog>

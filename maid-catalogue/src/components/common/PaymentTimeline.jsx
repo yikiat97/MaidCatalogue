@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
-import Card from '../ui/Card';
+import { Card } from '../ui/card';
 import { DollarSign, Calendar, CheckCircle, FileText } from 'lucide-react';
 import { useAnimation } from '../../hooks/useAnimation';
 

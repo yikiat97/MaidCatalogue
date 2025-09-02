@@ -1,0 +1,250 @@
+// Mock data for maid catalogue - fallback when API fails
+// Maintains exact structure required by MaidCard component
+
+const mockMaids = [
+  {
+    id: 'mock_001',
+    name: 'Maria Santos',
+    country: 'Philippines',
+    salary: 650,
+    DOB: '1992-03-15',
+    skills: ['Cooking', 'Housekeeping', 'Childcare'],
+    languages: ['English', 'Filipino', 'Mandarin'],
+    type: ['Experienced'],
+    imageUrl: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=400&fit=crop&crop=face',
+    height: 158,
+    weight: 52
+  },
+  {
+    id: 'mock_002',
+    name: 'Siti Nurhaliza',
+    country: 'Indonesia',
+    salary: 580,
+    DOB: '1995-07-22',
+    skills: ['Housekeeping', 'Cooking', 'Elderly Care'],
+    languages: ['English', 'Indonesian', 'Malay'],
+    type: ['Transfer'],
+    imageUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=400&fit=crop&crop=face',
+    height: 160,
+    weight: 48
+  },
+  {
+    id: 'mock_003',
+    name: 'Thida Win',
+    country: 'Myanmar',
+    salary: 520,
+    DOB: '1988-11-08',
+    skills: ['Cooking', 'Babysitting', 'Housekeeping'],
+    languages: ['English', 'Burmese'],
+    type: ['New/Fresh'],
+    imageUrl: 'https://images.unsplash.com/photo-1594824350830-78b7dc8b7b33?w=300&h=400&fit=crop&crop=face',
+    height: 155,
+    weight: 50
+  },
+  {
+    id: 'mock_004',
+    name: 'Priya Sharma',
+    country: 'India',
+    salary: 600,
+    DOB: '1990-05-14',
+    skills: ['Cooking', 'Childcare', 'Caregiving'],
+    languages: ['English', 'Hindi', 'Tamil'],
+    type: ['Experienced'],
+    imageUrl: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=300&h=400&fit=crop&crop=face',
+    height: 162,
+    weight: 54
+  },
+  {
+    id: 'mock_005',
+    name: 'Rashida Begum',
+    country: 'Bangladesh',
+    salary: 480,
+    DOB: '1993-09-30',
+    skills: ['Housekeeping', 'Cooking', 'Elderly Care'],
+    languages: ['English', 'Bengali'],
+    type: ['Transfer'],
+    imageUrl: 'https://images.unsplash.com/photo-1614283233556-f35b0c801ef1?w=300&h=400&fit=crop&crop=face',
+    height: 157,
+    weight: 49
+  },
+  {
+    id: 'mock_006',
+    name: 'Kumari Silva',
+    country: 'Sri Lanka',
+    salary: 620,
+    DOB: '1987-12-03',
+    skills: ['Cooking', 'Childcare', 'Housekeeping', 'Dog(s)'],
+    languages: ['English', 'Sinhala', 'Tamil'],
+    type: ['Experienced'],
+    imageUrl: 'https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=300&h=400&fit=crop&crop=face',
+    height: 159,
+    weight: 51
+  },
+  {
+    id: 'mock_007',
+    name: 'Sopheap Chhim',
+    country: 'Cambodia',
+    salary: 500,
+    DOB: '1994-04-18',
+    skills: ['Housekeeping', 'Babysitting', 'Cooking'],
+    languages: ['English', 'Khmer'],
+    type: ['New/Fresh'],
+    imageUrl: 'https://images.unsplash.com/photo-1619946794135-5bc917a27793?w=300&h=400&fit=crop&crop=face',
+    height: 156,
+    weight: 47
+  },
+  {
+    id: 'mock_008',
+    name: 'Linh Nguyen',
+    country: 'Vietnam',
+    salary: 580,
+    DOB: '1991-08-25',
+    skills: ['Cooking', 'Housekeeping', 'Caregiving'],
+    languages: ['English', 'Vietnamese', 'Mandarin'],
+    type: ['Transfer'],
+    imageUrl: 'https://images.unsplash.com/photo-1595211877493-41a4e5cd4eb1?w=300&h=400&fit=crop&crop=face',
+    height: 161,
+    weight: 50
+  },
+  {
+    id: 'mock_009',
+    name: 'Nurul Hassan',
+    country: 'Malaysia',
+    salary: 720,
+    DOB: '1989-06-12',
+    skills: ['Cooking', 'Childcare', 'Elderly Care', 'Cat(s)'],
+    languages: ['English', 'Malay', 'Mandarin'],
+    type: ['Experienced'],
+    imageUrl: 'https://images.unsplash.com/photo-1574701148212-8518049c7b2b?w=300&h=400&fit=crop&crop=face',
+    height: 163,
+    weight: 55
+  },
+  {
+    id: 'mock_010',
+    name: 'Siriporn Thana',
+    country: 'Thailand',
+    salary: 640,
+    DOB: '1992-10-07',
+    skills: ['Housekeeping', 'Cooking', 'Babysitting'],
+    languages: ['English', 'Thai'],
+    type: ['Transfer'],
+    imageUrl: 'https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?w=300&h=400&fit=crop&crop=face',
+    height: 158,
+    weight: 48
+  },
+  {
+    id: 'mock_011',
+    name: 'Carmen Reyes',
+    country: 'Philippines',
+    salary: 680,
+    DOB: '1986-01-20',
+    skills: ['Cooking', 'Childcare', 'Housekeeping', 'Elderly Care'],
+    languages: ['English', 'Filipino', 'Cantonese'],
+    type: ['Experienced'],
+    imageUrl: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=300&h=400&fit=crop&crop=face',
+    height: 160,
+    weight: 53
+  },
+  {
+    id: 'mock_012',
+    name: 'Dewi Lestari',
+    country: 'Indonesia',
+    salary: 560,
+    DOB: '1995-02-28',
+    skills: ['Housekeeping', 'Cooking', 'Dog(s)', 'Cat(s)'],
+    languages: ['English', 'Indonesian'],
+    type: ['New/Fresh'],
+    imageUrl: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=300&h=400&fit=crop&crop=face',
+    height: 157,
+    weight: 49
+  },
+  {
+    id: 'mock_013',
+    name: 'Aye Thant',
+    country: 'Myanmar',
+    salary: 540,
+    DOB: '1990-07-16',
+    skills: ['Cooking', 'Elderly Care', 'Caregiving'],
+    languages: ['English', 'Burmese'],
+    type: ['Transfer'],
+    imageUrl: 'https://images.unsplash.com/photo-1616766098956-c81f12114571?w=300&h=400&fit=crop&crop=face',
+    height: 154,
+    weight: 46
+  },
+  {
+    id: 'mock_014',
+    name: 'Ritu Patel',
+    country: 'India',
+    salary: 620,
+    DOB: '1988-04-05',
+    skills: ['Childcare', 'Cooking', 'Housekeeping', 'Babysitting'],
+    languages: ['English', 'Hindi', 'Gujarati'],
+    type: ['Experienced'],
+    imageUrl: 'https://images.unsplash.com/photo-1611689037241-d8dfe4280cbb?w=300&h=400&fit=crop&crop=face',
+    height: 161,
+    weight: 52
+  },
+  {
+    id: 'mock_015',
+    name: 'Fatima Khan',
+    country: 'Bangladesh',
+    salary: 500,
+    DOB: '1994-11-22',
+    skills: ['Housekeeping', 'Cooking', 'Elderly Care'],
+    languages: ['English', 'Bengali', 'Urdu'],
+    type: ['New/Fresh'],
+    imageUrl: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=300&h=400&fit=crop&crop=face',
+    height: 156,
+    weight: 48
+  },
+  {
+    id: 'mock_016',
+    name: 'Sanduni Fernando',
+    country: 'Sri Lanka',
+    salary: 590,
+    DOB: '1991-03-11',
+    skills: ['Cooking', 'Childcare', 'Housekeeping'],
+    languages: ['English', 'Sinhala'],
+    type: ['Transfer'],
+    imageUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=400&fit=crop&crop=face',
+    height: 159,
+    weight: 50
+  },
+  {
+    id: 'mock_017',
+    name: 'Channary Sok',
+    country: 'Cambodia',
+    salary: 520,
+    DOB: '1993-08-14',
+    skills: ['Housekeeping', 'Babysitting', 'Dog(s)'],
+    languages: ['English', 'Khmer', 'Vietnamese'],
+    type: ['New/Fresh'],
+    imageUrl: 'https://images.unsplash.com/photo-1594824350830-78b7dc8b7b33?w=300&h=400&fit=crop&crop=face',
+    height: 155,
+    weight: 47
+  },
+  {
+    id: 'mock_018',
+    name: 'Mai Phuong',
+    country: 'Vietnam',
+    salary: 600,
+    DOB: '1989-12-09',
+    skills: ['Cooking', 'Elderly Care', 'Caregiving', 'Housekeeping'],
+    languages: ['English', 'Vietnamese'],
+    type: ['Experienced'],
+    imageUrl: 'https://images.unsplash.com/photo-1595211877493-41a4e5cd4eb1?w=300&h=400&fit=crop&crop=face',
+    height: 160,
+    weight: 51
+  }
+];
+
+// Mock API response structure to match backend
+export const createMockApiResponse = () => ({
+  maids: mockMaids,
+  total: mockMaids.length,
+  page: 1,
+  limit: 20,
+  totalPages: 1
+});
+
+export default mockMaids;

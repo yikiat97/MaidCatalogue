@@ -276,7 +276,7 @@ const EditMaidModal = ({
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                     placeholder="Enter maid's full name"
                   />
                 </div>
@@ -290,7 +290,7 @@ const EditMaidModal = ({
                     value={formData.country}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                   >
                     <option value="">Select country</option>
                     <option value="Philippines">Philippines</option>
@@ -316,7 +316,7 @@ const EditMaidModal = ({
                     value={formData.DOB}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                   />
                 </div>
 
@@ -329,7 +329,7 @@ const EditMaidModal = ({
                     value={formData.maritalStatus}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                   >
                     <option value="">Select status</option>
                     <option value="Single">Single</option>
@@ -348,7 +348,7 @@ const EditMaidModal = ({
                     value={formData.Religion}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                   >
                     <option value="">Select religion</option>
                     <option value="Christian">Christian</option>
@@ -371,7 +371,7 @@ const EditMaidModal = ({
                     onChange={handleInputChange}
                     min="0"
                     max="20"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                     placeholder="0"
                   />
                 </div>
@@ -386,7 +386,7 @@ const EditMaidModal = ({
                     value={formData.supplier}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                     placeholder="Enter supplier name"
                   />
                 </div>
@@ -419,7 +419,7 @@ const EditMaidModal = ({
                     required
                     min="100"
                     max="250"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                     placeholder="160"
                   />
                 </div>
@@ -436,7 +436,7 @@ const EditMaidModal = ({
                     required
                     min="30"
                     max="200"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                     placeholder="55"
                   />
                 </div>
@@ -453,7 +453,7 @@ const EditMaidModal = ({
                     required
                     min="300"
                     max="5000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                     placeholder="800"
                   />
                 </div>
@@ -469,7 +469,7 @@ const EditMaidModal = ({
                     onChange={handleInputChange}
                     min="0"
                     max="50000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                     placeholder="0"
                   />
                 </div>
@@ -507,7 +507,7 @@ const EditMaidModal = ({
                               handleArrayFieldChange('skills', formData.skills.filter(s => s !== skill));
                             }
                           }}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-gray-300 text-primary-orange focus:ring-primary-orange"
                         />
                         <span className="text-sm text-gray-700">{skill}</span>
                       </label>
@@ -532,7 +532,7 @@ const EditMaidModal = ({
                               handleArrayFieldChange('languages', formData.languages.filter(l => l !== language));
                             }
                           }}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-gray-300 text-primary-orange focus:ring-primary-orange"
                         />
                         <span className="text-sm text-gray-700">{language}</span>
                       </label>
@@ -557,7 +557,7 @@ const EditMaidModal = ({
                               handleArrayFieldChange('type', formData.type.filter(t => t !== type));
                             }
                           }}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-gray-300 text-primary-orange focus:ring-primary-orange"
                         />
                         <span className="text-sm text-gray-700">{type}</span>
                       </label>
@@ -591,7 +591,7 @@ const EditMaidModal = ({
                     onChange={handleMaidDetailChange}
                     rows="3"
                     maxLength="2000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                     placeholder="Brief description about the maid..."
                   />
                 </div>
@@ -608,7 +608,7 @@ const EditMaidModal = ({
                       onChange={handleMaidDetailChange}
                       min="0"
                       max="31"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                       placeholder="4"
                     />
                   </div>
@@ -623,7 +623,7 @@ const EditMaidModal = ({
                       value={formData.maidDetails.highestEducation}
                       onChange={handleMaidDetailChange}
                       maxLength="500"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                       placeholder="e.g., High School, College"
                     />
                   </div>
@@ -639,7 +639,7 @@ const EditMaidModal = ({
                     onChange={handleMaidDetailChange}
                     rows="3"
                     maxLength="1000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                     placeholder="Previous work experience..."
                   />
                 </div>
@@ -658,7 +658,7 @@ const EditMaidModal = ({
                         onChange={handleMaidDetailChange}
                         min="0"
                         max="5"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                         placeholder="3"
                       />
                     </div>
@@ -671,7 +671,7 @@ const EditMaidModal = ({
                         onChange={handleMaidDetailChange}
                         min="0"
                         max="5"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                         placeholder="2"
                       />
                     </div>
@@ -684,7 +684,7 @@ const EditMaidModal = ({
                         onChange={handleMaidDetailChange}
                         min="0"
                         max="5"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                         placeholder="4"
                       />
                     </div>
@@ -731,7 +731,7 @@ const EditMaidModal = ({
                           value={detail.country}
                           onChange={(e) => handleEmploymentDetailChange(index, 'country', e.target.value)}
                           required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                           placeholder="e.g., Singapore"
                         />
                       </div>
@@ -748,7 +748,7 @@ const EditMaidModal = ({
                           required
                           min="1"
                           max="20"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                           placeholder="4"
                         />
                       </div>
@@ -763,7 +763,7 @@ const EditMaidModal = ({
                           value={detail.startDate}
                           onChange={(e) => handleEmploymentDetailChange(index, 'startDate', e.target.value)}
                           required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                         />
                       </div>
                       
@@ -777,7 +777,7 @@ const EditMaidModal = ({
                           value={detail.endDate}
                           onChange={(e) => handleEmploymentDetailChange(index, 'endDate', e.target.value)}
                           required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                         />
                       </div>
                     </div>
@@ -792,7 +792,7 @@ const EditMaidModal = ({
                         value={detail.mainJobScope}
                         onChange={(e) => handleEmploymentDetailChange(index, 'mainJobScope', e.target.value)}
                         required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                         placeholder="e.g., Housekeeping, Childcare"
                       />
                     </div>
@@ -808,7 +808,7 @@ const EditMaidModal = ({
                         required
                         rows="2"
                         maxLength="1000"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                         placeholder="Description of the employer and family..."
                       />
                     </div>
@@ -823,7 +823,7 @@ const EditMaidModal = ({
                         value={detail.reasonOfLeaving}
                         onChange={(e) => handleEmploymentDetailChange(index, 'reasonOfLeaving', e.target.value)}
                         required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
                         placeholder="e.g., Contract ended, Family relocated"
                       />
                     </div>
@@ -833,7 +833,7 @@ const EditMaidModal = ({
                 <button
                   type="button"
                   onClick={addEmploymentDetail}
-                  className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
+                  className="flex items-center space-x-2 text-primary-orange hover:text-blue-700 font-medium"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Employment Detail</span>
@@ -851,7 +851,7 @@ const EditMaidModal = ({
                   name="isActive"
                   checked={formData.isActive}
                   onChange={handleInputChange}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-primary-orange focus:ring-primary-orange"
                 />
                 <span className="text-sm font-medium text-gray-700">Active</span>
               </label>
@@ -862,7 +862,7 @@ const EditMaidModal = ({
                   name="isEmployed"
                   checked={formData.isEmployed}
                   onChange={handleInputChange}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-primary-orange focus:ring-primary-orange"
                 />
                 <span className="text-sm font-medium text-gray-700">Currently Employed</span>
               </label>
@@ -883,7 +883,7 @@ const EditMaidModal = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 flex items-center space-x-2"
+              className="px-6 py-2 bg-primary-orange text-white rounded-md hover:bg-primary-orange-dark focus:outline-none focus:ring-2 focus:ring-primary-orange disabled:opacity-50 flex items-center space-x-2"
             >
               {isSubmitting ? (
                 <>
