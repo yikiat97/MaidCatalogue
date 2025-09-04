@@ -1,7 +1,7 @@
 // Environment Configuration
 const ENVIRONMENTS = {
   development: {
-    API_BASE_URL: 'http://localhost:3000',
+    API_BASE_URL: '', // Use Vite proxy - routes /api to https://yikiat.com/api
     API_PORT: 3000,
     NODE_ENV: 'development',
   },
@@ -21,8 +21,15 @@ const ENVIRONMENTS = {
 
 // Get current environment (default to development)
 const getCurrentEnvironment = () => {
-  const env = import.meta.env?.VITE_NODE_ENV || 'development';
-  return ENVIRONMENTS[env] || ENVIRONMENTS.development;
+  // Use Vite's built-in environment detection for reliable results
+  if (import.meta.env.DEV) {
+    // Development mode: use proxy (empty BASE_URL)
+    return ENVIRONMENTS.development;
+  } else {
+    // Production mode: use full URLs
+    const prodEnv = import.meta.env?.VITE_NODE_ENV || 'production';
+    return ENVIRONMENTS[prodEnv] || ENVIRONMENTS.production;
+  }
 };
 
 // Export current environment config

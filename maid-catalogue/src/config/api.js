@@ -37,7 +37,11 @@ const API_CONFIG = {
     // Catalogue endpoints
     CATALOGUE: {
       MAIDS: '/api/catalogue/maids',
+      MAID_DETAIL: '/api/catalogue/maids', // Used with ID parameter: /api/catalogue/maids/{id}
       TOP_MAIDS: '/api/catalogue/top-maids',
+      SEARCH_MAIDS: '/api/catalogue/maids/search',
+      FILTER_MAIDS: '/api/catalogue/maids/filter',
+      BATCH_MAIDS: '/api/catalogue/maids/batch',
       USER_FAVORITES: '/api/catalogue/user/favorites',
     },
     
@@ -57,13 +61,30 @@ const API_CONFIG = {
   
   // Helper function to build URL with query parameters
   buildUrlWithParams: (endpoint, params) => {
-    const url = new URL(`${API_CONFIG.BASE_URL}${endpoint}`);
-    Object.keys(params).forEach(key => {
-      if (params[key] !== undefined && params[key] !== null) {
-        url.searchParams.append(key, params[key]);
-      }
-    });
-    return url.toString();
+    // Handle proxy mode (empty BASE_URL) vs direct mode (full BASE_URL)
+    const baseUrl = API_CONFIG.BASE_URL;
+    let fullUrl;
+    
+    if (!baseUrl || baseUrl === '') {
+      // Proxy mode: use relative URL
+      fullUrl = endpoint;
+    } else {
+      // Direct mode: use absolute URL
+      fullUrl = `${baseUrl}${endpoint}`;
+    }
+    
+    // Add query parameters if any
+    if (params && Object.keys(params).length > 0) {
+      const queryParams = new URLSearchParams();
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined && params[key] !== null) {
+          queryParams.append(key, params[key]);
+        }
+      });
+      fullUrl += `?${queryParams.toString()}`;
+    }
+    
+    return fullUrl;
   },
   
   // Helper function to build image URL
@@ -71,6 +92,27 @@ const API_CONFIG = {
     if (!imagePath) return null;
     if (imagePath.startsWith('http')) return imagePath;
     return `${API_CONFIG.BASE_URL}${imagePath}`;
+  },
+  
+  // Helper function to build maid detail URL with ID
+  buildMaidDetailUrl: (maidId) => {
+    return `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CATALOGUE.MAID_DETAIL}/${maidId}`;
+  },
+  
+  // Helper function to build search URL with query parameters
+  buildSearchUrl: (query, filters = {}) => {
+    const params = { q: query, ...filters };
+    return API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.CATALOGUE.SEARCH_MAIDS, params);
+  },
+  
+  // Helper function to build filter URL
+  buildFilterUrl: () => {
+    return `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CATALOGUE.FILTER_MAIDS}`;
+  },
+  
+  // Helper function to build batch maids URL
+  buildBatchMaidsUrl: () => {
+    return `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CATALOGUE.BATCH_MAIDS}`;
   },
   
   // Get current base URL

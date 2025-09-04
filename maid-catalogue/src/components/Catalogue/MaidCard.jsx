@@ -14,8 +14,7 @@ import {
   Avatar,
   useTheme,
   useMediaQuery,
-  Skeleton,
-  Checkbox
+  Skeleton
 } from '@mui/material';
 import maidPic from '../../assets/maidPic.jpg';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
@@ -283,7 +282,7 @@ export default function MaidCard({ maid, isAuthenticated, isSelected = false, on
   const getResponsiveStyles = () => {
     if (isMobile) {
       return {
-        cardHeight: 420,
+        cardHeight: 450,
         imageHeight: 180,
         maxImageHeight: 180,
         chipFontSize: '0.65rem',
@@ -299,7 +298,7 @@ export default function MaidCard({ maid, isAuthenticated, isSelected = false, on
       };
     } else if (isTablet) {
       return {
-        cardHeight: 480,
+        cardHeight: 520,
         imageHeight: 220,
         maxImageHeight: 220,
         chipFontSize: '0.7rem',
@@ -315,7 +314,7 @@ export default function MaidCard({ maid, isAuthenticated, isSelected = false, on
       };
     } else {
       return {
-        cardHeight: 520,
+        cardHeight: 560,
         imageHeight: 260,
         maxImageHeight: 260,
         chipFontSize: '0.75rem',
@@ -635,103 +634,49 @@ export default function MaidCard({ maid, isAuthenticated, isSelected = false, on
             </Typography>
           </Box>
           
-          {/* Age */}
-          {maidAge && (
-            <Typography variant="body2" sx={{ 
-              fontFamily: professionalFonts.secondary,
-              color: brandColors.primary, 
-              fontSize: styles.bodyFontSize,
-              fontWeight: 600,
-              letterSpacing: '0.01em',
-              mb: 0.75
-            }}>
-              {maidAge} years old
-            </Typography>
-          )}
+          {/* Age Row */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 1,
+            mb: 0.75
+          }}>
+            {/* Age */}
+            {maidAge && (
+              <Typography variant="body2" sx={{ 
+                fontFamily: professionalFonts.secondary,
+                color: brandColors.primary, 
+                fontSize: styles.bodyFontSize,
+                fontWeight: 600,
+                letterSpacing: '0.01em'
+              }}>
+                {maidAge} years old
+              </Typography>
+            )}
+          </Box>
           
-          {/* Monthly Salary */}
-          {maid.salary && (
-            <Typography variant="body2" sx={{ 
-              fontFamily: professionalFonts.secondary,
-              color: brandColors.secondary, 
-              fontSize: styles.bodyFontSize,
-              fontWeight: 700,
-              letterSpacing: '0.01em'
-            }}>
-              ${maid.salary}/month
-            </Typography>
-          )}
-          
-          {/* Skills Icons */}
+          {/* Skills Row */}
           {maid.skills && maid.skills.length > 0 && (
             <Box sx={{ 
               display: 'flex', 
               gap: 0.5, 
-              mt: 1.25,
-              mb: 0.5,
               flexWrap: 'wrap',
-              maxWidth: '100%'
+              mb: 0.75
             }}>
-              {maid.skills.slice(0, 5).map((skill, idx) => {
-                const IconComponent = skillIcons[skill];
-                if (!IconComponent) return null;
-                
-                return (
-                  <Tooltip 
-                    key={idx} 
-                    title={skill} 
-                    arrow
-                    placement="top"
-                    enterTouchDelay={0}
-                    leaveTouchDelay={1500}
-                    disableFocusListener={isMobile}
-                    disableHoverListener={isMobile}
-                    PopperProps={{
-                      sx: {
-                        '& .MuiTooltip-tooltip': {
-                          backgroundColor: brandColors.secondary,
-                          color: '#FFFFFF',
-                          fontSize: isMobile ? '0.7rem' : '0.75rem',
-                          padding: '6px 8px',
-                          borderRadius: '6px',
-                        },
-                        '& .MuiTooltip-arrow': {
-                          color: brandColors.secondary,
-                        },
-                      },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: isMobile ? 22 : isTablet ? 24 : 26,
-                        height: isMobile ? 22 : isTablet ? 24 : 26,
-                        borderRadius: '6px',
-                        backgroundColor: `${brandColors.primary}15`,
-                        color: brandColors.primary,
-                        border: `1px solid ${brandColors.primary}30`,
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                          backgroundColor: `${brandColors.primary}25`,
-                          transform: isMobile ? 'none' : 'scale(1.1)',
-                          borderColor: `${brandColors.primary}50`,
-                        },
-                      }}
-                    >
-                      <IconComponent sx={{ 
-                        fontSize: isMobile ? 14 : isTablet ? 15 : 16 
-                      }} />
-                    </Box>
-                  </Tooltip>
-                );
-              })}
-              {maid.skills.length > 5 && (
+            {maid.skills.slice(0, 5).map((skill, idx) => {
+              const IconComponent = skillIcons[skill];
+              if (!IconComponent) return null;
+              
+              return (
                 <Tooltip 
-                  title={`+${maid.skills.length - 5} more skills`}
+                  key={idx} 
+                  title={skill} 
                   arrow
                   placement="top"
+                  enterTouchDelay={0}
+                  leaveTouchDelay={1500}
+                  disableFocusListener={isMobile}
+                  disableHoverListener={isMobile}
                   PopperProps={{
                     sx: {
                       '& .MuiTooltip-tooltip': {
@@ -755,97 +700,174 @@ export default function MaidCard({ maid, isAuthenticated, isSelected = false, on
                       width: isMobile ? 22 : isTablet ? 24 : 26,
                       height: isMobile ? 22 : isTablet ? 24 : 26,
                       borderRadius: '6px',
-                      backgroundColor: `${brandColors.textSecondary}15`,
-                      color: brandColors.textSecondary,
-                      border: `1px solid ${brandColors.textSecondary}30`,
-                      fontSize: isMobile ? '0.7rem' : '0.75rem',
-                      fontWeight: 600,
+                      backgroundColor: `${brandColors.primary}15`,
+                      color: brandColors.primary,
+                      border: `1px solid ${brandColors.primary}30`,
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        backgroundColor: `${brandColors.primary}25`,
+                        transform: isMobile ? 'none' : 'scale(1.1)',
+                        borderColor: `${brandColors.primary}50`,
+                      },
                     }}
                   >
-                    +{maid.skills.length - 5}
+                    <IconComponent sx={{ 
+                      fontSize: isMobile ? 14 : isTablet ? 15 : 16 
+                    }} />
                   </Box>
                 </Tooltip>
-              )}
+              );
+            })}
+            {maid.skills.length > 5 && (
+              <Tooltip 
+                title={`+${maid.skills.length - 5} more skills`}
+                arrow
+                placement="top"
+                PopperProps={{
+                  sx: {
+                    '& .MuiTooltip-tooltip': {
+                      backgroundColor: brandColors.secondary,
+                      color: '#FFFFFF',
+                      fontSize: isMobile ? '0.7rem' : '0.75rem',
+                      padding: '6px 8px',
+                      borderRadius: '6px',
+                    },
+                    '& .MuiTooltip-arrow': {
+                      color: brandColors.secondary,
+                    },
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: isMobile ? 22 : isTablet ? 24 : 26,
+                    height: isMobile ? 22 : isTablet ? 24 : 26,
+                    borderRadius: '6px',
+                    backgroundColor: `${brandColors.textSecondary}15`,
+                    color: brandColors.textSecondary,
+                    border: `1px solid ${brandColors.textSecondary}30`,
+                    fontSize: isMobile ? '0.7rem' : '0.75rem',
+                    fontWeight: 600,
+                  }}
+                >
+                  +{maid.skills.length - 5}
+                </Box>
+              </Tooltip>
+            )}
             </Box>
+          )}
+          
+          {/* Monthly Salary */}
+          {maid.salary && (
+            <Typography variant="body2" sx={{ 
+              fontFamily: professionalFonts.secondary,
+              color: brandColors.secondary, 
+              fontSize: styles.bodyFontSize,
+              fontWeight: 700,
+              letterSpacing: '0.01em'
+            }}>
+              <Box component="span" sx={{ 
+                color: '#25D366',
+                fontSize: isMobile ? '1rem' : isTablet ? '1.1rem' : '1.2rem',
+                fontWeight: 800
+              }}>
+                ${maid.salary}
+              </Box>
+              /month
+            </Typography>
           )}
         </Box>
         
-        {/* Bottom Section - Checkbox and Action Button */}
+        {/* Bottom Section - Toggle Button and Action Button */}
         <Box sx={{ mt: 'auto', pt: 2 }}>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: isMobile ? 1 : 1.5 
-          }}>
-            {/* Contact Checkbox */}
-            <Box
-              sx={{
-                backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                backdropFilter: 'blur(15px)',
-                WebkitBackdropFilter: 'blur(15px)', // Safari support
-                borderRadius: '8px',
-                border: `1px solid rgba(255, 255, 255, 0.3)`,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.3)',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.4)',
-                  transform: isMobile ? 'none' : 'scale(1.05)',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.4)',
-                },
-                flexShrink: 0,
-              }}
-            >
-              <Checkbox
-                checked={isSelected}
-                onChange={(e) => {
-                  e.stopPropagation();
-                  toggleSelection();
-                }}
-                sx={{
-                  padding: isMobile ? '6px' : '8px',
-                  color: '#666666',
-                  '&.Mui-checked': {
-                    color: '#25D366',
-                  },
-                  '& .MuiSvgIcon-root': {
-                    fontSize: isMobile ? 20 : 22,
-                  },
-                }}
-              />
-            </Box>
-            
-            {/* View Details Button */}
+          {/* Contact Toggle Button */}
+          <Box sx={{ mb: 1.5 }}>
             <Button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleView();
+                toggleSelection();
               }}
-              variant="contained"
+              variant="outlined"
               sx={{
-                flex: 1,
+                width: '100%',
                 fontFamily: professionalFonts.accent,
-                background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryDark} 100%)`,
-                color: '#FFFFFF',
-                borderRadius: isMobile ? '10px' : '12px',
+                background: isSelected 
+                  ? `linear-gradient(135deg, #25D366 0%, #128C7E 100%)`
+                  : 'rgba(255, 255, 255, 0.25)',
+                backdropFilter: 'blur(15px)',
+                WebkitBackdropFilter: 'blur(15px)',
+                color: isSelected ? '#FFFFFF' : brandColors.textSecondary,
+                border: isSelected 
+                  ? '2px solid #25D366'
+                  : `2px solid rgba(255, 255, 255, 0.3)`,
+                borderRadius: isMobile ? '8px' : '10px',
                 fontSize: isMobile ? '0.75rem' : '0.8rem',
                 fontWeight: 600,
                 textTransform: 'none',
-                padding: styles.buttonPadding,
-                minHeight: `${styles.buttonHeight}px`,
+                padding: isMobile ? '8px 12px' : '10px 16px',
+                minHeight: isMobile ? '36px' : '40px',
                 letterSpacing: '0.02em',
-                boxShadow: `0 4px 16px rgba(255, 145, 77, 0.25)`,
-                '&:hover': {
-                  background: `linear-gradient(135deg, ${brandColors.primaryDark} 0%, #d35400 100%)`,
-                  boxShadow: `0 6px 20px rgba(255, 145, 77, 0.35)`,
-                  transform: isMobile ? 'none' : 'translateY(-1px)',
-                },
+                boxShadow: isSelected 
+                  ? '0 4px 16px rgba(37, 211, 102, 0.25)'
+                  : '0 4px 12px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.3)',
                 transition: 'all 0.3s ease',
+                '&:hover': {
+                  background: isSelected 
+                    ? `linear-gradient(135deg, #128C7E 0%, #075E54 100%)`
+                    : 'rgba(255, 255, 255, 0.4)',
+                  transform: isMobile ? 'none' : 'translateY(-1px)',
+                  boxShadow: isSelected
+                    ? '0 6px 20px rgba(37, 211, 102, 0.35)'
+                    : '0 4px 16px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.4)',
+                  border: isSelected 
+                    ? '2px solid #25D366'
+                    : `2px solid rgba(255, 255, 255, 0.5)`,
+                },
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                whiteSpace: 'nowrap',
               }}
             >
-              View Details
+{isSelected ? 'Added to Contact' : 'Add to Contact'}
             </Button>
           </Box>
+          
+          {/* View Details Button */}
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleView();
+            }}
+            variant="contained"
+            sx={{
+              width: '100%',
+              fontFamily: professionalFonts.accent,
+              background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryDark} 100%)`,
+              color: '#FFFFFF',
+              borderRadius: isMobile ? '10px' : '12px',
+              fontSize: isMobile ? '0.75rem' : '0.8rem',
+              fontWeight: 600,
+              textTransform: 'none',
+              padding: styles.buttonPadding,
+              minHeight: `${styles.buttonHeight}px`,
+              letterSpacing: '0.02em',
+              boxShadow: `0 4px 16px rgba(255, 145, 77, 0.25)`,
+              '&:hover': {
+                background: `linear-gradient(135deg, ${brandColors.primaryDark} 0%, #d35400 100%)`,
+                boxShadow: `0 6px 20px rgba(255, 145, 77, 0.35)`,
+                transform: isMobile ? 'none' : 'translateY(-1px)',
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            View Details
+          </Button>
         </Box>
       </CardContent>
       

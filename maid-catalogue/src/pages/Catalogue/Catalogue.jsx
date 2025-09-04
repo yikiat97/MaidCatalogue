@@ -1,18 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
-import { Button } from '@mui/material';
+import { Button, Skeleton, Fade, Alert } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import MaidCard from '../../components/Catalogue/MaidCard';
 import FilterSidebar from '../../components/Catalogue/FilterSidebar';
 import Header from '../../components/common/Header';
 import LoginPromptModal from '../../components/Catalogue/LoginPromptModal';
 import { useMaidContext } from '../../context/maidList';
 import API_CONFIG from '../../config/api.js';
-import { createMockApiResponse } from '../../data/mockMaids.js';
 
 // Brand colors removed since Reset Welcome button is no longer used
 
 export default function Catalogue() {
   const [maids, setMaids] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [salaryRange, setSalaryRange] = useState([400, 1000]);
   const [ageRange, setAgeRange] = useState([18, 60]);
   const [selectedCountries, setSelectedCountries] = useState([]);
@@ -28,6 +30,47 @@ export default function Catalogue() {
   // Ref to store timeout for welcome modal delay
   const welcomeModalTimeoutRef = useRef(null);
   
+
+  // Function to get all maids with pagination and caching
+  const fetchMaids = async (page = 1, append = false) => {
+    if (!append) {
+      setIsLoading(true);
+      setError(null);
+    }
+    
+    try {
+      const res = await fetch(API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.CATALOGUE.MAIDS, {
+        page: page.toString(),
+        limit: '20'
+      }), {
+        credentials: 'include',
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Failed to load helpers (${res.status}: ${res.statusText})`);
+      }
+      
+      const data = await res.json();
+      console.log('Fetched maids:', data);
+      
+      if (append) {
+        setMaids(prev => [...prev, ...data.maids]);
+        setMaidList(prev => [...prev, ...data.maids]);
+      } else {
+        setMaids(data.maids || []);
+        setMaidList(data.maids || []);
+      }
+    } catch (err) {
+      console.error('Error fetching maids from API:', err);
+      setError(err.message);
+      if (!append) {
+        setMaids([]);
+        setMaidList([]);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     // Function to check authentication
@@ -76,48 +119,6 @@ export default function Catalogue() {
       }
     };
 
-    // Function to get all maids with pagination and caching
-    const fetchMaids = async (page = 1, append = false) => {
-      try {
-
-        const res = await fetch(API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.CATALOGUE.MAIDS, {
-          page: page.toString(),
-          limit: '20'
-        }), {
-          credentials: 'include',
-        });
-        
-        if (!res.ok) {
-          throw new Error('Failed to fetch maids');
-        }
-        
-        const data = await res.json();
-        console.log('Fetched maids:', data);
-        
-        if (append) {
-          setMaids(prev => [...prev, ...data.maids]);
-          setMaidList(prev => [...prev, ...data.maids]);
-        } else {
-          setMaids(data.maids);
-          setMaidList(data.maids);
-        }
-      } catch (err) {
-        console.error('Error fetching maids from API:', err);
-        console.warn('🔄 Using fallback mock data for maid catalogue');
-        
-        // Use mock data as fallback when API fails
-        const mockData = createMockApiResponse();
-        
-        if (append) {
-          setMaids(prev => [...prev, ...mockData.maids]);
-          setMaidList(prev => [...prev, ...mockData.maids]);
-        } else {
-          setMaids(mockData.maids);
-          setMaidList(mockData.maids);
-        }
-      }
-    };
-
     // Call both functions independently
     checkAuth();
     fetchMaids();
@@ -145,6 +146,11 @@ export default function Catalogue() {
     setSelectedMaids([]); // Clear selections on logout
     // Redirect to login or home page
     window.location.href = '/login';
+  };
+
+  // Handle retry API call
+  const handleRetry = () => {
+    fetchMaids();
   };
 
   // Function to calculate age from DOB
@@ -212,7 +218,43 @@ export default function Catalogue() {
     window.open(whatsappUrl, '_blank');
   };
 
-  // Note: resetWelcomeModal function removed as it's no longer needed
+  // Loading skeleton component
+  const MaidCardSkeleton = () => (
+    <div className="w-full h-full p-1.5 sm:p-2 lg:p-3">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        {/* Image skeleton */}
+        <Skeleton 
+          variant="rectangular" 
+          width="100%" 
+          height={200}
+          sx={{ bgcolor: 'grey.100' }}
+        />
+        
+        {/* Content skeleton */}
+        <div className="p-3 space-y-2">
+          {/* Name */}
+          <Skeleton variant="text" width="80%" height={24} sx={{ bgcolor: 'grey.100' }} />
+          
+          {/* Country & Age */}
+          <Skeleton variant="text" width="60%" height={16} sx={{ bgcolor: 'grey.100' }} />
+          
+          {/* Salary */}
+          <Skeleton variant="text" width="50%" height={20} sx={{ bgcolor: 'grey.100' }} />
+          
+          {/* Skills */}
+          <div className="space-y-1">
+            <Skeleton variant="text" width="90%" height={14} sx={{ bgcolor: 'grey.100' }} />
+            <Skeleton variant="text" width="70%" height={14} sx={{ bgcolor: 'grey.100' }} />
+          </div>
+          
+          {/* Button */}
+          <div className="pt-2">
+            <Skeleton variant="rounded" width="100%" height={32} sx={{ bgcolor: 'grey.100' }} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
@@ -293,28 +335,98 @@ export default function Catalogue() {
 
             {/* Maid Cards Grid - Scrollable Container */}
             <div className="flex-1 overflow-y-auto lg:px-0 pb-4 pt-4 relative z-10">
-              {filteredMaids.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7">
-                  {filteredMaids.map((maid) => (
-                    <div key={maid.id} className="w-full h-full p-1.5 sm:p-2 lg:p-3">
-                      <MaidCard 
-                        maid={maid} 
-                        isAuthenticated={isAuthenticated}
-                        isSelected={selectedMaids.includes(maid.id)}
-                        onSelectionChange={handleMaidSelection}
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
-                    No maids found
-                  </h3>
-                  <p className="text-sm sm:text-base text-gray-600">
-                    Try adjusting your filters to see more results
-                  </p>
-                </div>
+              {/* Loading State */}
+              {isLoading && (
+                <Fade in={isLoading} timeout={300}>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7">
+                    {Array.from({ length: 20 }).map((_, index) => (
+                      <MaidCardSkeleton key={index} />
+                    ))}
+                  </div>
+                </Fade>
+              )}
+
+              {/* Error State */}
+              {!isLoading && error && (
+                <Fade in={!isLoading && !!error} timeout={300}>
+                  <div className="text-center py-12">
+                    <Alert 
+                      severity="error" 
+                      variant="outlined"
+                      sx={{ 
+                        maxWidth: 500, 
+                        margin: '0 auto',
+                        '& .MuiAlert-message': {
+                          textAlign: 'center',
+                          width: '100%'
+                        }
+                      }}
+                      action={
+                        <Button 
+                          color="inherit" 
+                          size="small" 
+                          onClick={handleRetry}
+                          startIcon={<RefreshIcon />}
+                          disabled={isLoading}
+                        >
+                          Retry
+                        </Button>
+                      }
+                    >
+                      <div>
+                        <strong>Failed to load helpers</strong>
+                        <br />
+                        <span className="text-sm opacity-80">{error}</span>
+                      </div>
+                    </Alert>
+                  </div>
+                </Fade>
+              )}
+
+              {/* Data State - Show maids */}
+              {!isLoading && !error && filteredMaids.length > 0 && (
+                <Fade in={!isLoading && !error} timeout={300}>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7">
+                    {filteredMaids.map((maid) => (
+                      <div key={maid.id} className="w-full h-full p-1.5 sm:p-2 lg:p-3">
+                        <MaidCard 
+                          maid={maid} 
+                          isAuthenticated={isAuthenticated}
+                          isSelected={selectedMaids.includes(maid.id)}
+                          onSelectionChange={handleMaidSelection}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </Fade>
+              )}
+
+              {/* Empty State - No maids found */}
+              {!isLoading && !error && filteredMaids.length === 0 && maids.length > 0 && (
+                <Fade in={!isLoading && !error} timeout={300}>
+                  <div className="text-center py-12">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
+                      No helpers match your filters
+                    </h3>
+                    <p className="text-sm sm:text-base text-gray-600">
+                      Try adjusting your filters to see more results
+                    </p>
+                  </div>
+                </Fade>
+              )}
+
+              {/* No Data State - API returned no maids */}
+              {!isLoading && !error && maids.length === 0 && (
+                <Fade in={!isLoading && !error} timeout={300}>
+                  <div className="text-center py-12">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
+                      No helpers available
+                    </h3>
+                    <p className="text-sm sm:text-base text-gray-600">
+                      Check back later for new listings
+                    </p>
+                  </div>
+                </Fade>
               )}
             </div>
           </div>
