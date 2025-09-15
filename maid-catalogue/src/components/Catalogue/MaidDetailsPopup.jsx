@@ -1,94 +1,112 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Dialog,
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogFooter, 
   DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  Stack,
-  Chip,
-  Grid,
-  Divider,
-  IconButton,
-  Rating,
-  Tooltip,
-  useTheme,
-  useMediaQuery,
-  Skeleton
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import PersonIcon from '@mui/icons-material/Person';
-import HeightIcon from '@mui/icons-material/Height';
-import ScaleIcon from '@mui/icons-material/Scale';
-import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom';
-import ChurchIcon from '@mui/icons-material/Church';
-import SchoolIcon from '@mui/icons-material/School';
-import StarIcon from '@mui/icons-material/Star';
-import LockIcon from '@mui/icons-material/Lock';
+  DialogClose 
+} from '../ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
+import { cn } from '../../lib/utils';
+import { X, MessageCircle, User, Ruler, Weight, Users, Church, GraduationCap, Building, Lock, Star } from 'lucide-react';
 import maidPic from '../../assets/maidPic.jpg';
 import API_CONFIG from '../../config/api.js';
 
-// Skill icons
-import KitchenIcon from '@mui/icons-material/Kitchen';
-import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
-import ChildCareIcon from '@mui/icons-material/ChildCare';
-import CribIcon from '@mui/icons-material/Crib';
-import ElderlyIcon from '@mui/icons-material/Elderly';
-import PetsIcon from '@mui/icons-material/Pets';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-
-// Brand colors
-const brandColors = {
-  primary: '#ff914d',
-  secondary: '#0c191b',
-  primaryLight: '#ffa366',
-  primaryDark: '#e67e22',
-  secondaryLight: '#1a2a2d',
-  secondaryDark: '#061012',
-  background: '#fafafa',
-  surface: '#ffffff',
-  text: '#0c191b',
-  textSecondary: '#5a6c6f',
-  border: '#e0e0e0',
-  success: '#27ae60',
-  warning: '#f39c12',
-  error: '#e74c3c'
+// Skill icons mapping with emojis
+const SKILL_ICONS = {
+  Cooking: '👨‍🍳',
+  Housekeeping: '🧹', 
+  Childcare: '👶',
+  Babysitting: '🍼',
+  'Elderly Care': '👴',
+  'Dog(s)': '🐕',
+  'Cat(s)': '🐱',
+  Caregiving: '❤️',
 };
 
-// Professional font imports
-const professionalFonts = {
-  primary: "'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif",
-  secondary: "'Source Sans Pro', 'Roboto', 'Arial', sans-serif",
-  accent: "'Poppins', 'Inter', 'system-ui', sans-serif",
-  mono: "'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace"
-};
+// Utility component for emoji icons
+const EmojiIcon = ({ children, className = "", size = "1em" }) => (
+  <span 
+    className={cn("inline-block select-none", className)}
+    style={{ fontSize: size }}
+  >
+    {children}
+  </span>
+);
+
+// Brand colors using Tailwind-compatible values (kept for potential future use)
+// const BRAND_COLORS = {
+//   primary: '#ff914d',
+//   secondary: '#0c191b', 
+//   success: '#27ae60',
+//   warning: '#f39c12'
+// };
 
 export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated }) {
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'lg'));
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [detailedMaid, setDetailedMaid] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // Reset image loading state when maid changes
+  // Fetch detailed maid data when popup opens
   useEffect(() => {
-    if (open && maid) {
+    if (open && maid?.id) {
       setImageLoaded(false);
       setImageError(false);
+      setLoading(true);
+      
+      const fetchDetailedMaid = async () => {
+        try {
+          let response = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.CATALOGUE.MAIDS}/${maid.id}`), {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          });
+
+          if (response.status === 401) {
+            // Try without credentials for unauthenticated users
+            response = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.CATALOGUE.MAIDS}/${maid.id}`), {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+          }
+
+          if (response.ok) {
+            const data = await response.json();
+            setDetailedMaid(data);
+          } else {
+            console.error('Failed to fetch detailed maid:', response.status);
+            // Fallback to basic maid data
+            setDetailedMaid(maid);
+          }
+        } catch (error) {
+          console.error('Error fetching detailed maid:', error);
+          // Fallback to basic maid data
+          setDetailedMaid(maid);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchDetailedMaid();
     }
   }, [open, maid]);
 
   // Secure blur protection for unauthenticated users
   useEffect(() => {
-    if (!open || !maid || isAuthenticated === true) return;
+    if (!open || !detailedMaid || isAuthenticated === true) return;
 
     const protectBlur = () => {
-      const popupImages = document.querySelectorAll(`[data-popup-id="${maid.id}"] img:not([alt*="flag"])`);
+      const popupImages = document.querySelectorAll(`[data-popup-id="${detailedMaid.id}"] img:not([alt*="flag"])`);
       popupImages.forEach(img => {
         if (!img.style.filter || !img.style.filter.includes('blur')) {
           img.style.filter = 'blur(12px)';
@@ -111,9 +129,27 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
     return () => {
       clearInterval(interval);
     };
-  }, [open, isAuthenticated, maid]);
+  }, [open, isAuthenticated, detailedMaid]);
 
   if (!maid) return null;
+  
+  // Use detailed maid data if available, otherwise fallback to basic maid data
+  const displayMaid = detailedMaid || maid;
+  
+  if (loading) {
+    return (
+      <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+        <DialogContent className="max-w-md">
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mb-4"></div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Loading detailed information...
+            </h2>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   // Helper functions
   const calculateAge = (dob) => {
@@ -153,22 +189,31 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
     return originalUrl.startsWith('http') ? originalUrl : API_CONFIG.buildImageUrl(originalUrl);
   };
 
-  const displayLabel = maid.type?.includes("Transfer") 
+  // Format employment duration
+  const formatEmploymentDuration = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffMonths = Math.floor(diffDays / 30);
+    const diffYears = Math.floor(diffMonths / 12);
+    
+    if (diffYears > 0) {
+      const remainingMonths = diffMonths % 12;
+      return `${diffYears} year${diffYears > 1 ? 's' : ''}${remainingMonths > 0 ? ` ${remainingMonths} month${remainingMonths > 1 ? 's' : ''}` : ''}`;
+    } else if (diffMonths > 0) {
+      return `${diffMonths} month${diffMonths > 1 ? 's' : ''}`;
+    } else {
+      return `${diffDays} day${diffDays > 1 ? 's' : ''}`;
+    }
+  };
+
+  const displayLabel = displayMaid.type?.includes("Transfer") 
     ? "Transfer"
-    : maid.type?.includes("New/Fresh")
+    : displayMaid.type?.includes("New/Fresh")
     ? "New/Fresh"
     : "Experienced";
 
-  const skillIcons = {
-    Cooking: KitchenIcon,
-    Housekeeping: CleaningServicesIcon,
-    Childcare: ChildCareIcon,
-    Babysitting: CribIcon,
-    'Elderly Care': ElderlyIcon,
-    'Dog(s)': PetsIcon,
-    'Cat(s)': PetsIcon,
-    Caregiving: FavoriteIcon,
-  };
 
   const getLanguages = (maid) => {
     const languages = [];
@@ -188,13 +233,15 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
     return languages;
   };
 
-  const maidAge = calculateAge(maid.DOB);
-  const languages = getLanguages(maid);
+  const maidAge = calculateAge(displayMaid.DOB);
+  const languages = getLanguages(displayMaid);
 
-  const handleClose = () => {
-    onClose();
+  // Generate profile link for WhatsApp sharing
+  const generateProfileLink = (maidId) => {
+    // Use appropriate base URL based on environment
+    const baseUrl = import.meta.env.DEV ? 'http://localhost:5173' : 'https://yikiat.com';
+    return `${baseUrl}/maid/${maidId}`;
   };
-
 
   const handleWhatsAppContact = () => {
     if (!isAuthenticated) {
@@ -202,155 +249,69 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
       navigate('/login');
       return;
     }
-    
-    const message = `Hi, I'm interested in maid ${maid.name} (ID: ${maid.id}).`;
+
+    // Generate WhatsApp message with profile link
+    const profileLink = generateProfileLink(displayMaid.id);
+    const message = `Hi! I'm interested in the following domestic helper:\n\n${displayMaid.name} (ID: ${displayMaid.id})\nView Profile: ${profileLink}\n\nCould you provide more information about their availability and arrange an interview? Thank you!`;
+
     window.open(`https://wa.me/88270086?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="md"
-      fullWidth
-      fullScreen={isMobile}
-      data-popup-id={maid.id}
-      PaperProps={{
-        sx: {
-          borderRadius: isMobile ? 0 : isTablet ? 2 : 3,
-          background: `linear-gradient(135deg, ${brandColors.surface} 0%, ${brandColors.background} 100%)`,
-          border: `2px solid ${brandColors.border}`,
-          boxShadow: isMobile ? 'none' : isTablet ? '0 12px 40px rgba(12, 25, 27, 0.2)' : '0 20px 60px rgba(12, 25, 27, 0.3)',
-          maxHeight: isMobile ? '100vh' : isTablet ? '95vh' : '90vh',
-          margin: isMobile ? 0 : isTablet ? 1 : 2,
-          width: isMobile ? '100%' : isTablet ? 'calc(100% - 16px)' : 'auto'
-        }
-      }}
-    >
-      {/* Header */}
-      <DialogTitle sx={{ 
-        p: isMobile ? 2 : isTablet ? 2.5 : 3, 
-        pb: 1,
-        position: 'relative',
-        borderBottom: `1px solid ${brandColors.border}`
-      }}>
-        <IconButton
-          onClick={handleClose}
-          sx={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-            color: brandColors.textSecondary,
-            '&:hover': {
-              backgroundColor: brandColors.border,
-              color: brandColors.text
-            }
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-        
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center',
-          gap: 2,
-          pr: 5
-        }}>
-          <img 
-            src={getCountryFlag(maid.country)} 
-            alt={`${maid.country} flag`}
-            style={{ 
-              width: isMobile ? 20 : isTablet ? 22 : 24, 
-              height: isMobile ? 15 : isTablet ? 16 : 18, 
-              borderRadius: '3px',
-              border: `1px solid ${brandColors.border}`
-            }}
-          />
-          <Box>
-            <Typography 
-              variant={isMobile ? "h5" : isTablet ? "h4" : "h4"} 
-              sx={{ 
-                fontFamily: professionalFonts.primary,
-                fontWeight: 700,
-                color: brandColors.text,
-                lineHeight: 1.2,
-                fontSize: isMobile ? '1.25rem' : isTablet ? '1.5rem' : '1.75rem'
-              }}
-            >
-              {maid.name}
-            </Typography>
-            <Typography 
-              variant="subtitle1" 
-              sx={{ 
-                color: brandColors.textSecondary,
-                fontWeight: 500
-              }}
-            >
-              From {maid.country} {maidAge && `• ${maidAge} years old`}
-            </Typography>
-          </Box>
-        </Box>
-      </DialogTitle>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent 
+        className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 bg-white"
+        data-popup-id={displayMaid.id}
+      >
+        {/* Header */}
+        <DialogHeader className="relative border-b border-gray-200 p-6 pb-4">
+          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </DialogClose>
+          
+          <div className="flex items-center gap-3 pr-12">
+            <img 
+              src={getCountryFlag(displayMaid.country)} 
+              alt={`${displayMaid.country} flag`}
+              className="w-6 h-4 rounded-sm border border-gray-200"
+            />
+            <div>
+              <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
+                {displayMaid.name}
+              </DialogTitle>
+              <p className="text-sm text-gray-600 font-medium mt-1">
+                From {displayMaid.country} {maidAge && `• ${maidAge} years old`}
+              </p>
+            </div>
+          </div>
+        </DialogHeader>
 
-      {/* Content */}
-      <DialogContent sx={{ 
-        p: isMobile ? 2 : isTablet ? 2.5 : 3,
-        overflow: 'auto'
-      }}>
-        {/* Profile Image Section */}
-        <Box sx={{ 
-          position: 'relative', 
-          mb: 3,
-          display: 'flex',
-          justifyContent: 'center'
-        }}>
+        {/* Content */}
+        <div className="p-6 overflow-y-auto space-y-6">
+          {/* Profile Image Section */}
+          <div className="relative flex justify-center">
             {!imageLoaded && !imageError && (
-              <Skeleton 
-                variant="rectangular" 
-                width={isMobile ? "100%" : isTablet ? 350 : 400} 
-                height={isMobile ? 300 : isTablet ? 350 : 420}
-                sx={{ 
-                  bgcolor: 'grey.200',
-                  borderRadius: 2
-                }}
-              />
+              <div className="w-full max-w-sm h-80 bg-gray-200 rounded-xl animate-pulse" />
             )}
               
             {imageError && (
-              <Box
-                sx={{
-                  width: isMobile ? '100%' : isTablet ? 350 : 400,
-                  height: isMobile ? 300 : isTablet ? 350 : 420,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: 'grey.100',
-                  color: 'grey.500',
-                  borderRadius: 2
-                }}
-              >
-                <PersonIcon sx={{ fontSize: 60, color: 'grey.400', mb: 1 }} />
-                <Typography variant="body2">No image available</Typography>
-              </Box>
+              <div className="w-full max-w-sm h-80 flex flex-col items-center justify-center bg-gray-100 text-gray-500 rounded-xl">
+                <User className="w-16 h-16 text-gray-400 mb-2" />
+                <span className="text-sm">No image available</span>
+              </div>
             )}
               
             <img
-              src={getOptimizedImageUrl(maid.imageUrl)}
-              alt={maid.name}
+              src={getOptimizedImageUrl(displayMaid.imageUrl)}
+              alt={displayMaid.name}
               loading="lazy"
-              style={{ 
-                width: isMobile ? '100%' : isTablet ? 350 : 400, 
-                height: isMobile ? 300 : isTablet ? 350 : 420,
-                borderRadius: 12,
-                objectFit: 'cover',
-                filter: isAuthenticated ? 'none' : 'blur(12px)',
-                transform: isAuthenticated ? 'none' : 'scale(1.1)',
-                transition: 'all 0.3s ease',
-                opacity: imageLoaded ? 1 : 0,
-                position: imageError ? 'absolute' : 'static',
-                top: imageError ? '-9999px' : 'auto'
-              }}
+              className={cn(
+                "w-full max-w-sm h-80 rounded-xl object-cover transition-all duration-300",
+                !isAuthenticated && "blur-lg scale-110",
+                !imageLoaded && "opacity-0",
+                imageError && "absolute -top-[9999px]"
+              )}
               onLoad={() => setImageLoaded(true)}
               onError={() => {
                 setImageError(true);
@@ -359,521 +320,294 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
             />
               
             {/* Status Badge */}
-            <Chip
-              label={displayLabel}
-              sx={{
-                position: 'absolute',
-                top: 12,
-                left: isMobile ? 12 : isTablet ? 'calc(50% - 175px + 12px)' : 'calc(50% - 200px + 12px)',
-                background: `linear-gradient(135deg, ${brandColors.success} 0%, ${brandColors.success}80 100%)`,
-                color: '#FFFFFF',
-                fontWeight: 700,
-                fontSize: '0.75rem',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                border: '1px solid rgba(255,255,255,0.3)'
-              }}
-            />
+            <Badge 
+              className="absolute top-3 left-3 bg-green-500 text-white font-bold text-xs shadow-lg"
+            >
+              {displayLabel}
+            </Badge>
 
             {/* Lock Icon Overlay for Unauthenticated Users */}
             {!isAuthenticated && (
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 1,
-                  pointerEvents: 'none',
-                  zIndex: 2
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: '50%',
-                    background: 'rgba(12, 25, 27, 0.9)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backdropFilter: 'blur(10px)',
-                    border: '2px solid rgba(255, 255, 255, 0.2)'
-                  }}
-                >
-                  <LockIcon sx={{ fontSize: 25, color: 'white' }} />
-                </Box>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: 'white',
-                    fontWeight: 600,
-                    textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-                    textAlign: 'center',
-                    fontSize: '0.75rem'
-                  }}
-                >
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2 pointer-events-none z-10">
+                <div className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center backdrop-blur-lg border-2 border-gray-600">
+                  <Lock className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-gray-900 font-semibold text-xs text-center bg-white/90 px-2 py-1 rounded">
                   Sign in to view
-                </Typography>
-              </Box>
+                </span>
+              </div>
             )}
-        </Box>
+          </div>
 
-        {/* Salary Card */}
-        <Box sx={{ 
-          background: `linear-gradient(135deg, ${brandColors.primary}08 0%, ${brandColors.primaryLight}08 100%)`,
-          borderRadius: 2, 
-          p: 3,
-          mb: 3,
-          border: `1px solid ${brandColors.primary}20`,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 2
-        }}>
-          <Box>
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                color: brandColors.textSecondary,
-                mb: 0.5,
-                fontFamily: professionalFonts.accent,
-                fontWeight: 600
-              }}
-            >
-              Monthly Salary
-            </Typography>
-            <Typography 
-              variant="h4" 
-              sx={{ 
-                fontWeight: 800,
-                color: brandColors.primary,
-                fontFamily: professionalFonts.primary
-              }}
-            >
-              ${maid.salary}
-            </Typography>
-          </Box>
-          {maid.loan && (
-            <Box sx={{ textAlign: isMobile ? 'left' : 'right' }}>
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: brandColors.textSecondary,
-                  mb: 0.5,
-                  fontFamily: professionalFonts.accent,
-                  fontWeight: 600
-                }}
-              >
-                Loan Amount
-              </Typography>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  color: brandColors.warning,
-                  fontWeight: 700
-                }}
-              >
-                ${maid.loan}
-              </Typography>
-            </Box>
-          )}
-        </Box>
+          {/* Salary Card */}
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center flex-wrap gap-4">
+                <div>
+                  <p className="text-sm text-gray-600 font-semibold mb-1">
+                    Monthly Salary
+                  </p>
+                  <p className="text-3xl font-bold text-orange-500">
+                    ${displayMaid.salary}
+                  </p>
+                </div>
+                {displayMaid.loan != null && (
+                  <div className="text-left sm:text-right">
+                    <p className="text-sm text-gray-600 font-semibold mb-1">
+                      Loan Amount
+                    </p>
+                    <p className="text-xl font-bold text-amber-500">
+                      ${displayMaid.loan}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Skills */}
-        <Box sx={{ mb: 3 }}>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontFamily: professionalFonts.primary,
-              color: brandColors.text, 
-              fontWeight: 700,
-              mb: 2,
-              fontSize: '1.2rem'
-            }}
-          >
-            Skills & Expertise
-          </Typography>
-          <Stack 
-            direction="row" 
-            sx={{ 
-              flexWrap: 'wrap', 
-              gap: 1.5,
-              justifyContent: isMobile ? 'flex-start' : 'flex-start'
-            }}
-          >
-            {(maid.skills || []).map((skill, idx) => {
-              const IconComponent = skillIcons[skill];
-              return (
-                <Tooltip title={skill} key={idx} arrow>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      backgroundColor: `${brandColors.primary}15`,
-                      color: brandColors.primary,
-                      borderRadius: 3,
-                      px: 2,
-                      py: 1,
-                      fontSize: '1.1rem',
-                      fontWeight: 600,
-                      border: `1px solid ${brandColors.primary}30`,
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        backgroundColor: `${brandColors.primary}25`,
-                        transform: 'translateY(-1px)'
-                      },
-                    }}
+          {/* Skills */}
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              Skills & Expertise
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {(displayMaid.skills || []).map((skill, idx) => {
+                const skillEmoji = SKILL_ICONS[skill];
+                return (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 bg-orange-100 text-orange-600 rounded-lg px-3 py-2 text-sm font-semibold border border-orange-200 hover:bg-orange-200 transition-colors cursor-default"
+                    title={skill}
                   >
-                    {IconComponent && <IconComponent sx={{ fontSize: 18 }} />}
+                    {skillEmoji && (
+                      <EmojiIcon size="1.1rem">
+                        {skillEmoji}
+                      </EmojiIcon>
+                    )}
                     {skill}
-                  </Box>
-                </Tooltip>
-              );
-            })}
-          </Stack>
-        </Box>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-        {/* Languages - Only show if available */}
-        {languages.length > 0 && (
-          <Box sx={{ mb: 3 }}>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontFamily: professionalFonts.primary,
-                color: brandColors.text, 
-                fontWeight: 700,
-                mb: 2,
-                fontSize: '1.2rem'
-              }}
-            >
-              Language Proficiency
-            </Typography>
-            <Grid container spacing={2}>
-              {languages.map((language, idx) => (
-                <Grid item xs={12} sm={6} md={4} key={idx}>
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    backgroundColor: `${brandColors.background}`,
-                    borderRadius: 2,
-                    p: 2,
-                    border: `1px solid ${brandColors.border}`
-                  }}>
-                    <Typography sx={{ fontWeight: 600, fontSize: '1rem' }}>
+          {/* Languages - Only show if available */}
+          {languages.length > 0 && (
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">
+                Language Proficiency
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {languages.map((language, idx) => (
+                  <div 
+                    key={idx}
+                    className="flex justify-between items-center bg-gray-50 rounded-lg p-4 border border-gray-200"
+                  >
+                    <span className="font-semibold text-gray-900">
                       {language.name}
-                    </Typography>
-                    <Rating 
-                      value={language.rating} 
-                      readOnly 
-                      size="small"
-                      icon={<StarIcon fontSize="inherit" />}
-                    />
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        )}
+                    </span>
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <Star 
+                          key={i}
+                          className={cn(
+                            "w-4 h-4",
+                            i < language.rating ? "text-yellow-400 fill-current" : "text-gray-300"
+                          )}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-        {/* Personal Information */}
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            fontWeight: 700,
-            mb: 3,
-            color: brandColors.text,
-            fontFamily: professionalFonts.primary,
-            fontSize: '1.1rem'
-          }}
-        >
-          Personal Information
-        </Typography>
+          {/* Personal Information */}
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              Personal Information
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <Ruler className="w-6 h-6 text-orange-500" />
+                <div>
+                  <p className="text-xs text-gray-600 font-medium">Height</p>
+                  <p className="text-lg font-bold text-gray-900">{displayMaid.height}cm</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <Weight className="w-6 h-6 text-orange-500" />
+                <div>
+                  <p className="text-xs text-gray-600 font-medium">Weight</p>
+                  <p className="text-lg font-bold text-gray-900">{displayMaid.weight}kg</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <User className="w-6 h-6 text-orange-500" />
+                <div>
+                  <p className="text-xs text-gray-600 font-medium">Marital Status</p>
+                  <p className="text-lg font-bold text-gray-900">{displayMaid.maritalStatus}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <Users className="w-6 h-6 text-orange-500" />
+                <div>
+                  <p className="text-xs text-gray-600 font-medium">Children</p>
+                  <p className="text-lg font-bold text-gray-900">{displayMaid.NumChildren}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <Church className="w-6 h-6 text-orange-500" />
+                <div>
+                  <p className="text-xs text-gray-600 font-medium">Religion</p>
+                  <p className="text-lg font-bold text-gray-900">{displayMaid.Religion}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <GraduationCap className="w-6 h-6 text-orange-500" />
+                <div>
+                  <p className="text-xs text-gray-600 font-medium">Education</p>
+                  <p className="text-lg font-bold text-gray-900">{displayMaid.maidDetails?.highestEducation || 'Not specified'}</p>
+                </div>
+              </div>
+
+              {displayMaid.supplier && (
+                <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <Building className="w-6 h-6 text-orange-500" />
+                  <div>
+                    <p className="text-xs text-gray-600 font-medium">Supplier</p>
+                    <p className="text-lg font-bold text-gray-900">{displayMaid.supplier}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Description */}
+          {displayMaid.maidDetails?.description && (
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">
+                About {displayMaid.name}
+              </h3>
+              <Card>
+                <CardContent className="p-6">
+                  <p className="text-gray-700 leading-relaxed">
+                    {displayMaid.maidDetails.description}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Employment History */}
+          {displayMaid.employmentDetails && displayMaid.employmentDetails.length > 0 && (
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">
+                Employment History
+              </h3>
+              
+              <div className="space-y-4">
+                {displayMaid.employmentDetails.map((employment, idx) => (
+                  <Card key={idx}>
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4 flex-wrap gap-2">
+                        <div>
+                          <h4 className="text-lg font-bold text-gray-900 capitalize">
+                            {employment.country}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {formatEmploymentDuration(employment.startDate, employment.endDate)}
+                          </p>
+                        </div>
+                        <Badge className="bg-orange-100 text-orange-600 font-semibold">
+                          Family of {employment.noOfFamilyMember}
+                        </Badge>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm">
+                        <p>
+                          <span className="font-semibold">Main Responsibilities:</span> {employment.mainJobScope}
+                        </p>
+                        
+                        <p className="text-gray-600">
+                          <span className="font-semibold">Employer:</span> {employment.employerDescription}
+                        </p>
+                        
+                        <p className="text-amber-600 italic">
+                          <span className="font-semibold">Reason for leaving:</span> {employment.reasonOfLeaving}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Work Preferences & Information */}
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              Work Preferences & Information
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <p className="text-xs text-gray-600 font-medium mb-2">Rest Days per Month</p>
+                <p className="text-lg font-bold text-gray-900">
+                  {displayMaid.maidDetails?.restDay || 'N/A'} days
+                </p>
+              </div>
+              
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <p className="text-xs text-gray-600 font-medium mb-2">Availability Status</p>
+                <Badge className={cn(
+                  "text-white font-bold text-sm px-3 py-1",
+                  displayMaid.isEmployed ? "bg-amber-500" : "bg-green-500"
+                )}>
+                  {displayMaid.isEmployed ? 'Currently Employed' : 'Available Now'}
+                </Badge>
+              </div>
+              
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <p className="text-xs text-gray-600 font-medium mb-2">Experience Level</p>
+                <Badge className="bg-green-500 text-white font-bold text-sm px-3 py-1">
+                  {displayLabel}
+                </Badge>
+              </div>
+              
+              {displayMaid.maidDetails?.workPreferences && (
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p className="text-xs text-gray-600 font-medium mb-2">Work Preferences</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    {displayMaid.maidDetails.workPreferences}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
         
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={4}>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 2, 
-              backgroundColor: `${brandColors.background}`,
-              borderRadius: 2,
-              p: 2,
-              border: `1px solid ${brandColors.border}`,
-              height: '100%'
-            }}>
-              <HeightIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
-              <Box>
-                <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
-                  Height
-                </Typography>
-                <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
-                  {maid.height}cm
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={4}>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 2, 
-              backgroundColor: `${brandColors.background}`,
-              borderRadius: 2,
-              p: 2,
-              border: `1px solid ${brandColors.border}`,
-              height: '100%'
-            }}>
-              <ScaleIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
-              <Box>
-                <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
-                  Weight
-                </Typography>
-                <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
-                  {maid.weight}kg
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={4}>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 2, 
-              backgroundColor: `${brandColors.background}`,
-              borderRadius: 2,
-              p: 2,
-              border: `1px solid ${brandColors.border}`,
-              height: '100%'
-            }}>
-              <PersonIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
-              <Box>
-                <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
-                  Marital Status
-                </Typography>
-                <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
-                  {maid.maritalStatus}
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={4}>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 2, 
-              backgroundColor: `${brandColors.background}`,
-              borderRadius: 2,
-              p: 2,
-              border: `1px solid ${brandColors.border}`,
-              height: '100%'
-            }}>
-              <FamilyRestroomIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
-              <Box>
-                <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
-                  Children
-                </Typography>
-                <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
-                  {maid.NumChildren}
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={4}>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 2, 
-              backgroundColor: `${brandColors.background}`,
-              borderRadius: 2,
-              p: 2,
-              border: `1px solid ${brandColors.border}`,
-              height: '100%'
-            }}>
-              <ChurchIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
-              <Box>
-                <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
-                  Religion
-                </Typography>
-                <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
-                  {maid.Religion}
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={4}>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 2, 
-              backgroundColor: `${brandColors.background}`,
-              borderRadius: 2,
-              p: 2,
-              border: `1px solid ${brandColors.border}`,
-              height: '100%'
-            }}>
-              <SchoolIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
-              <Box>
-                <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
-                  Education
-                </Typography>
-                <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
-                  {maid.maidDetails?.highestEducation || 'Not specified'}
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
-        </Grid>
-
-        {/* Description */}
-        {maid.maidDetails?.description && (
-          <Box sx={{ mb: 3 }}>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 700,
-                mb: 2,
-                color: brandColors.text,
-                fontFamily: professionalFonts.primary,
-                fontSize: '1.2rem'
-              }}
-            >
-              About {maid.name}
-            </Typography>
-            <Box sx={{
-              backgroundColor: `${brandColors.background}`,
-              borderRadius: 2,
-              p: 3,
-              border: `1px solid ${brandColors.border}`
-            }}>
-              <Typography 
-                variant="body1" 
-                sx={{ 
-                  lineHeight: 1.7,
-                  color: brandColors.textSecondary,
-                  fontSize: '1rem'
-                }}
-              >
-                {maid.maidDetails.description}
-              </Typography>
-            </Box>
-          </Box>
-        )}
-
-        {/* Work Information */}
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            fontWeight: 700,
-            mb: 2,
-            color: brandColors.text,
-            fontFamily: professionalFonts.primary,
-            fontSize: '1.2rem'
-          }}
-        >
-          Work Information
-        </Typography>
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6}>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 2, 
-              backgroundColor: `${brandColors.background}`,
-              borderRadius: 2,
-              p: 2,
-              border: `1px solid ${brandColors.border}`,
-              height: '100%'
-            }}>
-              <Box>
-                <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
-                  Rest Days per Month
-                </Typography>
-                <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
-                  {maid.maidDetails?.restDay || 'N/A'} days
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 2, 
-              backgroundColor: `${brandColors.background}`,
-              borderRadius: 2,
-              p: 2,
-              border: `1px solid ${brandColors.border}`,
-              height: '100%'
-            }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
-                  Availability Status
-                </Typography>
-                <Chip 
-                  label={maid.isEmployed ? 'Currently Employed' : 'Available Now'} 
-                  size="medium"
-                  sx={{ 
-                    background: maid.isEmployed 
-                      ? `linear-gradient(135deg, ${brandColors.warning} 0%, ${brandColors.warning}80 100%)`
-                      : `linear-gradient(135deg, ${brandColors.success} 0%, ${brandColors.success}80 100%)`,
-                    color: '#FFFFFF',
-                    fontWeight: 700,
-                    fontSize: '0.8rem',
-                    alignSelf: 'flex-start'
-                  }}
-                />
-              </Box>
-            </Box>
-          </Grid>
-        </Grid>
+        {/* Footer Actions */}
+        <DialogFooter className="border-t border-gray-200 p-6">
+          <Button
+            onClick={handleWhatsAppContact}
+            className={cn(
+              "w-full sm:w-auto font-bold transition-all duration-200 hover:scale-105",
+              isAuthenticated 
+                ? "bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl" 
+                : "bg-orange-500 hover:bg-orange-600 text-white shadow-lg hover:shadow-xl"
+            )}
+          >
+            <MessageCircle className="w-4 h-4 mr-2" />
+            {isAuthenticated ? 'Contact via WhatsApp' : 'Sign in to Contact'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-
-      {/* Actions */}
-      <DialogActions sx={{ 
-        p: isMobile ? 2 : isTablet ? 2.5 : 3, 
-        pt: 1.5,
-        flexDirection: isMobile ? 'column' : 'row',
-        gap: isMobile ? 1.5 : isTablet ? 2 : 2,
-        borderTop: `1px solid ${brandColors.border}`
-      }}>
-        
-        <Button
-          variant="contained"
-          onClick={handleWhatsAppContact}
-          fullWidth={isMobile}
-          startIcon={<WhatsAppIcon />}
-          sx={{
-            fontFamily: professionalFonts.accent,
-            background: isAuthenticated 
-              ? `linear-gradient(135deg, #25D366 0%, #128C7E 100%)`
-              : `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryDark} 100%)`,
-            color: 'white',
-            fontWeight: 700,
-            '&:hover': {
-              background: isAuthenticated 
-                ? `linear-gradient(135deg, #128C7E 0%, #075E54 100%)`
-                : `linear-gradient(135deg, ${brandColors.primaryDark} 0%, ${brandColors.primary} 100%)`,
-              transform: 'translateY(-1px)',
-              boxShadow: isAuthenticated
-                ? '0 6px 16px rgba(37, 211, 102, 0.4)'
-                : '0 6px 16px rgba(255, 145, 77, 0.4)'
-            }
-          }}
-        >
-          {isAuthenticated ? 'Contact via WhatsApp' : 'Sign in to Contact'}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 }

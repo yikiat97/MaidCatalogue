@@ -90,3 +90,13 @@ Accordion.propTypes = {
 };
 
 export default Accordion;
+export { Accordion, AccordionItem };
+
+// For compatibility with shadcn-style imports
+export const AccordionContent = ({ children, className = '' }) => (
+  <div className={className}>{children}</div>
+);
+
+export const AccordionTrigger = ({ children, className = '', onClick }) => (
+  <button onClick={onClick} className={className}>{children}</button>
+);

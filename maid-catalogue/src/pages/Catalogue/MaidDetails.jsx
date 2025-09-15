@@ -328,8 +328,8 @@ export default function MaidDetails() {
   const handleLogout = () => {
     setIsAuthenticated(false);
     setIsFavorited(false);
-    // Redirect to login or home page
-    window.location.href = '/login';
+    // Redirect to catalogue page
+    window.location.href = '/catalogue';
   };
 
   if (loading) return (
@@ -432,7 +432,7 @@ export default function MaidDetails() {
         <Box sx={{ flexGrow: 1 }}>
           {/* Navigation Bar */}
           <Box sx={{ mb: 3 }}>
-            <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+            <Header />
           </Box>
 
           {/* Back Button */}
@@ -723,7 +723,9 @@ export default function MaidDetails() {
                               sx={{ 
                                 background: `linear-gradient(135deg, ${brandColors.success} 0%, ${brandColors.success}80 100%)`,
                                 color: '#FFFFFF',
-                                fontWeight: 700
+                                fontWeight: 700,
+                                fontSize: '0.75rem',
+                                minWidth: '100px'
                               }}
                             />
                           </Box>
@@ -751,7 +753,9 @@ export default function MaidDetails() {
                                   ? `linear-gradient(135deg, ${brandColors.warning} 0%, ${brandColors.warning}80 100%)`
                                   : `linear-gradient(135deg, ${brandColors.success} 0%, ${brandColors.success}80 100%)`,
                                 color: '#FFFFFF',
-                                fontWeight: 700
+                                fontWeight: 700,
+                                fontSize: '0.75rem',
+                                minWidth: '100px'
                               }}
                             />
                           </Box>
@@ -944,15 +948,24 @@ export default function MaidDetails() {
                       Personal Information
                     </Typography>
                     
-                    <Grid container spacing={3}>
+                    <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                          <HeightIcon sx={{ color: brandColors.primary }} />
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 2,
+                          backgroundColor: `${brandColors.background}`,
+                          borderRadius: 2,
+                          p: 2,
+                          border: `1px solid ${brandColors.border}`,
+                          height: '100%'
+                        }}>
+                          <HeightIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
                           <Box>
-                            <Typography variant="body2" sx={{ color: brandColors.textSecondary }}>
+                            <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
                               Height
                             </Typography>
-                            <Typography sx={{ fontWeight: 600 }}>
+                            <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
                               {maid.height} cm
                             </Typography>
                           </Box>
@@ -960,13 +973,22 @@ export default function MaidDetails() {
                       </Grid>
 
                       <Grid item xs={12} sm={6}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                          <ScaleIcon sx={{ color: brandColors.primary }} />
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 2,
+                          backgroundColor: `${brandColors.background}`,
+                          borderRadius: 2,
+                          p: 2,
+                          border: `1px solid ${brandColors.border}`,
+                          height: '100%'
+                        }}>
+                          <ScaleIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
                           <Box>
-                            <Typography variant="body2" sx={{ color: brandColors.textSecondary }}>
+                            <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
                               Weight
                             </Typography>
-                            <Typography sx={{ fontWeight: 600 }}>
+                            <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
                               {maid.weight} kg
                             </Typography>
                           </Box>
@@ -974,13 +996,22 @@ export default function MaidDetails() {
                       </Grid>
 
                       <Grid item xs={12} sm={6}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                          <PersonIcon sx={{ color: brandColors.primary }} />
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 2,
+                          backgroundColor: `${brandColors.background}`,
+                          borderRadius: 2,
+                          p: 2,
+                          border: `1px solid ${brandColors.border}`,
+                          height: '100%'
+                        }}>
+                          <PersonIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
                           <Box>
-                            <Typography variant="body2" sx={{ color: brandColors.textSecondary }}>
+                            <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
                               Marital Status
                             </Typography>
-                            <Typography sx={{ fontWeight: 600 }}>
+                            <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
                               {maid.maritalStatus}
                             </Typography>
                           </Box>
@@ -988,13 +1019,22 @@ export default function MaidDetails() {
                       </Grid>
 
                       <Grid item xs={12} sm={6}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                          <FamilyRestroomIcon sx={{ color: brandColors.primary }} />
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 2,
+                          backgroundColor: `${brandColors.background}`,
+                          borderRadius: 2,
+                          p: 2,
+                          border: `1px solid ${brandColors.border}`,
+                          height: '100%'
+                        }}>
+                          <FamilyRestroomIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
                           <Box>
-                            <Typography variant="body2" sx={{ color: brandColors.textSecondary }}>
+                            <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
                               Number of Children
                             </Typography>
-                            <Typography sx={{ fontWeight: 600 }}>
+                            <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
                               {maid.NumChildren}
                             </Typography>
                           </Box>
@@ -1002,13 +1042,22 @@ export default function MaidDetails() {
                       </Grid>
 
                       <Grid item xs={12} sm={6}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                          <ChurchIcon sx={{ color: brandColors.primary }} />
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 2,
+                          backgroundColor: `${brandColors.background}`,
+                          borderRadius: 2,
+                          p: 2,
+                          border: `1px solid ${brandColors.border}`,
+                          height: '100%'
+                        }}>
+                          <ChurchIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
                           <Box>
-                            <Typography variant="body2" sx={{ color: brandColors.textSecondary }}>
+                            <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
                               Religion
                             </Typography>
-                            <Typography sx={{ fontWeight: 600 }}>
+                            <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
                               {maid.Religion}
                             </Typography>
                           </Box>
@@ -1016,13 +1065,22 @@ export default function MaidDetails() {
                       </Grid>
 
                       <Grid item xs={12} sm={6}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                          <SchoolIcon sx={{ color: brandColors.primary }} />
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 2,
+                          backgroundColor: `${brandColors.background}`,
+                          borderRadius: 2,
+                          p: 2,
+                          border: `1px solid ${brandColors.border}`,
+                          height: '100%'
+                        }}>
+                          <SchoolIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
                           <Box>
-                            <Typography variant="body2" sx={{ color: brandColors.textSecondary }}>
+                            <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
                               Education
                             </Typography>
-                            <Typography sx={{ fontWeight: 600 }}>
+                            <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
                               {maid.maidDetails?.highestEducation || 'Not specified'}
                             </Typography>
                           </Box>
@@ -1239,13 +1297,22 @@ export default function MaidDetails() {
                     <Grid container spacing={2}>
                       {!isMobile && (
                         <Grid item xs={12} sm={6}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                            <AccessTimeIcon sx={{ color: brandColors.primary }} />
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 2,
+                            backgroundColor: `${brandColors.background}`,
+                            borderRadius: 2,
+                            p: 2,
+                            border: `1px solid ${brandColors.border}`,
+                            height: '100%'
+                          }}>
+                            <AccessTimeIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
                             <Box>
-                              <Typography variant="body2" sx={{ color: brandColors.textSecondary }}>
+                              <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
                                 Rest Days per Month
                               </Typography>
-                              <Typography sx={{ fontWeight: 600 }}>
+                              <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
                                 {maid.maidDetails?.restDay || 'Not specified'} days
                               </Typography>
                             </Box>
@@ -1256,13 +1323,22 @@ export default function MaidDetails() {
                       {isMobile && (
                         <>
                           <Grid item xs={12} sm={6}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                              <AccessTimeIcon sx={{ color: brandColors.primary }} />
+                            <Box sx={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: 2,
+                              backgroundColor: `${brandColors.background}`,
+                              borderRadius: 2,
+                              p: 2,
+                              border: `1px solid ${brandColors.border}`,
+                              height: '100%'
+                            }}>
+                              <AccessTimeIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
                               <Box>
-                                <Typography variant="body2" sx={{ color: brandColors.textSecondary }}>
+                                <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
                                   Rest Days per Month
                                 </Typography>
-                                <Typography sx={{ fontWeight: 600 }}>
+                                <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
                                   {maid.maidDetails?.restDay || 'Not specified'} days
                                 </Typography>
                               </Box>
@@ -1270,13 +1346,22 @@ export default function MaidDetails() {
                           </Grid>
                           
                           <Grid item xs={12} sm={6}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                              <WorkIcon sx={{ color: brandColors.primary }} />
+                            <Box sx={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: 2,
+                              backgroundColor: `${brandColors.background}`,
+                              borderRadius: 2,
+                              p: 2,
+                              border: `1px solid ${brandColors.border}`,
+                              height: '100%'
+                            }}>
+                              <WorkIcon sx={{ color: brandColors.primary, fontSize: 24 }} />
                               <Box>
-                                <Typography variant="body2" sx={{ color: brandColors.textSecondary }}>
+                                <Typography variant="body2" sx={{ color: brandColors.textSecondary, fontSize: '0.8rem' }}>
                                   Availability
                                 </Typography>
-                                <Typography sx={{ fontWeight: 600 }}>
+                                <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
                                   {maid.isEmployed ? 'Currently Employed' : 'Available'}
                                 </Typography>
                               </Box>

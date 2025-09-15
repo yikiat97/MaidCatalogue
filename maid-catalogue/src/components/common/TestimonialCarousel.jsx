@@ -10,7 +10,8 @@ import {
 } from "../ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 
-const testimonials = [
+// Default fallback testimonials if no reviews are provided
+const defaultTestimonials = [
   {
     id: 1,
     name: "Zhi Ren Yeo",
@@ -74,7 +75,7 @@ const TestimonialCard = ({ testimonial }) => {
   };
 
   return (
-    <Card variant="elevated" padding="large" className="h-[320px] md:h-[300px] bg-white relative overflow-hidden flex flex-col transition-all duration-300 ease-in-out p-6 md:p-8">
+    <Card variant="elevated" padding="large" className="min-h-[300px] md:min-h-[280px] bg-white relative flex flex-col transition-all duration-500 ease-in-out p-6 md:p-8">
       {/* Opening quotation mark */}
       <img 
         src="/images/quotation-right-mark-svgrepo-com.svg" 
@@ -94,14 +95,14 @@ const TestimonialCard = ({ testimonial }) => {
       </div>
 
       {/* Testimonial Text */}
-      <div className="mb-6 flex-grow overflow-y-auto">
-        <p className="text-gray-700 font-inter text-sm md:text-base leading-6 italic transition-all duration-300 ease-in-out">
+      <div className="mb-6 flex-grow transition-all duration-300 ease-in-out">
+        <p className="text-gray-700 font-inter text-sm md:text-base leading-6 italic transition-all duration-500 ease-in-out">
           {isExpanded ? (
             <>
               {testimonial.text}{' '}
               <button
                 onClick={() => setIsExpanded(false)}
-                className="text-[#ff690d] hover:text-[#ff8a3d] font-inter font-medium text-sm transition-colors duration-200 focus:outline-none focus:underline cursor-pointer"
+                className="text-[#ff690d] hover:text-[#ff8a3d] font-inter font-medium text-sm transition-colors duration-200 focus:outline-none focus:underline cursor-pointer inline-block mt-2"
               >
                 Read less
               </button>
@@ -152,9 +153,12 @@ const TestimonialCard = ({ testimonial }) => {
   );
 };
 
-const TestimonialCarousel = () => {
+const TestimonialCarousel = ({ reviews = null, isLoading = false, error = null }) => {
   const [api, setApi] = useState();
   const [current, setCurrent] = useState(0);
+
+  // Use provided reviews or fallback to default testimonials
+  const testimonials = reviews && reviews.length > 0 ? reviews : defaultTestimonials;
 
   // Autoplay plugin with improved configuration
   const autoplay = React.useRef(
@@ -203,6 +207,23 @@ const TestimonialCarousel = () => {
     }
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="relative w-full">
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ff690d]"></div>
+          <span className="ml-3 text-gray-600 font-inter">Loading reviews...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state - show fallback testimonials
+  if (error) {
+    console.warn('Google Reviews error, showing fallback testimonials:', error);
+  }
+
   return (
     <div className="relative w-full">
       <Carousel
@@ -237,21 +258,6 @@ const TestimonialCarousel = () => {
         </CarouselNext>
       </Carousel>
 
-      {/* Pagination Dots */}
-      <div className="flex justify-center gap-2 mt-8">
-        {testimonials.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-200 ${
-              index === current
-                ? 'bg-[#ff690d] scale-110'
-                : 'bg-gray-300 hover:bg-gray-400'
-            }`}
-            aria-label={`Go to testimonial ${index + 1}`}
-          />
-        ))}
-      </div>
     </div>
   );
 };

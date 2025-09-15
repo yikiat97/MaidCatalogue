@@ -1,17 +1,63 @@
-/* :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+:root {
+  /* Color System */
+  --primary-orange: #ff690d;
+  --primary-orange-light: #ff914d;
+  --primary-orange-dark: #e55a0a;
+  
+  --bg-light-gray: #f8f9fa;
+  --bg-medium-gray: #e9ecef;
+  --bg-dark-gray: #6c757d;
+  --bg-light-blue: #f0f8ff;
+  
+  --text-dark-gray: #343a40;
+  --text-light-white: #ffffff;
+  --text-medium-gray: #6c757d;
+  --text-light-gray: #adb5bd;
+  --text-dark-black: #000000;
+  
+  --border-light: #dee2e6;
+  --border-medium: #ced4da;
+  --border-orange-light: rgba(255, 105, 13, 0.2);
+  
+  /* Responsive Spacing System */
+  --spacing-hero-top-mobile: max(4rem, env(safe-area-inset-top));
+  --spacing-hero-top-tablet: max(5rem, env(safe-area-inset-top));
+  --spacing-hero-top-desktop: max(6rem, env(safe-area-inset-top));
+  
+  --spacing-section-mobile: 2rem;
+  --spacing-section-tablet: 3rem;
+  --spacing-section-desktop: 4rem;
+  --spacing-section-large: 5rem;
+  
+  /* Fluid Typography */
+  --font-hero-fluid: clamp(1.125rem, 2.5vw + 0.5rem, 4.5rem);
+  --font-desc-fluid: clamp(0.875rem, 1.5vw + 0.3rem, 1.375rem);
+  
+  /* Layout Constants */
+  --container-max-width: 1440px;
+  --content-padding: clamp(1rem, 4vw, 3rem);
+  --border-radius-base: 12px;
+  --border-radius-large: 20px;
+  
+  /* Animation & Motion */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.6s ease;
+  
+  /* Z-index Scale */
+  --z-background: -1;
+  --z-base: 0;
+  --z-content: 10;
+  --z-overlay: 20;
+  --z-modal: 30;
+  --z-toast: 40;
+  
+  /* Responsive font synthesis and rendering */
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-} */
+}
 
 body {
   min-height: 100vh;
@@ -22,6 +68,135 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
   font-family: sans-serif;
+}
+
+/* Container System */
+.container-responsive {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding-left: var(--content-padding);
+  padding-right: var(--content-padding);
+}
+
+/* Responsive Utilities */
+.text-responsive-hero {
+  font-size: var(--font-hero-fluid);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.text-responsive-desc {
+  font-size: var(--font-desc-fluid);
+  line-height: 1.5;
+}
+
+/* Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-float,
+  .whatsapp-float-animated {
+    animation: none !important;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  :root {
+    --primary-orange: #cc5500;
+    --primary-orange-light: #ff6600;
+    --primary-orange-dark: #aa4400;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (pointer: coarse) {
+  button, 
+  [role="button"],
+  .cursor-pointer {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Hero Section Responsive Enhancements */
+@media (max-width: 320px) {
+  :root {
+    --font-hero-fluid: clamp(0.875rem, 6vw, 1.25rem);
+    --font-desc-fluid: clamp(0.75rem, 4vw, 1rem);
+    --content-padding: 0.75rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .hero-section {
+    padding-top: clamp(2rem, 4vh, 3rem) !important;
+  }
+  
+  .text-responsive-hero {
+    font-size: clamp(1rem, 4vw, 2rem) !important;
+  }
+  
+  .text-responsive-desc {
+    font-size: clamp(0.75rem, 2.5vw, 1rem) !important;
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --font-hero-fluid: clamp(3rem, 4vw, 5rem);
+    --font-desc-fluid: clamp(1.125rem, 1.5vw, 1.5rem);
+  }
+}
+
+/* Container Queries Support */
+@container (max-width: 400px) {
+  .hero-content {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .about-section-content {
+    padding: 1rem !important;
+  }
+  
+  .about-section-spacing {
+    gap: 0.75rem !important;
+  }
+}
+
+@container (min-width: 401px) and (max-width: 768px) {
+  .about-section-video {
+    aspect-ratio: 4/3 !important;
+  }
+}
+
+@container (min-width: 769px) {
+  .about-section-layout {
+    gap: 2rem;
+  }
+}
+
+/* Improved focus indicators for accessibility */
+@media (prefers-reduced-motion: no-preference) {
+  button:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid var(--primary-orange);
+    outline-offset: 2px;
+    transition: outline-color var(--transition-fast);
+  }
+}
+
+/* Radial Gradient Utilities */
+.bg-gradient-radial {
+  background: radial-gradient(circle, var(--tw-gradient-stops));
 }
 
 /* Custom Animations */

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import API_CONFIG from '../config/api.js';
 import { cn } from "../lib/utils"
 import { Button } from "../components/ui/button"
@@ -19,6 +20,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { login, updateUser, fetchUserProfile } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,66 +28,52 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.LOGIN), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include',
-      });
-
-      if (res.ok) {
-        const result = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.SIMPLE_CALLBACK), {
-          method: 'POST',
-          credentials: 'include',
-        });
+      const result = await login({ email, password });
+      
+      if (result.success) {
+        console.log('Login successful:', result.user);
         
-        if (result.ok) {
-          const userData = await result.json();
-          console.log('User data:', userData);
+        // Explicit state updates to ensure UI refresh
+        updateUser(result.user);
+        await fetchUserProfile();
+        
+        // Check if there's a redirect URL stored (from recommendation link)
+        const redirectUrl = localStorage.getItem('redirectAfterLogin');
+        console.log('🔍 Login: redirectUrl found:', redirectUrl);
+        
+        if (result.user?.role === 'admin') {
+          navigate('/admin');
+        } else if (redirectUrl) {
+          // Clear the stored URL
+          localStorage.removeItem('redirectAfterLogin');
           
-          // Check if there's a redirect URL stored (from recommendation link)
-          const redirectUrl = localStorage.getItem('redirectAfterLogin');
-          console.log('🔍 Login: redirectUrl found:', redirectUrl);
-          
-          if (userData.role === 'admin') {
-            navigate('/admin');
-          } else if (redirectUrl) {
-            // Clear the stored URL
-            localStorage.removeItem('redirectAfterLogin');
+          // Call the auth callback endpoint to associate recommendation with user
+          try {
+            const callbackRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
+              method: 'POST',
+              credentials: 'include',
+            });
             
-            // Call the auth callback endpoint to associate recommendation with user
-            try {
-              const callbackRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
-                method: 'POST',
-                credentials: 'include',
-              });
-              
-              if (callbackRes.ok) {
-                const callbackData = await callbackRes.json();
-                console.log('Auth callback successful:', callbackData);
-                // Redirect back to recommendation page
-                window.location.href = redirectUrl;
-              } else {
-                console.error('Auth callback failed:', callbackRes.status);
-                // Still redirect even if callback fails
-                window.location.href = redirectUrl;
-              }
-            } catch (err) {
-              console.error('Auth callback error:', err);
+            if (callbackRes.ok) {
+              const callbackData = await callbackRes.json();
+              console.log('Auth callback successful:', callbackData);
+              // Redirect back to recommendation page
+              navigate(redirectUrl.replace(window.location.origin, ''));
+            } else {
+              console.error('Auth callback failed:', callbackRes.status);
               // Still redirect even if callback fails
-              window.location.href = redirectUrl;
+              navigate(redirectUrl.replace(window.location.origin, ''));
             }
-          } else {
-            navigate('/catalogue');
+          } catch (err) {
+            console.error('Auth callback error:', err);
+            // Still redirect even if callback fails
+            navigate(redirectUrl.replace(window.location.origin, ''));
           }
         } else {
-          setError('Login failed. Please try again.');
+          navigate('/catalogue');
         }
       } else {
-        const errorData = await res.json();
-        setError(errorData.message || 'Login failed. Please try again.');
+        setError(result.error || 'Login failed. Please try again.');
       }
     } catch (err) {
       console.error('Login error:', err);

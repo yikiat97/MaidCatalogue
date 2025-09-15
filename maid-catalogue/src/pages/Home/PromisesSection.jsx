@@ -8,7 +8,7 @@ const PromisesSection = () => {
 
   const promises = [
     {
-      title: "Affordability.",
+      title: "Affordability",
       description: "Every family can afford a helper with us",
       gradient: "from-green-400 to-emerald-500",
       image: "/images/1.jpeg"
@@ -53,7 +53,7 @@ const PromisesSection = () => {
         {/* Promise Cards Grid Layout */}
         <div ref={containerRef} className="max-w-7xl mx-auto">
           {/* Single Row - 3 Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
             {promises.map((promise, index) => {
               return (
                 <Card
@@ -62,6 +62,8 @@ const PromisesSection = () => {
                     visibleItems.includes(index)
                       ? 'opacity-100 translate-y-0 scale-100'
                       : 'opacity-0 translate-y-8 scale-95'
+                  } ${
+                    index === 2 ? 'md:col-span-2 xl:col-span-1 md:justify-self-center' : ''
                   }`}
                   variant="default"
                   padding="none"

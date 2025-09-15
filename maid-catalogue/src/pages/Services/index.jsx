@@ -1,8 +1,9 @@
 import React from 'react';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
-import HelperServicesSection from '../../components/common/HelperServicesSection';
+import ServicePricingCards from '../../components/Services/ServicePricingCards';
 import PaymentTimeline from '../../components/common/PaymentTimeline';
+import ProcessSection from '../Home/ProcessSection';
 import { Button } from '../../components/ui/button';
 import { useAnimation } from '../../hooks/useAnimation';
 
@@ -19,7 +20,7 @@ const ServicesPage = () => {
           className="bg-cover bg-center bg-no-repeat relative overflow-hidden"
           style={{
             backgroundImage: "url('/images/easyhire-cover.svg')",
-            height: '50vh',
+            height: 'clamp(300px, 40vh, 450px)',
             paddingTop: '30px' // Account for fixed navbar
           }}
         >
@@ -49,32 +50,35 @@ const ServicesPage = () => {
         </section>
 
 
-        {/* Helper Services Section */}
-        <HelperServicesSection />
+        {/* Service Pricing Cards */}
+        <ServicePricingCards />
+
+        {/* Process Section */}
+        <ProcessSection />
 
         {/* Payment Timeline Section */}
         <PaymentTimeline />
 
         {/* Call to Action Section */}
-        <section className="py-16 bg-[#ff690d] text-white relative overflow-hidden">
+        <section className="py-4 md:py-12 lg:py-16 bg-[#ff690d] text-white relative overflow-hidden">
           <div className="max-w-[1440px] w-full mx-auto px-4 text-center relative z-10">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-extrabold leading-tight mb-6">
               Ready to Get Started?
             </h2>
-            <p className="text-lg mb-8 max-w-2xl mx-auto">
+            <p className="text-base md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto px-4">
               Join hundreds of satisfied families who have found their perfect domestic helper through our comprehensive services.
             </p>
-            <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+            <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center px-4">
               <Button 
                 size="lg" 
-                className="bg-white text-[#ff690d] hover:bg-gray-100 px-8 py-3 text-lg font-semibold transition-all duration-200 transform hover:scale-105"
+                className="bg-white text-[#ff690d] hover:bg-gray-100 px-6 md:px-8 py-3 text-base md:text-lg font-semibold transition-all duration-200 transform hover:scale-105 w-full sm:w-auto">
               >
                 FIND A HELPER NOW
               </Button>
               <Button 
                 variant="outline"
                 size="lg" 
-                className="border-white text-white hover:bg-white hover:text-[#ff690d] px-8 py-3 text-lg font-semibold transition-all duration-200"
+                className="border-white text-white hover:bg-white hover:text-[#ff690d] px-6 md:px-8 py-3 text-base md:text-lg font-semibold transition-all duration-200 w-full sm:w-auto">
               >
                 SPEAK TO CONSULTANT
               </Button>

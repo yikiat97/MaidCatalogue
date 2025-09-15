@@ -22,10 +22,10 @@ const Footer = () => {
       {/* Main Footer Section */}
       <div className="bg-[#585757] py-12 md:py-16">
         <div className="max-w-[1440px] w-full mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-            
-            {/* Column 1: About Easy Hire */}
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 lg:gap-12">
+
+            {/* Column 1: About Easy Hire - Full width on mobile, stays same on larger screens */}
+            <div className="space-y-6 md:col-span-1">
               <div>
                 <Link to="/" className="inline-block hover-scale">
                   <img
@@ -36,13 +36,13 @@ const Footer = () => {
                 </Link>
               </div>
               <p className="text-white font-inter text-sm leading-relaxed">
-                Making domestic help affordable and accessible for all Singaporean families. 
+                Making domestic help affordable and accessible for all Singaporean families.
                 Transparent pricing, genuine care, and full support every step of the way.
               </p>
               <div className="pt-2">
-                <Button 
-                  variant="primary" 
-                  size="medium" 
+                <Button
+                  variant="primary"
+                  size="medium"
                   onClick={handleFindHelper}
                   className="hover-scale"
                 >
@@ -51,130 +51,138 @@ const Footer = () => {
               </div>
             </div>
 
-            {/* Column 2: Quick Links */}
-            <div className="space-y-6">
-              <h3 className="text-white font-inter font-bold text-lg">
-                Quick Links
-              </h3>
-              <nav className="flex flex-col space-y-3">
-                <Link
-                  to="/"
-                  className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
-                >
-                  Home
-                </Link>
-                <Link
-                  to="/about"
-                  className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
-                >
-                  About Us
-                </Link>
-                <Link
-                  to="/services"
-                  className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
-                >
-                  Services
-                </Link>
-                <Link
-                  to="/faqs"
-                  className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
-                >
-                  FAQs
-                </Link>
-                <Link
-                  to="/contact"
-                  className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
-                >
-                  Contact Us
-                </Link>
-              </nav>
-            </div>
+            {/* Columns 2-3: Links Section - 2 columns on mobile, stays same on larger screens */}
+            <div className="grid grid-cols-2 gap-6 md:col-span-2 lg:col-span-2">
 
-            {/* Column 3: Our Services */}
-            <div className="space-y-6">
-              <h3 className="text-white font-inter font-bold text-lg">
-                Our Services
-              </h3>
-              <nav className="flex flex-col space-y-3">
-                <Link
-                  to="/catalogue?filter=myanmar"
-                  className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
-                >
-                  Myanmar Helpers
-                </Link>
-                <Link
-                  to="/catalogue?filter=indonesian"
-                  className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
-                >
-                  Indonesian Helpers
-                </Link>
-                <Link
-                  to="/catalogue?filter=filipino"
-                  className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
-                >
-                  Filipino Helpers
-                </Link>
-                <Link
-                  to="/catalogue?filter=transfer"
-                  className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
-                >
-                  Transfer Helpers
-                </Link>
-                <Link
-                  to="/services"
-                  className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
-                >
-                  Documentation Support
-                </Link>
-              </nav>
-            </div>
-
-            {/* Column 4: Contact & Newsletter */}
-            <div className="space-y-6">
-              <h3 className="text-white font-inter font-bold text-lg">
-                Get In Touch
-              </h3>
-              
-              {/* Contact Information */}
-              <div className="space-y-3">
-                <div className="flex items-start space-x-3">
-                  <svg className="w-4 h-4 text-[#ff690d] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
-                  </svg>
-                  <a 
-                    href="mailto:hello@easyhire.sg" 
+              {/* Quick Links */}
+              <div className="space-y-4">
+                <h3 className="text-white font-inter font-bold text-base lg:text-lg">
+                  Quick Links
+                </h3>
+                <nav className="flex flex-col space-y-2 lg:space-y-3">
+                  <Link
+                    to="/"
                     className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
                   >
-                    hello@easyhire.sg
-                  </a>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <svg className="w-4 h-4 text-[#ff690d] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-                  </svg>
-                  <a 
-                    href="tel:+6591234567" 
+                    Home
+                  </Link>
+                  <Link
+                    to="/about"
                     className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
                   >
-                    +65 9123 4567
-                  </a>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <svg className="w-4 h-4 text-[#ff690d] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
-                  </svg>
-                  <span className="text-white font-inter text-sm">
-                    Singapore
-                  </span>
+                    About Us
+                  </Link>
+                  <Link
+                    to="/services"
+                    className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
+                  >
+                    Services
+                  </Link>
+                  <Link
+                    to="/faqs"
+                    className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
+                  >
+                    FAQs
+                  </Link>
+                  <Link
+                    to="/contact"
+                    className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
+                  >
+                    Contact Us
+                  </Link>
+                </nav>
+              </div>
+
+              {/* Our Services */}
+              <div className="space-y-4">
+                <h3 className="text-white font-inter font-bold text-base lg:text-lg">
+                  Our Services
+                </h3>
+                <nav className="flex flex-col space-y-2 lg:space-y-3">
+                  <Link
+                    to="/catalogue?country=Myanmar"
+                    className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
+                  >
+                    Myanmar Helpers
+                  </Link>
+                  <Link
+                    to="/catalogue?country=Indonesia"
+                    className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
+                  >
+                    Indonesian Helpers
+                  </Link>
+                  <Link
+                    to="/catalogue?country=Philippines"
+                    className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
+                  >
+                    Filipino Helpers
+                  </Link>
+                  <Link
+                    to="/catalogue?type=Transfer"
+                    className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
+                  >
+                    Transfer Helpers
+                  </Link>
+                  <Link
+                    to="/services"
+                    className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
+                  >
+                    Documentation Support
+                  </Link>
+                </nav>
+              </div>
+            </div>
+
+            {/* Column 4: Contact & Hours - Full width on mobile, stays same on larger screens */}
+            <div className="grid grid-cols-1 gap-6 md:col-span-3 lg:col-span-1">
+
+              {/* Get In Touch */}
+              <div className="space-y-4">
+                <h3 className="text-white font-inter font-bold text-base lg:text-lg">
+                  Get In Touch
+                </h3>
+
+                {/* Contact Information */}
+                <div className="space-y-2 lg:space-y-3">
+                  <div className="flex items-start space-x-3">
+                    <svg className="w-4 h-4 text-[#ff690d] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                    </svg>
+                    <a
+                      href="mailto:hello@easyhire.sg"
+                      className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
+                    >
+                      hello@easyhire.sg
+                    </a>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <svg className="w-4 h-4 text-[#ff690d] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                    </svg>
+                    <a
+                      href="tel:+6591234567"
+                      className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
+                    >
+                      +65 9123 4567
+                    </a>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <svg className="w-4 h-4 text-[#ff690d] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
+                    </svg>
+                    <span className="text-white font-inter text-sm">
+                      Singapore
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {/* Operating Hours */}
-              <div>
-                <h4 className="text-white font-inter font-semibold text-sm mb-2">
+              <div className="space-y-4">
+                <h4 className="text-white font-inter font-semibold text-base lg:text-lg">
                   Operating Hours
                 </h4>
                 <p className="text-white font-inter text-sm">
@@ -183,8 +191,6 @@ const Footer = () => {
                   Sun: Closed
                 </p>
               </div>
-
-             
             </div>
           </div>
         </div>

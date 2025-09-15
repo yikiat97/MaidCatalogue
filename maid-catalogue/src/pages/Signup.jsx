@@ -102,55 +102,53 @@ export default function SignUp() {
         return;
       }
 
-      // Step 3: Check if there's a redirect URL stored (from recommendation link)
-      const redirectUrl = localStorage.getItem('redirectAfterLogin');
-      console.log('🔍 Signup: redirectUrl found:', redirectUrl);
+      // Step 3: Call simple-callback to verify authentication (matching Login.jsx pattern)
+      const result = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.SIMPLE_CALLBACK), {
+        method: 'POST',
+        credentials: 'include',
+      });
       
-      if (redirectUrl) {
-        // Clear the stored URL
-        localStorage.removeItem('redirectAfterLogin');
+      if (result.ok) {
+        const userData = await result.json();
+        console.log('User data:', userData);
         
-        // Call the auth callback endpoint to associate recommendation with user
-        try {
-          const callbackRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
-            method: 'POST',
-            credentials: 'include',
-          });
+        // Step 4: Check if there's a redirect URL stored (from recommendation link)
+        const redirectUrl = localStorage.getItem('redirectAfterLogin');
+        console.log('🔍 Signup: redirectUrl found:', redirectUrl);
+        
+        if (userData.role === 'admin') {
+          navigate('/admin');
+        } else if (redirectUrl) {
+          // Clear the stored URL
+          localStorage.removeItem('redirectAfterLogin');
           
-          if (callbackRes.ok) {
-            const callbackData = await callbackRes.json();
-            console.log('Auth callback successful:', callbackData);
-            // Redirect back to recommendation page
-            window.location.href = redirectUrl;
-          } else {
-            console.error('Auth callback failed:', callbackRes.status);
+          // Call the auth callback endpoint to associate recommendation with user
+          try {
+            const callbackRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
+              method: 'POST',
+              credentials: 'include',
+            });
+            
+            if (callbackRes.ok) {
+              const callbackData = await callbackRes.json();
+              console.log('Auth callback successful:', callbackData);
+              // Redirect back to recommendation page
+              window.location.href = redirectUrl;
+            } else {
+              console.error('Auth callback failed:', callbackRes.status);
+              // Still redirect even if callback fails
+              window.location.href = redirectUrl;
+            }
+          } catch (err) {
+            console.error('Auth callback error:', err);
             // Still redirect even if callback fails
             window.location.href = redirectUrl;
           }
-        } catch (err) {
-          console.error('Auth callback error:', err);
-          // Still redirect even if callback fails
-          window.location.href = redirectUrl;
-        }
-      } else {
-        // No redirect URL, use default behavior
-        const callbackResponse = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-        });
-        
-        console.log('Auth callback response:', callbackResponse);
-        const callbackData = await callbackResponse.json();
-        
-        if (callbackData.redirectTo) {
-          // Success - redirect to the specified URL (likely /catalogue)
-          console.log('Login successful, redirecting to:', callbackData.redirectTo);
-          window.location.href = callbackData.redirectTo;
         } else {
-          // Fallback redirect if no redirectTo is provided
           navigate('/catalogue');
         }
+      } else {
+        setErrors({ submit: 'Authentication verification failed. Please try logging in.' });
       }
 
     } catch (error) {

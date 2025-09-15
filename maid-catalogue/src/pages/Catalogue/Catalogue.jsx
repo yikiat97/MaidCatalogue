@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button, Skeleton, Fade, Alert } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -22,10 +23,12 @@ export default function Catalogue() {
   const [languages, setLanguages] = useState([]);
   const [types, setTypes] = useState([]);
   const [selectedMaids, setSelectedMaids] = useState([]);
+  const [userFavorites, setUserFavorites] = useState([]);
   
   const { setMaidList } = useMaidContext();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [searchParams] = useSearchParams();
   
   // Ref to store timeout for welcome modal delay
   const welcomeModalTimeoutRef = useRef(null);
@@ -48,6 +51,14 @@ export default function Catalogue() {
       
       if (!res.ok) {
         throw new Error(`Failed to load helpers (${res.status}: ${res.statusText})`);
+      }
+      
+      // Check if response is JSON before parsing
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const textResponse = await res.text();
+        console.error('Non-JSON response received:', textResponse.substring(0, 200));
+        throw new Error(`Expected JSON response but received ${contentType || 'unknown content type'}`);
       }
       
       const data = await res.json();
@@ -92,8 +103,27 @@ export default function Catalogue() {
           // Clear the welcome modal flag when user logs in
           localStorage.removeItem('hasSeenWelcomeModal');
 
-          // Note: Favorites functionality removed in favor of selection system
-          // If needed in the future, favorites can be re-implemented alongside selection
+          // Fetch user favorites
+          try {
+            const favRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.USER.FAVORITES), {
+              credentials: 'include',
+            });
+            
+            if (favRes.ok) {
+              const favData = await favRes.json();
+              if (Array.isArray(favData)) {
+                const favoriteIds = favData.map(maid => maid.id);
+                setUserFavorites(favoriteIds);
+              } else {
+                setUserFavorites([]);
+              }
+            } else {
+              setUserFavorites([]);
+            }
+          } catch (err) {
+            console.error('Error fetching favorites:', err);
+            setUserFavorites([]);
+          }
         } else {
           setIsAuthenticated(false);
           // Check if user has already seen the welcome modal
@@ -140,12 +170,26 @@ export default function Catalogue() {
     }
   }, [isAuthenticated]);
 
+  // Handle URL parameters for filtering
+  useEffect(() => {
+    const country = searchParams.get('country');
+    const type = searchParams.get('type');
+    
+    if (country) {
+      setSelectedCountries([country]);
+    }
+    
+    if (type) {
+      setTypes([type]);
+    }
+  }, [searchParams]);
+
   // Handle logout
   const handleLogout = () => {
     setIsAuthenticated(false);
     setSelectedMaids([]); // Clear selections on logout
-    // Redirect to login or home page
-    window.location.href = '/login';
+    // Redirect to home page
+    window.location.href = '/';
   };
 
   // Handle retry API call
@@ -191,6 +235,13 @@ export default function Catalogue() {
     });
   };
 
+  // Generate profile link for a maid
+  const generateProfileLink = (maidId) => {
+    // Use appropriate base URL based on environment
+    const baseUrl = import.meta.env.DEV ? 'http://localhost:5173' : 'https://yikiat.com';
+    return `${baseUrl}/maid/${maidId}`;
+  };
+
   // Handle bulk WhatsApp contact for selected helpers
   const handleBulkContact = () => {
     if (!isAuthenticated) {
@@ -207,11 +258,12 @@ export default function Catalogue() {
     let message = `Hi! I'm interested in the following domestic helpers:\n\n`;
     
     selectedMaidDetails.forEach((maid, index) => {
-      const topSkills = maid.skills.slice(0, 3).join(', '); // Get top 3 skills
-      message += `${index + 1}. ${maid.name} (ID: ${maid.id}) - ${maid.country}, ${calculateAge(maid.DOB)}y, ${topSkills}\n`;
+      const profileLink = generateProfileLink(maid.id);
+      message += `${index + 1}. ${maid.name} (ID: ${maid.id})\n`;
+      message += `   View Profile: ${profileLink}\n\n`;
     });
     
-    message += `\nCould you provide more information about their availability and arrange interviews? Thank you!`;
+    message += `Could you provide more information about their availability and arrange interviews? Thank you!`;
     
     // Open WhatsApp with the message
     const whatsappUrl = `https://wa.me/88270086?text=${encodeURIComponent(message)}`;
@@ -260,7 +312,7 @@ export default function Catalogue() {
     <div className="h-screen bg-gray-50 flex flex-col">
       <div className="w-full px-2 sm:px-4 pt-2 md:pt-3 flex-1 flex flex-col">
         {/* Navigation Header */}
-        <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+        <Header />
         
         {/* Main Content */}
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-5 lg:gap-6 mt-[104px] flex-1 min-h-0 bg-white">
@@ -285,13 +337,13 @@ export default function Catalogue() {
           {/* Available Helper Section */}
           <div className="flex-1 flex flex-col min-h-0 bg-white relative">
             {/* Gap Filler - Fills space between navbar and Available Helper header */}
-            <div className="sticky top-[96px] bg-white h-2 z-20 border-b-0"></div>
+            <div className="lg:sticky lg:top-[96px] bg-white h-2 lg:z-20 border-b-0"></div>
             
             {/* Full Background Coverage - Prevents any content bleeding */}
             <div className="absolute inset-0 bg-white z-0"></div>
             
             {/* Available Helper Header - Sticky with Higher Z-Index */}
-            <div className="sticky top-[104px] z-30 bg-white shadow-sm border-b border-gray-200 px-4 lg:px-0 py-3 relative">
+            <div className="lg:sticky lg:top-[104px] lg:z-30 bg-white shadow-sm border-b border-gray-200 px-4 lg:px-0 py-3 relative">
               <div className="flex justify-between items-center gap-3">
                 {/* Available Helper Title - Left Side */}
                 <div className="flex items-center gap-3">
@@ -300,8 +352,8 @@ export default function Catalogue() {
                   </h2>
                 </div>
                 
-                {/* Contact Selected Button - Right Side */}
-                <div className="flex-shrink-0">
+                {/* Contact Selected Button - Right Side (Desktop Only) */}
+                <div className="hidden lg:flex flex-shrink-0">
                   {selectedMaids.length > 0 && (
                     <Button
                       onClick={handleBulkContact}
@@ -311,7 +363,7 @@ export default function Catalogue() {
                       sx={{
                         background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
                         color: '#FFFFFF',
-                        borderRadius: '20px',
+                        borderRadius: '8px',
                         fontSize: { xs: '0.7rem', sm: '0.75rem' },
                         fontWeight: 600,
                         textTransform: 'none',
@@ -326,7 +378,7 @@ export default function Catalogue() {
                         transition: 'all 0.2s ease',
                       }}
                     >
-                      Contact Selected ({selectedMaids.length})
+                      Schedule Interview ({selectedMaids.length} {selectedMaids.length === 1 ? 'helper' : 'helpers'})
                     </Button>
                   )}
                 </div>
@@ -338,7 +390,7 @@ export default function Catalogue() {
               {/* Loading State */}
               {isLoading && (
                 <Fade in={isLoading} timeout={300}>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 3xl:grid-cols-5">
                     {Array.from({ length: 20 }).map((_, index) => (
                       <MaidCardSkeleton key={index} />
                     ))}
@@ -386,12 +438,13 @@ export default function Catalogue() {
               {/* Data State - Show maids */}
               {!isLoading && !error && filteredMaids.length > 0 && (
                 <Fade in={!isLoading && !error} timeout={300}>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 3xl:grid-cols-5">
                     {filteredMaids.map((maid) => (
                       <div key={maid.id} className="w-full h-full p-1.5 sm:p-2 lg:p-3">
                         <MaidCard 
                           maid={maid} 
                           isAuthenticated={isAuthenticated}
+                          userFavorites={userFavorites}
                           isSelected={selectedMaids.includes(maid.id)}
                           onSelectionChange={handleMaidSelection}
                         />
@@ -438,6 +491,46 @@ export default function Catalogue() {
         open={showWelcomeModal}
         onClose={() => setShowWelcomeModal(false)}
       />
+      
+      {/* Floating Contact Selected Button - Mobile Only */}
+      {selectedMaids.length > 0 && (
+        <div className="lg:hidden fixed bottom-6 left-6 sm:left-1/2 sm:-translate-x-1/2 z-50">
+          <Fade in={selectedMaids.length > 0} timeout={300}>
+            <Button
+              onClick={handleBulkContact}
+              startIcon={<WhatsAppIcon />}
+              variant="contained"
+              size="large"
+              sx={{
+                background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
+                color: '#FFFFFF',
+                borderRadius: '10px',
+                fontSize: { xs: '0.75rem', sm: '0.9rem' },
+                fontWeight: 600,
+                textTransform: 'none',
+                padding: '10px 20px',
+                minHeight: '56px',
+                minWidth: '180px',
+                maxWidth: '280px',
+                whiteSpace: 'nowrap',
+                boxShadow: '0 8px 24px rgba(37, 211, 102, 0.4)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #128C7E 0%, #075E54 100%)',
+                  boxShadow: '0 12px 32px rgba(37, 211, 102, 0.5)',
+                  transform: 'translateY(-2px)',
+                },
+                '&:active': {
+                  transform: 'translateY(0px)',
+                  boxShadow: '0 6px 16px rgba(37, 211, 102, 0.3)',
+                },
+                transition: 'all 0.2s ease',
+              }}
+            >
+              Schedule Interview ({selectedMaids.length} {selectedMaids.length === 1 ? 'helper' : 'helpers'})
+            </Button>
+          </Fade>
+        </div>
+      )}
     </div>
   );
 }

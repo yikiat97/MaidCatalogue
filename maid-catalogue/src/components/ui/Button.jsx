@@ -14,9 +14,9 @@ const Button = ({
   const baseClasses = 'font-inter font-extrabold rounded-[20px] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer';
   
   const variants = {
-    primary: 'bg-[#ff690d] text-[#f3f3f3] hover:bg-[#e55a0a] disabled:bg-gray-400',
+    primary: 'bg-[var(--primary-orange)] text-[#f3f3f3] hover:bg-[var(--primary-orange-dark)] disabled:bg-gray-400',
     secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 disabled:bg-gray-100',
-    outline: 'border border-[#ff690d] text-[#ff690d] hover:bg-[#ff690d] hover:text-white disabled:border-gray-200 disabled:text-gray-400',
+    outline: 'border border-[var(--primary-orange)] text-[var(--primary-orange)] hover:bg-[var(--primary-orange)] hover:text-white disabled:border-gray-200 disabled:text-gray-400',
   };
 
   const sizes = {

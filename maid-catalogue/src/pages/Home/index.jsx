@@ -5,7 +5,6 @@ import HeroSection from '../../components/common/HeroSection';
 import TestimonialsSection from './TestimonialsSection';
 import AboutSection from './AboutSection';
 import PromisesSection from './PromisesSection';
-import ProcessSection from './ProcessSection';
 import HelperProfilesSection from './HelperProfilesSection';
 import FAQSection from './FAQSection';
 
@@ -18,7 +17,6 @@ const HomePage = () => {
         <TestimonialsSection />
         <AboutSection />
         <PromisesSection />
-        <ProcessSection />
         <HelperProfilesSection />
         <FAQSection />
       </main>

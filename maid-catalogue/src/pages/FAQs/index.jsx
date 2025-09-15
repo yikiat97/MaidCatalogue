@@ -169,7 +169,7 @@ const FAQsPage = () => {
           className="bg-cover bg-center bg-no-repeat relative overflow-hidden"
           style={{
             backgroundImage: "url('/images/hero-bg.jpg')",
-            height: '50vh',
+            height: 'clamp(300px, 40vh, 450px)',
             paddingTop: '30px' // Account for fixed navbar
           }}
         >
@@ -199,7 +199,7 @@ const FAQsPage = () => {
         </section>
 
         {/* Filter Section */}
-        <section className="py-8 bg-gray-50">
+        <section className="py-4 md:py-8 bg-gray-50">
           <div className="max-w-[1440px] w-full mx-auto px-4">
             <div 
               ref={searchRef}
@@ -234,7 +234,7 @@ const FAQsPage = () => {
         </section>
 
         {/* FAQs Content */}
-        <section className="py-12 bg-white">
+        <section className="py-6 md:py-12 bg-white">
           <div className="max-w-[1440px] w-full mx-auto px-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
@@ -274,7 +274,7 @@ const FAQsPage = () => {
         </section>
 
         {/* Contact Support Section */}
-        <section className="py-16 bg-[#ff690d] text-white relative overflow-hidden">
+        <section className="py-8 md:py-16 bg-[#ff690d] text-white relative overflow-hidden">
           <div className="max-w-[1440px] w-full mx-auto px-4 text-center relative z-10">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-extrabold leading-tight mb-6">
               Still Have Questions?

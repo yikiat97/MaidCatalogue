@@ -1,10 +1,47 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAnimation } from '../../hooks/useAnimation';
 import TestimonialCarousel from '../../components/common/TestimonialCarousel';
+import { getGoogleReviews } from '../../services/googlePlaces';
 
 const TestimonialsSection = () => {
   const { elementRef: headingRef, isVisible: isHeadingVisible } = useAnimation(0.2);
   const { elementRef: carouselRef, isVisible: isCarouselVisible } = useAnimation(0.1);
+
+  // Google Reviews state
+  const [reviews, setReviews] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [placeInfo, setPlaceInfo] = useState(null);
+
+  // Fetch Google Reviews on component mount
+  useEffect(() => {
+    const fetchReviews = async () => {
+      const placeId = import.meta.env.VITE_GOOGLE_PLACE_ID;
+      const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
+      
+      // Skip if Place ID is not configured or is placeholder
+      if (!placeId || placeId === 'ChIJ_YOUR_PLACE_ID_HERE') {
+        console.log('ℹ️ Google Place ID not configured, using fallback testimonials');
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const data = await getGoogleReviews(placeId);
+        setReviews(data.reviews);
+        setPlaceInfo(data.placeInfo);
+      } catch (err) {
+        console.error('❌ Failed to fetch Google Reviews:', err.message);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, []);
 
   return (
     <section className="py-16 relative overflow-hidden" style={{backgroundColor: '#edebeb'}}>
@@ -38,7 +75,11 @@ const TestimonialsSection = () => {
               : 'opacity-0 translate-y-8'
           }`}
         >
-          <TestimonialCarousel />
+          <TestimonialCarousel 
+            reviews={reviews}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
       </div>
     </section>

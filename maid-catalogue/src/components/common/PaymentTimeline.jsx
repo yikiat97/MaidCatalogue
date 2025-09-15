@@ -13,40 +13,40 @@ const PaymentTimeline = () => {
     {
       id: 1,
       title: '1st Payment',
-      subtitle: 'Initial Booking',
-      amount: '30%',
-      timing: 'Upon Service Booking',
-      description: 'Secure your helper selection and initiate the work permit application process',
+      subtitle: 'Package Fee',
+      amount: 'Package Fee',
+      timing: 'Upon Confirmation',
+      description: 'Package fee upon confirmation',
       icon: Calendar,
       color: 'bg-[#ff690d]'
     },
     {
       id: 2,
       title: '2nd Payment',
-      subtitle: 'Processing Stage',
-      amount: '50%',
-      timing: 'During Documentation',
-      description: 'Complete medical checks, training, and administrative requirements',
+      subtitle: 'Insurance Purchase',
+      amount: 'Insurance',
+      timing: 'Insurance Payment',
+      description: 'Purchase of helper\'s insurance - Direct payment to our partnered insurer for helper\'s medical insurance',
       icon: FileText,
       color: 'bg-[#ff914d]'
     },
     {
       id: 3,
       title: '3rd Payment',
-      subtitle: 'Final Payment',
-      amount: '20%',
-      timing: 'Upon Helper Arrival',
-      description: 'Helper successfully arrives and begins work with full support',
+      subtitle: 'Helper\'s Loan',
+      amount: 'Loan Payment',
+      timing: 'Upon Deployment',
+      description: 'Helper\'s loan upon deployment',
       icon: CheckCircle,
       color: 'bg-[#4ade80]'
     }
   ];
 
   return (
-    <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
+    <section className="py-8 md:py-12 lg:py-16 bg-gradient-to-br from-gray-50 to-white">
       <div className="max-w-[1440px] w-full mx-auto px-4">
         {/* Section Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 md:mb-10 lg:mb-12">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-extrabold leading-tight mb-4">
             <span className="text-black">Payment </span>
             <span className="text-[#ff690d]">Schedule</span>
@@ -90,7 +90,7 @@ const PaymentTimeline = () => {
                     }}
                     className="flex-1 relative z-10 flex"
                   >
-                    <Card className="bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 p-6 mx-2 flex flex-col h-full w-full">
+                    <Card className="bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 mx-2 flex flex-col h-full w-full">
                       {/* Stage Indicator */}
                       <div className="flex flex-col items-center mb-4">
                         <div className={`w-16 h-16 ${stage.color} rounded-full flex items-center justify-center mb-3 shadow-lg`}>
@@ -124,7 +124,7 @@ const PaymentTimeline = () => {
           </div>
 
           {/* Mobile Timeline */}
-          <div className="block md:hidden space-y-6">
+          <div className="block md:hidden space-y-4">
             {paymentStages.map((stage, index) => {
               const IconComponent = stage.icon;
               const isLast = index === paymentStages.length - 1;
@@ -159,7 +159,7 @@ const PaymentTimeline = () => {
                     </div>
 
                     {/* Content */}
-                    <Card className="flex-1 bg-white border border-gray-200 shadow-lg p-4">
+                    <Card className="flex-1 bg-white border border-gray-200 shadow-lg p-3 sm:p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <h3 className="text-lg font-bold text-gray-900">
@@ -193,9 +193,9 @@ const PaymentTimeline = () => {
             y: isTimelineVisible ? 0 : 20 
           }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="mt-12 text-center"
+          className="mt-8 md:mt-10 lg:mt-12 text-center">
         >
-          <Card className="bg-gradient-to-r from-[#ff690d]/5 to-[#ff914d]/5 border border-[#ff690d]/20 p-6 max-w-4xl mx-auto">
+          <Card className="bg-gradient-to-r from-[#ff690d]/5 to-[#ff914d]/5 border border-[#ff690d]/20 p-4 md:p-6 max-w-4xl mx-auto">
             <div className="flex items-center justify-center mb-4">
               <CheckCircle className="w-6 h-6 text-[#ff690d] mr-2" />
               <h3 className="text-lg font-semibold text-gray-900">Payment Protection</h3>

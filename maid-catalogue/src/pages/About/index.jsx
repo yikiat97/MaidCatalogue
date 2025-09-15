@@ -1,54 +1,44 @@
 import React from 'react';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
-import { Button } from '../../components/ui/button';
+import PhoneFramedVideo from '../../components/common/PhoneFramedVideo';
 import { useAnimation } from '../../hooks/useAnimation';
 
 const AboutPage = () => {
   const { elementRef: titleRef, isVisible: isTitleVisible } = useAnimation(0.3);
-  const { elementRef: storyRef, isVisible: isStoryVisible } = useAnimation(0.2);
-  const { elementRef: valuesRef, isVisible: isValuesVisible } = useAnimation(0.1);
-
-  const values = [
-    {
-      title: "Transparency",
-      description: "No hidden fees, no unexpected clauses - just honest, transparent pricing and communication.",
-      icon: "💎"
-    },
-    {
-      title: "Technology", 
-      description: "Seamless digital hiring process from the comfort of your home with integrated modern solutions.",
-      icon: "💻"
-    },
-    {
-      title: "Quality Selection",
-      description: "Every helper profile meticulously screened and trained for diverse household needs.",
-      icon: "⭐"
-    },
-    {
-      title: "Ongoing Support",
-      description: "Comprehensive post-hire support to ensure smooth transitions and long-term success.",
-      icon: "🤝"
-    }
-  ];
+  const { elementRef: visionRef, isVisible: isVisionVisible } = useAnimation(0.3);
+  const { elementRef: commitmentRef, isVisible: isCommitmentVisible } = useAnimation(0.3);
+  const { elementRef: fetrinRef, isVisible: isFetrinVisible } = useAnimation(0.3);
+  const { elementRef: videosRef, isVisible: isVideosVisible } = useAnimation(0.3);
 
   return (
     <div className="min-h-screen bg-white">
       <Header />
       
-      <main className="pt-12">
+      <main className="pt-12 relative">
+        {/* Combined gradient background that spans multiple sections */}
+        <div 
+          className="absolute inset-0 pointer-events-none z-5"
+          style={{
+            background: `
+              radial-gradient(circle at 30% 25%, #fed7aa 0%, #fff7ed 20%, transparent 50%),
+              radial-gradient(circle at 75% 45%, #fed7aa 0%, #fff7ed 20%, transparent 45%),
+              radial-gradient(circle at 65% 85%, #fed7aa 0%, #fff7ed 20%, transparent 50%)
+            `
+          }}
+        />
         {/* Hero Section */}
         <section 
-          className="bg-cover bg-no-repeat relative overflow-hidden"
+          className="bg-cover bg-center bg-no-repeat relative overflow-hidden z-10"
           style={{
-            backgroundImage: 'url(/images/all-staff.PNG)',
-            backgroundPosition: 'center 15%',
-            height: '50vh',
+            backgroundImage: "url('/images/easyhire-cover.svg')",
+            height: 'clamp(300px, 40vh, 450px)',
             paddingTop: '30px' // Account for fixed navbar
           }}
         >
-          {/* Background overlay for text readability */}
-          <div className="absolute inset-0 bg-black/40 z-10"></div>
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
+          
           <div className="max-w-[1440px] w-full px-4 mx-auto relative z-20 h-full flex items-center">
             <div className="w-full text-center">
               <div 
@@ -61,65 +51,124 @@ const AboutPage = () => {
               >
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-inter font-extrabold leading-tight">
                   <span className="text-white">About </span>
-                  <span className="text-[#ff690d]">Easy Hire</span>
+                  <span className="text-[#ff690d]">EasyHire</span>
                 </h1>
                 <p className="text-lg md:text-xl text-white mt-6 max-w-3xl mx-auto">
-                  Serving Homes, Serving Hearts - Technology-enabled hiring that makes quality domestic help accessible and affordable.
+                  Founded with a simple mission: to make finding quality domestic help accessible, transparent, and affordable for every family in Singapore.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Our Story Section */}
-        <section className="py-16 ">
-          <div className="max-w-[1440px] w-full mx-auto px-4">
+        {/* Vision Section */}
+        <section
+          className="relative z-10 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/assets/vision-bg.jpg')"
+          }}
+        >
+          <div className="max-w-[1440px] w-full mx-auto px-4 relative z-10">
             <div 
-              ref={storyRef}
+              ref={visionRef}
               className={`transition-all duration-1000 ease-out ${
-                isStoryVisible 
+                isVisionVisible 
                   ? 'opacity-100 translate-y-0' 
                   : 'opacity-0 translate-y-8'
               }`}
             >
-              <div className="flex flex-col lg:flex-row items-center overflow-hidden shadow-none">
-                {/* Text Content */}
-                <div className="w-full lg:w-3/5 p-8 lg:p-12">
-                  <div className="space-y-6">
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-bold text-gray-900">
-                      Serving Homes, Serving Hearts
-                    </h2>
-                    
-                    <div className="space-y-4 text-base md:text-lg font-inter leading-relaxed text-gray-700">
-                      <p>
-                        At Easy Hire, we understand the genuine needs of both employers and domestic helpers. We've revolutionized the traditional hiring process by integrating <span className="text-[#ff690d] font-bold">cutting-edge technology</span> to make it seamless, transparent, and affordable.
-                      </p>
-                      
-                      <p>
-                        Our mission is simple: reduce hiring costs to the <span className="text-[#ff690d] font-bold">bare cost of direct hiring</span> while ensuring every helper profile is meticulously screened and trained for diverse household needs.
-                      </p>
-
-                      <p>
-                        We enable employers to hire from the comfort of their homes with complete transparency - no hidden fees, no unexpected clauses, and comprehensive post-hire support every step of the way.
-                      </p>
-                    </div>
-
-                    <Button 
-                      size="lg" 
-                      className="bg-[#ff690d] hover:bg-[#e55a0a] text-white px-8 py-3 text-lg font-semibold transition-all duration-200 transform hover:scale-105"
-                    >
-                      FIND A HELPER
-                    </Button>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12 xl:gap-16 items-center">
+                {/* Image Left */}
+                <div className="flex items-center justify-center relative">
+                  {/* Background gradient blur effect */}
+                  <div className="absolute inset-0 bg-gradient-radial from-[#ff690d]/20 via-[#fed7aa]/10 to-transparent rounded-full blur-xl transform scale-110"></div>
+                  {/* Foreground gradient container */}
+                  <div className="relative z-10   to-transparent rounded-2xl p-6 md:p-8">
+                    <img
+                      src="/images/FOUNDER.svg"
+                      alt="Li Ling - Founder of Easy Hire"
+                      className="w-full max-w-md lg:max-w-lg h-auto object-contain"
+                    />
                   </div>
                 </div>
                 
-                {/* Image Section */}
-                <div className="w-full lg:w-2/5 relative">
-                  <div className="relative h-64 lg:h-full min-h-[400px] flex items-end justify-center lg:justify-end">
+                {/* Text Content Right */}
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="pb-4">
+                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-extrabold text-white mb-4">
+                        Li Ling
+                      </h2>
+                      <div className="w-24 h-1 bg-[#ff690d]"></div>
+                    </div>
+                    <div className="space-y-4">
+                      {/* Main bold statement */}
+                    
+
+                      {/* Personal story */}
+                      <div className="space-y-4">
+                        <p className="text-base md:text-lg lg:text-xl font-light font-inter text-gray-200 leading-relaxed text-justify">
+                          Hi, I'm Li Ling, founder of Easy Hire. I started this agency after seeing my own family struggle with hidden fees and poor support when hiring a helper. Easy Hire is built on transparency, fair treatment, and real after-care so both employers and helpers feel respected from day one. No surprises, just honest guidance and support that leaves an impact.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Commitment Section */}
+        <section
+          className="relative z-10 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/assets/commitment-bg.jpg')"
+          }}
+        >
+          <div className="max-w-[1440px] w-full mx-auto px-4 relative z-10">
+            <div 
+              ref={commitmentRef}
+              className={`transition-all duration-1000 ease-out ${
+                isCommitmentVisible 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-8'
+              }`}
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12 xl:gap-16 items-center">
+                {/* Text Content Left */}
+                <div className="space-y-6 order-2 lg:order-1">
+                  <div className="space-y-4">
+                    <div className="pb-4">
+                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-extrabold text-white mb-4">
+                        Yikiat
+                      </h2>
+                      <div className="w-24 h-1 bg-[#ff690d]"></div>
+                    </div>
+                    <div className="space-y-4">
+                      {/* Main bold statement */}
+                      
+
+                      {/* Personal story */}
+                      <div className="space-y-4">
+                        <p className="text-base md:text-lg lg:text-xl font-light font-inter text-gray-200 leading-relaxed text-justify">
+                          I am Yikiat. I build the systems that make hiring simple and seamless. My focus is to build responsibly, protect data, and keep things steady without extra fuss. If something can be simpler or safer, that's what I work on next.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Image Right */}
+                <div className="flex items-center justify-center order-1 lg:order-2 min-h-full self-center relative">
+                  {/* Background gradient blur effect */}
+                  <div className="absolute inset-0 bg-gradient-radial from-[#ff690d]/20 via-[#fed7aa]/10 to-transparent rounded-full blur-xl transform scale-110"></div>
+                  {/* Foreground gradient container */}
+                  <div className="relative z-10   to-transparent rounded-2xl p-6 md:p-8">
                     <img
-                      src="/images/all-staff.PNG"
-                      alt="Happy family together - representing the caring relationships Easy Hire helps build"
-                      className="w-full h-full object-cover lg:object-contain max-w-sm lg:max-w-none"
+                      src="/images/CTO.svg"
+                      alt="Yikiat - Systems Developer"
+                      className="w-full max-w-md lg:max-w-lg h-auto object-contain"
                     />
                   </div>
                 </div>
@@ -128,116 +177,142 @@ const AboutPage = () => {
           </div>
         </section>
 
-        {/* Our Values Section */}
-        <section className="py-16 bg-white">
+        {/* Fetrin Testimonial Section */}
+        <section
+          className="py-8 md:py-12 lg:py-16 relative z-10 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/assets/vision-bg.jpg')"
+          }}
+        >
+          <div className="max-w-[1440px] w-full mx-auto px-4 relative z-10">
+            <div
+              ref={fetrinRef}
+              className={`transition-all duration-1000 ease-out ${
+                isFetrinVisible
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-8'
+              }`}
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12 xl:gap-16 items-center">
+                {/* Image Left */}
+                <div className="flex items-center justify-center relative">
+                  {/* Background gradient blur effect */}
+                  <div className="absolute inset-0 bg-gradient-radial from-[#ff690d]/20 via-[#fed7aa]/10 to-transparent rounded-full blur-xl transform scale-110"></div>
+                  {/* Foreground gradient container */}
+                  <div className="relative z-10 to-transparent rounded-2xl p-6 md:p-8">
+                    <img
+                      src="/images/OSE.svg"
+                      alt="Fetrin - Customer Care Specialist"
+                      className="w-full max-w-md lg:max-w-lg h-auto object-contain"
+                    />
+                  </div>
+                </div>
+
+                {/* Text Content Right */}
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="pb-4">
+                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-extrabold text-white mb-4">
+                        Fetrin
+                      </h2>
+                      <div className="w-24 h-1 bg-[#ff690d]"></div>
+                    </div>
+                    <div className="space-y-4">
+                      {/* Main bold statement */}
+                    
+
+                      {/* Personal story */}
+                      <div className="space-y-4">
+                        <p className="text-base md:text-lg lg:text-xl font-light font-inter text-gray-200 leading-relaxed text-justify">
+                          Hi there, my name is Fetrin. I want to make hiring helpers easy, reliable, and supportive for both families and helpers. I am committed to helping employers find the right helper while ensuring every helper is treated with fairness and respect.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Video Stories Section */}
+        <section className="py-4 md:py-12 lg:py-20 relative z-10">
           <div className="max-w-[1440px] w-full mx-auto px-4">
             <div 
-              ref={valuesRef}
+              ref={videosRef}
               className={`transition-all duration-1000 ease-out ${
-                isValuesVisible 
+                isVideosVisible 
                   ? 'opacity-100 translate-y-0' 
                   : 'opacity-0 translate-y-8'
               }`}
             >
-              <div className="text-center mb-12">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-extrabold leading-tight">
-                  <span className="text-black">Our Core </span>
-                  <span className="text-[#ff690d]">Values</span>
+              {/* Section Header */}
+              <div className="text-center mb-8 md:mb-12 lg:mb-16">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-extrabold text-black mb-4">
+                  Our Story
                 </h2>
-                <p className="text-lg text-gray-700 mt-4 max-w-3xl mx-auto">
-                  These principles guide everything we do and shape how we serve families across Singapore.
+                <div className="w-24 h-1 bg-[#ff690d] mx-auto mb-6"></div>
+                <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                  Discover the passion and vision behind EasyHire through the stories of our founder and our company's journey.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {values.map((value, index) => (
-                  <div
-                    key={index}
-                    className="text-center p-6 h-full bg-white rounded-lg shadow-md"
-                    style={{ 
-                      animationDelay: `${index * 100}ms`
-                    }}
-                  >
-                    <div className="text-4xl mb-4">{value.icon}</div>
-                    <h3 className="text-xl font-inter font-bold text-gray-900 mb-3">
-                      {value.title}
+              {/* Videos Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10 lg:gap-12 xl:gap-16 items-start">
+                
+                {/* About Our Founder Video */}
+                <div className="text-center space-y-6">
+                  <div>
+                    <h3 className="text-xl md:text-2xl font-bold font-inter text-gray-900 mb-2">
+                      About Our Founder
                     </h3>
-                    <p className="text-gray-700 leading-relaxed">
-                      {value.description}
+                    <p className="text-sm md:text-base text-gray-600 max-w-md mx-auto">
+                      Meet the visionary behind EasyHire and learn about the personal journey that inspired our mission.
                     </p>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+                  
+                  <PhoneFramedVideo
+                    sources={[
+                      { src: '/assets/aboutfounder.mov', type: 'video/quicktime' }
+                    ]}
+                    videoId="about-founder"
+                    autoplay={false}
+                    muted={true}
+                    loop={false}
+                    ariaLabel="Video about EasyHire founder and company vision"
+                    className="mx-auto"
+                  />
+                </div>
 
-        {/* Mission & Vision Section */}
-        <section className="py-16 bg-[#ff690d] text-white relative overflow-hidden">
-          <div className="max-w-[1440px] w-full mx-auto px-4 relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-              <div className="text-center lg:text-left">
-                <h3 className="text-2xl sm:text-3xl font-inter font-bold mb-6">Our Mission</h3>
-                <p className="text-lg leading-relaxed">
-                  Serving Homes, Serving Hearts - To bridge the gap between employers and domestic helpers through technology-enabled transparency, affordability, and unwavering commitment to quality service.
-                </p>
+                {/* EasyHire History Video */}
+                <div className="text-center space-y-6">
+                  <div>
+                    <h3 className="text-xl md:text-2xl font-bold font-inter text-gray-900 mb-2">
+                      EasyHire Story
+                    </h3>
+                    <p className="text-sm md:text-base text-gray-600 max-w-md mx-auto">
+                      Explore the history and evolution of EasyHire, from inception to becoming Singapore's trusted helper agency.
+                    </p>
+                  </div>
+                  
+                  <PhoneFramedVideo
+                    sources={[
+                      { src: '/assets/historyofEH.mov', type: 'video/quicktime' }
+                    ]}
+                    videoId="history-eh"
+                    autoplay={false}
+                    muted={true}
+                    loop={false}
+                    ariaLabel="Video about EasyHire company history and growth"
+                    className="mx-auto"
+                  />
+                </div>
               </div>
-              
-              <div className="text-center lg:text-left">
-                <h3 className="text-2xl sm:text-3xl font-inter font-bold mb-6">Our Vision</h3>
-                <p className="text-lg leading-relaxed">
-                  To revolutionize domestic helper hiring in Singapore through innovative technology, making quality help accessible at the bare cost of direct hiring while maintaining the highest standards of service and support.
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Background decorative elements */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute w-32 h-32 bg-white/10 rounded-full animate-float"
-                 style={{ 
-                   top: '20%', left: '10%',
-                   animationDelay: '0s',
-                   animationDuration: '8s'
-                 }}></div>
-            <div className="absolute w-24 h-24 bg-white/10 rounded-full animate-float"
-                 style={{ 
-                   bottom: '30%', right: '15%',
-                   animationDelay: '2s',
-                   animationDuration: '6s'
-                 }}></div>
-          </div>
-        </section>
-
-        {/* Call to Action Section */}
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-[1440px] w-full mx-auto px-4 text-center">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-inter font-extrabold leading-tight mb-6">
-              <span className="text-black">Ready to Find Your Perfect </span>
-              <span className="text-[#ff690d]">Helper?</span>
-            </h2>
-            <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
-              Join hundreds of satisfied families who have found their ideal domestic helper through Easy Hire. Start your journey today.
-            </p>
-            <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
-              <Button 
-                size="lg" 
-                className="bg-[#ff690d] hover:bg-[#e55a0a] text-white px-8 py-3 text-lg font-semibold transition-all duration-200 transform hover:scale-105"
-              >
-                FIND A HELPER
-              </Button>
-              <Button 
-                variant="outline"
-                size="lg" 
-                className="border-[#ff690d] text-[#ff690d] hover:bg-[#ff690d] hover:text-white px-8 py-3 text-lg font-semibold transition-all duration-200"
-              >
-                CONTACT US
-              </Button>
             </div>
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );

@@ -237,7 +237,7 @@ export default function Catalogue() {
           <Grid item xs={12} md={9} lg={9.5}>
             {/* Header */}
             <Box sx={{ mb: 3 }}>
-              <Header isAuthenticated={isAuthenticated} />
+              <Header />
             </Box>
 
             {/* Header Section */}

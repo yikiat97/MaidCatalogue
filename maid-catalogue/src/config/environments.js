@@ -13,7 +13,7 @@ const ENVIRONMENTS = {
   },
   
   production: {
-    API_BASE_URL: 'https://yikiat.com',
+    API_BASE_URL: 'https://yikiat.com', // Direct API calls to yikiat.com
     API_PORT: 3000,
     NODE_ENV: 'production',
   },
@@ -21,15 +21,35 @@ const ENVIRONMENTS = {
 
 // Get current environment (default to development)
 const getCurrentEnvironment = () => {
+  // Check for environment variable override first
+  const envOverride = import.meta.env?.VITE_API_BASE_URL;
+  
+  let environment;
+  
   // Use Vite's built-in environment detection for reliable results
   if (import.meta.env.DEV) {
     // Development mode: use proxy (empty BASE_URL)
-    return ENVIRONMENTS.development;
+    environment = ENVIRONMENTS.development;
+    console.log('🔧 Environment: DEVELOPMENT (using Vite proxy)');
   } else {
     // Production mode: use full URLs
     const prodEnv = import.meta.env?.VITE_NODE_ENV || 'production';
-    return ENVIRONMENTS[prodEnv] || ENVIRONMENTS.production;
+    environment = ENVIRONMENTS[prodEnv] || ENVIRONMENTS.production;
+    console.log(`🚀 Environment: ${prodEnv.toUpperCase()} (direct API calls)`);
   }
+  
+  // Override API_BASE_URL if environment variable is provided
+  if (envOverride) {
+    console.log(`🔗 API_BASE_URL overridden by VITE_API_BASE_URL: ${envOverride}`);
+    environment = {
+      ...environment,
+      API_BASE_URL: envOverride
+    };
+  }
+  
+  console.log(`🌐 Final API Configuration: ${environment.API_BASE_URL || 'proxy'}`);
+  
+  return environment;
 };
 
 // Export current environment config

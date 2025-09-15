@@ -11,12 +11,23 @@ import {
   Checkbox,
   Skeleton,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '../../components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+// Skill icons
+import KitchenIcon from '@mui/icons-material/Kitchen';
+import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
+import ChildCareIcon from '@mui/icons-material/ChildCare';
+import CribIcon from '@mui/icons-material/Crib';
+import ElderlyIcon from '@mui/icons-material/Elderly';
+import PetsIcon from '@mui/icons-material/Pets';
 import { useAnimation } from '../../hooks/useAnimation';
 import { useMaidContext } from '../../context/maidList';
 import API_CONFIG from '../../config/api.js';
@@ -48,6 +59,20 @@ const professionalFonts = {
   mono: "'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace"
 };
 
+// Skill icons mapping
+const skillIcons = {
+  Cooking: KitchenIcon,
+  Housekeeping: CleaningServicesIcon,
+  Childcare: ChildCareIcon,
+  'Child Care': ChildCareIcon,
+  Babysitting: CribIcon,
+  'Elderly Care': ElderlyIcon,
+  'Dog(s)': PetsIcon,
+  'Cat(s)': PetsIcon,
+  'Pet Care': PetsIcon,
+  Caregiving: FavoriteIcon,
+};
+
 const HelperProfilesSection = () => {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -58,12 +83,17 @@ const HelperProfilesSection = () => {
   
   // State management
   const [maids, setMaids] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedMaids, setSelectedMaids] = useState([]);
+  const [favoriteMaids, setFavoriteMaids] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [imageLoaded, setImageLoaded] = useState({});
   const [imageError, setImageError] = useState({});
   const [showDetailsPopup, setShowDetailsPopup] = useState(false);
   const [selectedMaidForDetails, setSelectedMaidForDetails] = useState(null);
+  
+  const { setMaidList } = useMaidContext();
   
   const { elementRef: titleRef, isVisible: isTitleVisible } = useAnimation(0.3);
 
@@ -112,9 +142,9 @@ const HelperProfilesSection = () => {
   const getResponsiveStyles = () => {
     if (isMobile) {
       return {
-        cardHeight: 450,
+        cardHeight: 380,
         cardWidth: '100%',
-        imageHeight: 300,
+        imageHeight: 200,
         chipFontSize: '0.65rem',
         chipHeight: '20px',
         nameFontSize: '1rem',
@@ -128,9 +158,9 @@ const HelperProfilesSection = () => {
       };
     } else if (isTablet) {
       return {
-        cardHeight: 520,
+        cardHeight: 440,
         cardWidth: '100%',
-        imageHeight: 360,
+        imageHeight: 220,
         chipFontSize: '0.7rem',
         chipHeight: '22px',
         nameFontSize: '1.1rem',
@@ -144,9 +174,9 @@ const HelperProfilesSection = () => {
       };
     } else {
       return {
-        cardHeight: 600,
+        cardHeight: 480,
         cardWidth: '320px', // Fixed width for desktop for consistent card size
-        imageHeight: 420,
+        imageHeight: 240,
         chipFontSize: '0.75rem',
         chipHeight: '24px',
         nameFontSize: '1.2rem',
@@ -162,97 +192,89 @@ const HelperProfilesSection = () => {
   };
 
   const styles = getResponsiveStyles();
-  
-  // Hardcoded helper data - updated to match maid data structure
-  const helpers = [
-    {
-      id: 1,
-      name: 'Maria Santos',
-      country: 'Philippines',
-      salary: 680,
-      skills: ['Cooking', 'Child Care', 'Elderly Care'],
-      imageUrl: '/images/img_frame_4_309x253.png',
-      rating: 4.8,
-      experience: '8 years',
-      availability: 'Available',
-      DOB: '1992-01-15', // Added DOB instead of age
-      languages: ['English', 'Filipino', 'Mandarin'],
-      type: 'Experienced' // Added type field for badge
-    },
-    {
-      id: 2,
-      name: 'Siti Rahman',
-      country: 'Indonesia',
-      salary: 650,
-      skills: ['Housekeeping', 'Cooking', 'Pet Care'],
-      imageUrl: '/images/img_frame_4_309x253.png',
-      rating: 4.9,
-      experience: '6 years',
-      availability: 'Available',
-      DOB: '1996-03-22',
-      languages: ['English', 'Indonesian', 'Malay'],
-      type: 'Transfer'
-    },
-    {
-      id: 3,
-      name: 'Chen Wei Lin',
-      country: 'Taiwan',
-      salary: 720,
-      skills: ['Child Care', 'Tutoring', 'Housekeeping'],
-      imageUrl: '/images/img_frame_4_309x253.png',
-      rating: 4.7,
-      experience: '10 years',
-      availability: 'Available',
-      DOB: '1989-07-10',
-      languages: ['Mandarin', 'English', 'Taiwanese'],
-      type: 'Experienced'
-    },
-    {
-      id: 4,
-      name: 'Priya Sharma',
-      country: 'India',
-      salary: 600,
-      skills: ['Cooking', 'Housekeeping', 'Elderly Care'],
-      imageUrl: '/images/img_frame_4_309x253.png',
-      rating: 4.6,
-      experience: '5 years',
-      availability: 'Available',
-      DOB: '1994-05-18',
-      languages: ['English', 'Hindi', 'Tamil'],
-      type: 'New/Fresh'
-    },
-    {
-      id: 5,
-      name: 'Fatima Al-Zahra',
-      country: 'Myanmar',
-      salary: 620,
-      skills: ['Child Care', 'Cooking', 'Light Housework'],
-      imageUrl: '/images/img_frame_4_309x253.png',
-      rating: 4.5,
-      experience: '4 years',
-      availability: 'Available',
-      DOB: '1998-11-03',
-      languages: ['English', 'Burmese', 'Thai'],
-      type: 'Transfer'
-    },
-    {
-      id: 6,
-      name: 'Lily Nguyen',
-      country: 'Vietnam',
-      salary: 640,
-      skills: ['Housekeeping', 'Cooking', 'Ironing'],
-      imageUrl: '/images/img_frame_4_309x253.png',
-      rating: 4.8,
-      experience: '7 years',
-      availability: 'Available',
-      DOB: '1995-09-12',
-      languages: ['English', 'Vietnamese', 'Cantonese'],
-      type: 'Experienced'
+
+  // Function to fetch maids from API (limit to first 6 for homepage display)
+  const fetchMaids = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const res = await fetch(API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.CATALOGUE.MAIDS, {
+        page: '1',
+        limit: '6' // Limit to 6 for homepage carousel
+      }), {
+        credentials: 'include',
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Failed to load helpers (${res.status}: ${res.statusText})`);
+      }
+      
+      // Check if response is JSON before parsing
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const textResponse = await res.text();
+        console.error('Non-JSON response received:', textResponse.substring(0, 200));
+        throw new Error(`Expected JSON response but received ${contentType || 'unknown content type'}`);
+      }
+      
+      const data = await res.json();
+      console.log('Fetched maids for homepage:', data);
+      
+      const maidsData = data.maids || [];
+      setMaids(maidsData);
+      // Update global context with homepage maids
+      setMaidList(prev => {
+        // Merge with existing data, avoiding duplicates
+        const existingIds = new Set(prev.map(maid => maid.id));
+        const newMaids = maidsData.filter(maid => !existingIds.has(maid.id));
+        return [...prev, ...newMaids];
+      });
+    } catch (err) {
+      console.error('Error fetching maids from API:', err);
+      setError(err.message);
+      setMaids([]);
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
+
+  // Function to check authentication
+  const checkAuth = async () => {
+    try {
+      const res = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.PROFILE), {
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+    } catch (err) {
+      console.error('Error checking authentication:', err);
+      setIsAuthenticated(false);
+    }
+  };
+
+  // useEffect to fetch data on component mount
+  useEffect(() => {
+    checkAuth();
+    fetchMaids();
+  }, []);
 
   const toggleSelection = (helperId) => {
     setSelectedMaids(prev => {
+      if (prev.includes(helperId)) {
+        return prev.filter(id => id !== helperId);
+      } else {
+        return [...prev, helperId];
+      }
+    });
+  };
+
+  const toggleFavorite = (helperId) => {
+    setFavoriteMaids(prev => {
       if (prev.includes(helperId)) {
         return prev.filter(id => id !== helperId);
       } else {
@@ -300,6 +322,23 @@ const HelperProfilesSection = () => {
           </p>
         </div>
 
+        {/* Error State */}
+        {error && (
+          <div className="mb-8 max-w-2xl mx-auto">
+            <Alert severity="error" className="rounded-lg">
+              <strong>Unable to load helpers:</strong> {error}
+              <Button 
+                onClick={fetchMaids}
+                startIcon={<RefreshIcon />}
+                size="small" 
+                className="ml-4"
+              >
+                Retry
+              </Button>
+            </Alert>
+          </div>
+        )}
+
         {/* Carousel */}
         <div className="relative">
           <Carousel
@@ -317,15 +356,37 @@ const HelperProfilesSection = () => {
             className="w-full"
           >
             <CarouselContent className="-ml-4 my-4">
-              {helpers.map((helper) => {
-                const displayLabel = helper.type.includes("Transfer")
+              {isLoading ? (
+                // Loading skeletons
+                Array.from({ length: 6 }).map((_, index) => (
+                  <CarouselItem key={`skeleton-${index}`} className="pl-4 py-2 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                    <div className="w-full max-w-sm mx-auto">
+                      <Skeleton 
+                        variant="rectangular" 
+                        width="100%" 
+                        height={styles.cardHeight}
+                        className="rounded-2xl"
+                      />
+                    </div>
+                  </CarouselItem>
+                ))
+              ) : (
+                maids.map((helper) => {
+                // Handle type field - might be string or need different logic for real API data
+                const helperType = helper.type || helper.category || 'Experienced';
+                const displayLabel = helperType.includes && helperType.includes("Transfer")
                   ? "Transfer"
-                  : helper.type.includes("New/Fresh")
+                  : helperType.includes && helperType.includes("New/Fresh")
+                  ? "New/Fresh"
+                  : helperType === "Transfer" 
+                  ? "Transfer"
+                  : helperType === "New/Fresh" || helperType === "Fresh"
                   ? "New/Fresh"
                   : "Experienced";
                 
                 const helperAge = calculateAge(helper.DOB);
                 const isSelected = selectedMaids.includes(helper.id);
+                const isFavorited = favoriteMaids.includes(helper.id);
                 
                 return (
                   <CarouselItem key={helper.id} className="pl-4 py-2 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
@@ -405,28 +466,55 @@ const HelperProfilesSection = () => {
                           </Box>
                         )}
                         
-                        <CardMedia
-                          component="img"
-                          image={getOptimizedImageUrl(helper.imageUrl)}
-                          alt={helper.name}
-                          loading="lazy"
-                          sx={{
-                            width: '100%',
-                            height: styles.imageHeight,
-                            objectFit: 'cover',
-                            filter: isAuthenticated ? 'none' : 'blur(12px)',
-                            transform: isAuthenticated ? 'none' : 'scale(1.1)',
-                            transition: 'all 0.3s ease',
-                            opacity: imageLoaded[helper.id] ? 1 : 0,
+                        <Tooltip
+                          title={!isAuthenticated ? "Click to view details (sign in for full access)" : "Click to view details"}
+                          arrow
+                          placement="top"
+                          enterTouchDelay={0}
+                          leaveTouchDelay={1500}
+                          disableFocusListener={isMobile}
+                          disableHoverListener={isMobile}
+                          PopperProps={{
+                            sx: {
+                              '& .MuiTooltip-tooltip': {
+                                backgroundColor: brandColors.secondary,
+                                color: '#FFFFFF',
+                                fontSize: isMobile ? '0.75rem' : '0.875rem',
+                                maxWidth: isMobile ? '200px' : '250px',
+                                padding: isMobile ? '8px 12px' : '10px 16px',
+                                borderRadius: '8px',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                                border: `1px solid ${brandColors.border}`,
+                              },
+                              '& .MuiTooltip-arrow': {
+                                color: brandColors.secondary,
+                              },
+                            },
                           }}
-                          onLoad={() => {
-                            setImageLoaded(prev => ({ ...prev, [helper.id]: true }));
-                          }}
-                          onError={() => {
-                            setImageError(prev => ({ ...prev, [helper.id]: true }));
-                            setImageLoaded(prev => ({ ...prev, [helper.id]: true }));
-                          }}
-                        />
+                        >
+                          <CardMedia
+                            component="img"
+                            image={getOptimizedImageUrl(helper.imageUrl)}
+                            alt={helper.name}
+                            loading="lazy"
+                            sx={{
+                              width: '100%',
+                              height: styles.imageHeight,
+                              objectFit: 'cover',
+                              filter: isAuthenticated ? 'none' : 'blur(12px)',
+                              transform: isAuthenticated ? 'none' : 'scale(1.1)',
+                              transition: 'all 0.3s ease',
+                              opacity: imageLoaded[helper.id] ? 1 : 0,
+                            }}
+                            onLoad={() => {
+                              setImageLoaded(prev => ({ ...prev, [helper.id]: true }));
+                            }}
+                            onError={() => {
+                              setImageError(prev => ({ ...prev, [helper.id]: true }));
+                              setImageLoaded(prev => ({ ...prev, [helper.id]: true }));
+                            }}
+                          />
+                        </Tooltip>
                         
                         {/* Overlay gradient */}
                         <Box
@@ -516,43 +604,58 @@ const HelperProfilesSection = () => {
                           }}
                         />
                         
-                        {/* Selection Checkbox - moved to right top */}
-                        <Box
+                        {/* Heart Favorite Icon - top right */}
+                        <IconButton
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleFavorite(helper.id);
+                          }}
                           sx={{
                             position: 'absolute',
                             top: isMobile ? 8 : 12,
                             right: isMobile ? 8 : 12,
-                            backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                            width: isMobile ? 32 : isTablet ? 36 : 40,
+                            height: isMobile ? 32 : isTablet ? 36 : 40,
+                            background: `rgba(255, 145, 77, 0.25)`, // Orange theme
                             backdropFilter: 'blur(15px)',
                             WebkitBackdropFilter: 'blur(15px)',
-                            borderRadius: '8px',
-                            border: `1px solid rgba(255, 255, 255, 0.3)`,
-                            boxShadow: '0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)',
-                            transition: 'all 0.2s ease',
+                            border: `1px solid rgba(255, 145, 77, 0.4)`, // Orange border
+                            boxShadow: '0 8px 32px rgba(255, 145, 77, 0.2), inset 0 1px 0 rgba(255, 145, 77, 0.3)', // Orange shadow
+                            zIndex: 3,
+                            transition: 'all 0.3s ease',
                             '&:hover': {
-                              backgroundColor: 'rgba(255, 255, 255, 0.4)',
+                              background: `rgba(255, 145, 77, 0.4)`, // Orange hover
                               transform: isMobile ? 'none' : 'scale(1.05)',
+                              boxShadow: '0 8px 32px rgba(255, 145, 77, 0.35), inset 0 1px 0 rgba(255, 145, 77, 0.4)', // Enhanced orange glow
                             },
+                            '&::before': {
+                              content: '""',
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              background: 'linear-gradient(135deg, rgba(255,145,77,0.3) 0%, rgba(255,145,77,0.1) 100%)', // Orange gradient
+                              borderRadius: 'inherit',
+                              zIndex: -1
+                            }
                           }}
                         >
-                          <Checkbox
-                            checked={isSelected}
-                            onChange={(e) => {
-                              e.stopPropagation();
-                              toggleSelection(helper.id);
-                            }}
-                            sx={{
-                              padding: isMobile ? '4px' : '6px',
-                              color: '#666666',
-                              '&.Mui-checked': {
-                                color: brandColors.primary,
-                              },
-                              '& .MuiSvgIcon-root': {
-                                fontSize: isMobile ? 18 : 20,
-                              },
-                            }}
-                          />
-                        </Box>
+                          {isFavorited ? (
+                            <FavoriteIcon sx={{ 
+                              fontSize: isMobile ? 18 : isTablet ? 20 : 22,
+                              color: '#c0392b', // Deeper red for better contrast against orange
+                              transition: 'all 0.3s ease'
+                            }} />
+                          ) : (
+                            <FavoriteBorderIcon sx={{ 
+                              fontSize: isMobile ? 18 : isTablet ? 20 : 22,
+                              color: 'white', // Keep white for good contrast
+                              transition: 'all 0.3s ease'
+                            }} />
+                          )}
+                        </IconButton>
                       </Box>
 
                       {/* Content - Minimalist Layout */}
@@ -568,7 +671,7 @@ const HelperProfilesSection = () => {
                       >
                         {/* Top Section - Name and Country */}
                         <Box>
-                          {/* Name */}
+                          {/* Name with Age */}
                           <Typography 
                             variant="h6" 
                             sx={{ 
@@ -581,14 +684,19 @@ const HelperProfilesSection = () => {
                               whiteSpace: 'nowrap',
                               letterSpacing: '-0.02em',
                               lineHeight: 1.2,
-                              mb: 1
+                              mb: 0.75
                             }}
                           >
                             {helper.name}
+                            {helperAge && (
+                              <Box component="span" sx={{ color: brandColors.primary }}>
+                                , {helperAge}
+                              </Box>
+                            )}
                           </Typography>
                           
                           {/* Country with Flag */}
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.75 }}>
                             <img 
                               src={getCountryFlag(helper.country)} 
                               alt={`${helper.country} flag`}
@@ -610,16 +718,128 @@ const HelperProfilesSection = () => {
                             </Typography>
                           </Box>
                           
-                          {/* Age */}
-                          {helperAge && (
+                          {/* Skills Row */}
+                          {helper.skills && helper.skills.length > 0 && (
+                            <Box sx={{ 
+                              display: 'flex', 
+                              gap: 0.5, 
+                              flexWrap: 'wrap',
+                              mb: 0.5
+                            }}>
+                            {helper.skills.slice(0, 4).map((skill, idx) => {
+                              const IconComponent = skillIcons[skill];
+                              if (!IconComponent) return null;
+                              
+                              return (
+                                <Tooltip 
+                                  key={idx} 
+                                  title={skill} 
+                                  arrow
+                                  placement="top"
+                                  enterTouchDelay={0}
+                                  leaveTouchDelay={1500}
+                                  disableFocusListener={isMobile}
+                                  disableHoverListener={isMobile}
+                                  PopperProps={{
+                                    sx: {
+                                      '& .MuiTooltip-tooltip': {
+                                        backgroundColor: brandColors.secondary,
+                                        color: '#FFFFFF',
+                                        fontSize: isMobile ? '0.7rem' : '0.75rem',
+                                        padding: '6px 8px',
+                                        borderRadius: '6px',
+                                      },
+                                      '& .MuiTooltip-arrow': {
+                                        color: brandColors.secondary,
+                                      },
+                                    },
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      width: isMobile ? 22 : isTablet ? 24 : 26,
+                                      height: isMobile ? 22 : isTablet ? 24 : 26,
+                                      borderRadius: '6px',
+                                      backgroundColor: `${brandColors.primary}15`,
+                                      color: brandColors.primary,
+                                      border: `1px solid ${brandColors.primary}30`,
+                                      transition: 'all 0.2s ease',
+                                      '&:hover': {
+                                        backgroundColor: `${brandColors.primary}25`,
+                                        transform: isMobile ? 'none' : 'scale(1.1)',
+                                        borderColor: `${brandColors.primary}50`,
+                                      },
+                                    }}
+                                  >
+                                    <IconComponent sx={{ 
+                                      fontSize: isMobile ? 14 : isTablet ? 15 : 16 
+                                    }} />
+                                  </Box>
+                                </Tooltip>
+                              );
+                            })}
+                            {helper.skills.length > 4 && (
+                              <Tooltip 
+                                title={`+${helper.skills.length - 4} more skills`}
+                                arrow
+                                placement="top"
+                                PopperProps={{
+                                  sx: {
+                                    '& .MuiTooltip-tooltip': {
+                                      backgroundColor: brandColors.secondary,
+                                      color: '#FFFFFF',
+                                      fontSize: isMobile ? '0.7rem' : '0.75rem',
+                                      padding: '6px 8px',
+                                      borderRadius: '6px',
+                                    },
+                                    '& .MuiTooltip-arrow': {
+                                      color: brandColors.secondary,
+                                    },
+                                  },
+                                }}
+                              >
+                                <Box
+                                  sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: isMobile ? 22 : isTablet ? 24 : 26,
+                                    height: isMobile ? 22 : isTablet ? 24 : 26,
+                                    borderRadius: '6px',
+                                    backgroundColor: `${brandColors.textSecondary}15`,
+                                    color: brandColors.textSecondary,
+                                    border: `1px solid ${brandColors.textSecondary}30`,
+                                    fontSize: isMobile ? '0.7rem' : '0.75rem',
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  +{helper.skills.length - 4}
+                                </Box>
+                              </Tooltip>
+                            )}
+                            </Box>
+                          )}
+                          
+                          {/* Monthly Salary */}
+                          {helper.salary && (
                             <Typography variant="body2" sx={{ 
                               fontFamily: professionalFonts.secondary,
-                              color: brandColors.primary, 
+                              color: brandColors.secondary, 
                               fontSize: styles.bodyFontSize,
-                              fontWeight: 600,
+                              fontWeight: 700,
                               letterSpacing: '0.01em'
                             }}>
-                              {helperAge} years old
+                              <Box component="span" sx={{ 
+                                color: '#25D366',
+                                fontSize: isMobile ? '1.3rem' : isTablet ? '1.5rem' : '1.7rem',
+                                fontWeight: 800
+                              }}>
+                                ${helper.salary}
+                              </Box>
+                              /month
                             </Typography>
                           )}
                         </Box>
@@ -661,7 +881,8 @@ const HelperProfilesSection = () => {
                   </Card>
                 </CarouselItem>
                 );
-              })}
+              })
+              )}
             </CarouselContent>
             
             {/* Navigation Arrows */}
@@ -674,7 +895,7 @@ const HelperProfilesSection = () => {
         <div className="text-center mt-4">
           <button
             onClick={handleViewAll}
-            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold rounded-full hover:shadow-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-orange-200"
+            className="inline-flex items-center px-8 py-4 bg-primary-orange text-white font-semibold rounded-full hover:bg-primary-orange-dark hover:shadow-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-orange/30"
           >
             View All Helpers
             <svg className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

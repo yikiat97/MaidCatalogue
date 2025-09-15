@@ -170,18 +170,19 @@ const HelperFinderCard = () => {
       slotProps={{
         paper: {
           sx: {
-            borderRadius: isMobile ? 0 : 3,
+            borderRadius: isMobile ? 0 : 'var(--border-radius-large)',
             background: 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 105, 13, 0.1)',
             boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+            m: isMobile ? 0 : { xs: 1, sm: 2, md: 3 },
           }
         }
       }}
     >
       <DialogTitle sx={{ 
-        p: 3, 
-        pb: 1,
+        p: { xs: 2, sm: 2.5, md: 3 }, 
+        pb: { xs: 0.5, sm: 1 },
         position: 'relative'
       }}>
         <IconButton
@@ -340,10 +341,12 @@ const HelperFinderCard = () => {
           variant="contained"
           fullWidth
           sx={{
-            py: { xs: 1.25, sm: 1.5 },
-            borderRadius: '12px',
+            py: { xs: 1.5, sm: 1.75, md: 2 },
+            px: { xs: 2, sm: 2.5, md: 3 },
+            borderRadius: 'var(--border-radius-base)',
             background: 'linear-gradient(135deg, #ff690d 0%, #ff914d 100%)',
-            fontSize: { xs: '0.9rem', sm: '1rem' },
+            fontSize: { xs: '1rem', sm: '1.1rem', md: '1.125rem' },
+            minHeight: { xs: '48px', sm: '52px', md: '56px' },
             fontWeight: 600,
             textTransform: 'none',
             fontFamily: 'Inter, system-ui, sans-serif',
@@ -368,10 +371,10 @@ const HelperFinderCard = () => {
       <Paper 
         elevation={0}
         sx={{
-          width: { xs: '100%', sm: '90%', lg: '70%' },
+          width: { xs: '100%', sm: '95%', md: '85%', lg: '75%', xl: '70%' },
           mx: 'auto',
-          p: { xs: 3, sm: 3.5, lg: 5 },
-          borderRadius: { xs: '20px', lg: '24px' },
+          p: { xs: 1.75, sm: 2.25, md: 2.5, lg: 3, xl: 3.5 },
+          borderRadius: { xs: 'var(--border-radius-large)', lg: 'var(--border-radius-large)' },
           background: 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255, 105, 13, 0.1)',
@@ -390,16 +393,16 @@ const HelperFinderCard = () => {
         }}
       >
         {/* Header */}
-        <Box textAlign="center" mb={{ xs: 2, lg: 3 }}>
+        <Box textAlign="center" mb={{ xs: 1.25, lg: 1.75 }}>
           <Typography 
             variant="h4" 
             fontWeight="bold" 
             color="#0c191b"
-            mb={{ xs: 0.5, lg: 1 }}
+            mb={{ xs: 0.25, lg: 0.5 }}
             sx={{
               fontFamily: 'Inter, system-ui, sans-serif',
               letterSpacing: '-0.025em',
-              fontSize: { xs: '1.1rem', sm: '1.25rem', lg: '1.75rem' }
+              fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem', lg: '1.5rem', xl: '1.75rem' }
             }}
           >
             Find Your Perfect Helper
@@ -408,7 +411,7 @@ const HelperFinderCard = () => {
           <Typography 
             variant="body2" 
             color="#5a6c6f"
-            sx={{ fontSize: { xs: '0.85rem', sm: '0.9rem', lg: '1rem' } }}
+            sx={{ fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem', lg: '0.95rem', xl: '1rem' } }}
           >
             Choose your preferences to see instant pricing
           </Typography>
@@ -418,7 +421,7 @@ const HelperFinderCard = () => {
         <Box sx={{ 
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-          gap: { xs: 3, md: 4, lg: 6 },
+          gap: { xs: 1.75, sm: 2.25, md: 3, lg: 3.75, xl: 4.5 },
           alignItems: 'start'
         }}>
           
@@ -428,8 +431,8 @@ const HelperFinderCard = () => {
            
 
             {/* Experience Selection */}
-            <Box sx={{ mb: { xs: 2.5, lg: 3 } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 1, lg: 1.5 } }}>
+            <Box sx={{ mb: { xs: 1.5, lg: 2 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.75, lg: 1 } }}>
                 <WorkIcon sx={{ color: experienceError ? '#d32f2f' : '#ff690d', fontSize: { xs: '1rem', lg: '1.1rem' }, mr: 0.75 }} />
                 <Typography 
                   variant="body2" 
@@ -451,11 +454,13 @@ const HelperFinderCard = () => {
                     variant={experience === option.value ? "contained" : "outlined"}
                     sx={{
                       flex: 1,
-                      py: { xs: 1.1, sm: 1.2, lg: 1.25 },
-                      borderRadius: '12px',
+                      py: { xs: 1.25, sm: 1.35, md: 1.4, lg: 1.5 },
+                      px: { xs: 1, sm: 1.25, md: 1.5 },
+                      borderRadius: 'var(--border-radius-base)',
                       fontWeight: 600,
                       textTransform: 'none',
-                      fontSize: { xs: '0.7rem', sm: '0.8rem', lg: '0.9rem' },
+                      fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.85rem', lg: '0.9rem' },
+                      minHeight: { xs: '44px', sm: '46px', md: '48px' },
                       borderWidth: '2px',
                       ...(experience === option.value ? {
                         background: 'linear-gradient(135deg, #ff690d 0%, #ff914d 100%)',
@@ -484,8 +489,8 @@ const HelperFinderCard = () => {
             </Box>
 
             {/* Nationality Selection */}
-            <Box sx={{ mb: { xs: 1.5, lg: 4 } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 1, lg: 1.5 } }}>
+            <Box sx={{ mb: { xs: 1, lg: 2.5 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.75, lg: 1 } }}>
                 <MapPin size={16} color={nationalityError ? '#d32f2f' : '#ff690d'} style={{ marginRight: 6 }} />
                 <Typography 
                   variant="body2" 
@@ -507,11 +512,13 @@ const HelperFinderCard = () => {
                     variant={nationality === option.value ? "contained" : "outlined"}
                     sx={{
                       flex: 1,
-                      py: { xs: 1.1, sm: 1.2, lg: 1.25 },
-                      borderRadius: '12px',
+                      py: { xs: 1.25, sm: 1.35, md: 1.4, lg: 1.5 },
+                      px: { xs: 0.75, sm: 1, md: 1.25 },
+                      borderRadius: 'var(--border-radius-base)',
                       fontWeight: 600,
                       textTransform: 'none',
-                      fontSize: { xs: '0.8rem', sm: '0.85rem', lg: '0.85rem' },
+                      fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.85rem' },
+                      minHeight: { xs: '44px', sm: '46px', md: '48px' },
                       borderWidth: '2px',
                       ...(nationality === option.value ? {
                         background: 'linear-gradient(135deg, #ff690d 0%, #ff914d 100%)',
@@ -544,7 +551,7 @@ const HelperFinderCard = () => {
           {/* Right Column - Pricing Breakdown */}
           <Box>
             {/* Section Header */}
-            <Box sx={{ mb: { xs: 2, lg: 3 } }}>
+            <Box sx={{ mb: { xs: 1.5, lg: 2.25 } }}>
               <Typography 
                 variant="h6" 
                 fontWeight="bold" 
@@ -552,7 +559,7 @@ const HelperFinderCard = () => {
                 sx={{
                   fontFamily: 'Inter, system-ui, sans-serif',
                   fontSize: { xs: '1rem', lg: '1.25rem' },
-                  mb: { xs: 1, lg: 1.5 }
+                  mb: { xs: 0.75, lg: 1 }
                 }}
               >
                 Package Cost Breakdown
@@ -564,7 +571,7 @@ const HelperFinderCard = () => {
             {experience && nationality ? (
               <>
                 {/* Compact Cost Summary */}
-                <Box sx={{ mb: { xs: 2, lg: 3 } }}>
+                <Box sx={{ mb: { xs: 1.5, lg: 2.25 } }}>
                   <Box
                     onClick={() => setShowPricingModal(true)}
                     sx={{
@@ -647,7 +654,7 @@ const HelperFinderCard = () => {
               </>
             ) : (
               /* Placeholder when selections are incomplete */
-              <Box sx={{ mb: { xs: 2, lg: 3 } }}>
+              <Box sx={{ mb: { xs: 1.5, lg: 2.25 } }}>
                 <Box
                   sx={{
                     p: { xs: 2, lg: 2.5 },
@@ -691,13 +698,15 @@ const HelperFinderCard = () => {
                 fullWidth
                 variant="contained"
                 size="large"
-                endIcon={<ArrowRightIcon sx={{ fontSize: { xs: '0.9rem', lg: '1rem' } }} />}
+                endIcon={<ArrowRightIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem', md: '1.125rem' } }} />}
                 sx={{
-                  py: { xs: 1.1, sm: 1.2, lg: 1.25 },
-                  borderRadius: '12px',
+                  py: { xs: 1.4, sm: 1.5, md: 1.6, lg: 1.75 },
+                  px: { xs: 2, sm: 2.5, md: 3 },
+                  borderRadius: 'var(--border-radius-base)',
                   background: 'linear-gradient(135deg, #ff690d 0%, #ff914d 100%)',
                   boxShadow: '0 4px 16px rgba(255, 105, 13, 0.25)',
-                  fontSize: { xs: '0.85rem', lg: '0.9rem' },
+                  fontSize: { xs: '0.9rem', sm: '0.95rem', md: '1rem', lg: '1rem' },
+                  minHeight: { xs: '48px', sm: '52px', md: '56px' },
                   fontWeight: 700,
                   textTransform: 'none',
                   fontFamily: 'Inter, system-ui, sans-serif',

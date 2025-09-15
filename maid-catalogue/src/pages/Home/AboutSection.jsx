@@ -1,15 +1,18 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Card } from '../../components/ui/card';
 import { useAnimation } from '../../hooks/useAnimation';
-
+import YouTubeVideoControls from '../../components/common/YouTubeVideoControls';
 const AboutSection = () => {
   const { elementRef: cardRef, isVisible: isCardVisible } = useAnimation(0.2);
+  const { elementRef: videoRef, isVisible: isVideoVisible } = useAnimation(0.1);
+  const navigate = useNavigate();
 
   return (
-    <section className="py-12 bg-white relative overflow-hidden">
-      <div className="max-w-[1440px] w-full px-4 mx-auto relative">
+    <section className="py-8 sm:py-12 lg:py-16 bg-white relative overflow-hidden" style={{ containerType: 'inline-size' }}>
+      <div className="max-w-[1440px] w-full px-4 sm:px-6 lg:px-8 mx-auto relative">
         {/* Scattered Exploded Blurred Circles - Multi-Layer Z-Index System */}
         <div className="absolute inset-0 pointer-events-none">
           {/* BACKGROUND TIER (z-index: -1) - Large scattered background circles */}
@@ -161,7 +164,8 @@ const AboutSection = () => {
                  animationDuration: '3s'
                }}></div>
         </div>
-        <h2 className="relative z-10 text-2xl sm:text-3xl md:text-4xl font-inter font-extrabold leading-tight text-center capitalize">
+        <h2 className="relative z-10 font-inter font-extrabold leading-tight text-center capitalize mb-6 sm:mb-8 lg:mb-12" 
+            style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)' }}>
           <span className="text-black">About </span>
           <span className="text-[#ff690d]">Easy Hire</span>
         </h2>
@@ -177,19 +181,21 @@ const AboutSection = () => {
               : 'opacity-0 translate-y-8'
           }`}
         >
-          <div className="flex flex-col lg:flex-row items-start lg:items-stretch overflow-hidden">
+          <div className="flex flex-col md:flex-row items-start md:items-center overflow-hidden about-section-layout">
             {/* Text Content */}
-            <div className="w-full lg:w-3/5 p-8 lg:p-12">
-              <div className="space-y-6">
+            <div className="w-full md:w-1/2 mb-6 sm:mb-8 md:mb-0 about-section-content flex flex-col justify-center">
+              <div className="space-y-4 sm:space-y-6 about-section-spacing">
                 {/* Header with Badge */}
              
                 {/* Founder Introduction */}
-                <div className="space-y-4">
-                  <p className="text-lg font-inter font-medium text-gray-800">
+                <div className="space-y-3 sm:space-y-4">
+                  <p className="font-inter font-medium text-gray-800" 
+                     style={{ fontSize: 'clamp(1rem, 2.5vw, 1.25rem)' }}>
                     <span className="text-[#ff690d] font-bold">"Serving Homes, Serving Hearts"</span>
                   </p>
                   
-                  <div className="space-y-4 text-base md:text-lg font-inter leading-relaxed text-gray-700">
+                  <div className="space-y-4 font-inter leading-relaxed text-gray-700" 
+                       style={{ fontSize: 'clamp(0.875rem, 2vw, 1.125rem)' }}>
                     <p>
                       At Easy Hire, we understand the genuine needs of both employers and domestic helpers. We've revolutionized the traditional hiring process by integrating technology to make it seamless and affordable.
                     </p>
@@ -202,21 +208,22 @@ const AboutSection = () => {
 
                 {/* Key Value Propositions */}
                 <div className="space-y-4">
-                  <h4 className="text-xl font-inter font-semibold text-gray-900">
+                  <h4 className="font-inter font-semibold text-gray-900" 
+                      style={{ fontSize: 'clamp(1rem, 2.5vw, 1.25rem)' }}>
                     What makes Easy Hire different:
                   </h4>
                   
                   <div className="space-y-3">
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0 w-2 h-2 bg-[#ff690d] rounded-full mt-2"></div>
-                      <p className="text-base md:text-lg text-gray-700">
+                      <p className="text-gray-700" style={{ fontSize: 'clamp(0.875rem, 2vw, 1.125rem)' }}>
                         <span className="text-[#ff690d] font-semibold">Complete transparency</span> - No hidden fees, no unexpected clauses, just honest pricing.
                       </p>
                     </div>
                     
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0 w-2 h-2 bg-[#ff690d] rounded-full mt-2"></div>
-                      <p className="text-base md:text-lg text-gray-700">
+                      <p className="text-gray-700" style={{ fontSize: 'clamp(0.875rem, 2vw, 1.125rem)' }}>
                         <span className="text-[#ff690d] font-semibold">Technology-enabled hiring</span> from the comfort of your home with ongoing post-hire support.
                       </p>
                     </div>
@@ -224,10 +231,12 @@ const AboutSection = () => {
                 </div>
 
                 {/* Call to Action */}
-                <div className="pt-6">
+                <div className="pt-4 sm:pt-6">
                   <Button 
                     size="lg" 
-                    className="bg-[#ff690d] hover:bg-[#e55a0a] text-white px-8 py-3 text-lg font-semibold transition-all duration-200 transform hover:scale-105"
+                    className="bg-[#ff690d] hover:bg-[#e55a0a] text-white px-6 sm:px-8 py-3 font-semibold transition-all duration-200 transform hover:scale-105 min-h-[44px] min-w-[44px]"
+                    style={{ fontSize: 'clamp(0.875rem, 2vw, 1.125rem)' }}
+                    onClick={() => navigate('/catalogue')}
                   >
                     FIND A HELPER
                   </Button>
@@ -235,14 +244,32 @@ const AboutSection = () => {
               </div>
             </div>
             
-            {/* Image Section */}
-            <div className="w-full lg:w-2/5 relative">
-              <div className="relative h-64 lg:h-full min-h-[400px] flex items-end justify-center lg:justify-end">
-                <img
-                  src="/images/img_familypic_1.png"
-                  alt="Easy Hire Team - Dedicated professionals serving families"
-                  className="w-full h-full object-cover lg:object-contain max-w-sm lg:max-w-none"
-                />
+            {/* Video Section */}
+            <div className="w-full md:w-1/2 relative flex items-center justify-center">
+              <div 
+                ref={videoRef}
+                className={`relative transition-all duration-1000 ease-out w-full ${
+                  isVideoVisible 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 translate-y-8'
+                }`}
+              >
+                {/* Aspect Ratio Container - 16:9 standard */}
+                <div className="relative w-full about-section-video" style={{ aspectRatio: '16/9' }}>
+                  <iframe
+                    id="youtube-player-about"
+                    className="absolute inset-0 w-full h-full rounded-lg shadow-lg"
+                    src="https://www.youtube.com/embed/3V9f6NTaxtc?autoplay=1&mute=1&loop=1&playlist=3V9f6NTaxtc&controls=0&enablejsapi=1&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&color=white&vq=hd720"
+                    title="About Easy Hire - Professional Service Video"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                  />
+                  {/* Transparent overlay to prevent YouTube hover effects */}
+                  <div className="absolute inset-0 z-10 pointer-events-none bg-transparent rounded-lg"></div>
+                  <YouTubeVideoControls playerId="youtube-player-about" />
+                </div>
               </div>
             </div>
           </div>

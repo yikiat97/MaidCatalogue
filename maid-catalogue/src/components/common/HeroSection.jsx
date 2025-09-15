@@ -9,39 +9,41 @@ const HeroSection = () => {
 
   return (
     <section 
-      className="relative flex items-center bg-gray-100"
+      className="hero-section relative flex items-center bg-gray-100"
       style={{
-        minHeight: '100svh', // Safe viewport height for mobile
+        minHeight: '100svh',
         height: '100vh',
-        paddingTop: '96px' // Account for fixed navbar h-24 (96px)
+        paddingTop: 'var(--spacing-hero-top-mobile)',
+        '--spacing-hero-top-mobile': 'clamp(4rem, 8vh, 6rem)'
       }}
     >
-      {/* Video Background */}
-      <video
-        className="absolute top-0 left-0 w-full h-full object-cover z-0"
-        autoPlay
-        muted
-        loop
-        playsInline
-      >
-        <source src="/assets/0828.mp4" type="video/mp4" />
-        {/* Fallback image for browsers that don't support video */}
-        <img src="/images/hero-bg.jpg" alt="Hero background" className="w-full h-full object-cover" />
-      </video>
+      {/* Image Background */}
+      <img 
+        src="/images/all-staff.PNG" 
+        alt="Staff group photo" 
+        className="absolute top-0 left-0 w-full h-full object-cover z-0" 
+        style={{ 
+          objectPosition: 'center center',
+          aspectRatio: '16/9'
+        }}
+      />
       
       {/* Dark overlay for text readability */}
       <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
-      <div className="max-w-[1440px] w-full mx-auto px-4 relative z-20">
+      <div className="container-responsive w-full relative z-20">
         {/* Main Heading */}
         <div 
           ref={headingRef}
-          className={`text-center mb-4 sm:mb-6 md:mb-8 transition-all duration-1000 ease-out ${
+          className={`text-center transition-all duration-1000 ease-out ${
             isHeadingVisible 
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'
           }`}
+          style={{
+            marginBottom: 'clamp(1rem, 3vw, 2rem)'
+          }}
         >
-          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-inter font-extrabold leading-tight capitalize">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-inter font-extrabold leading-tight capitalize px-2 xs:px-4">
             <span className="text-white">Most </span>
             <span className="text-[#ff690d]">affordable</span>
             <span className="text-white"> maid agency in Singapore</span>
@@ -51,14 +53,20 @@ const HeroSection = () => {
         {/* Description */}
         <div 
           ref={descRef}
-          className={`text-center mb-4 sm:mb-6 md:mb-8 md:px-24 transition-all duration-1000 ease-out delay-300 ${
+          className={`text-center transition-all duration-1000 ease-out delay-300 ${
             isDescVisible 
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'
           }`}
+          style={{
+            marginBottom: 'clamp(1.5rem, 4vw, 3rem)',
+            paddingLeft: 'clamp(1rem, 8vw, 6rem)',
+            paddingRight: 'clamp(1rem, 8vw, 6rem)'
+          }}
         >
-          <p className="text-sm sm:text-base md:text-lg lg:text-xl font-inter font-normal leading-relaxed text-white">
-            With one of our packages carrying absolutely no service fee, we are proud to be the most affordable maid agency in Singapore<span className="hidden sm:inline">—so every family can bring a helper home without stretching their budget. Beyond cost savings, our fee structure is fully transparent</span>
+          <p className="text-responsive-desc font-inter font-normal text-white max-w-4xl mx-auto">
+            <span className="hidden xxs:inline">With one of our packages carrying absolutely no service fee, we are proud to be the most affordable maid agency in Singapore</span>
+            <span className="hidden sm:inline">—so every family can bring a helper home without stretching their budget. Beyond cost savings, our fee structure is fully transparent</span>
           </p>
         </div>
 
@@ -70,6 +78,10 @@ const HeroSection = () => {
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'
           }`}
+          style={{
+            maxWidth: '100%',
+            width: '100%'
+          }}
         >
           <HelperFinderCard />
         </div>

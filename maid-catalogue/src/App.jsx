@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import Catalogue from './pages/Catalogue/Catalogue';
@@ -5,13 +6,16 @@ import MaidDetails from './pages/Catalogue/MaidDetails';
 import Shortlisted from './pages/Catalogue/Shortlisted';
 import Signup from './pages/Signup';
 import Recommend from './pages/Catalogue/Recommend';
+import CardVariations from './pages/Catalogue/CardVariations';
 import { MaidContextProvider } from './context/maidList';
-// import { getToken } from './utils/auth';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import HomePage from './pages/Home';
 import AboutPage from './pages/About';
 import ServicesPage from './pages/Services';
 import FAQsPage from './pages/FAQs';
 import ContactPage from './pages/Contact';
+import PricingPage from './pages/Pricing';
+import PriceCardPage from './pages/PriceCard';
 import Admin from "./pages/admin/admin";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -32,11 +36,11 @@ function ConditionalFloatingWhatsApp() {
   return !isAdminRoute ? <FloatingWhatsApp /> : null;
 }
 
-export default function App() {
-  const isAuthenticated = true//!!getToken();
+// Component to get authentication state
+function AppContent() {
+  const { isAuthenticated } = useAuth();
 
-return (
-  <MaidContextProvider>
+  return (
     <Router>
       <ScrollToTop />
       <Routes>
@@ -45,13 +49,17 @@ return (
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/faqs" element={<FAQsPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/price-card" element={<PriceCardPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route
           path="/catalogue"
-          element={
-            isAuthenticated ? <Catalogue /> : <Navigate to="/login" replace />
-          }
+          element={<Catalogue />}
+        />
+        <Route
+          path="/card-variations"
+          element={<CardVariations />}
         />
         <Route
           path="/maid/:id"
@@ -110,6 +118,16 @@ return (
       </Routes>
       <ConditionalFloatingWhatsApp />
     </Router>
-  </MaidContextProvider>
-);
+  );
+}
+
+// Main App component with providers
+export default function App() {
+  return (
+    <AuthProvider>
+      <MaidContextProvider>
+        <AppContent />
+      </MaidContextProvider>
+    </AuthProvider>
+  );
 }
