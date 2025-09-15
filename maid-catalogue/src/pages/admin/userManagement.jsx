@@ -48,6 +48,37 @@ import {
 import API_CONFIG from '../../config/api.js';
 import ViewMaidModal from '../../components/admin/ViewMaidModal';
 
+/**
+ * 🚨 CRITICAL SECURITY WARNING 🚨
+ *
+ * This admin component has significant security vulnerabilities that MUST be addressed:
+ *
+ * 1. CLIENT-SIDE ONLY AUTHORIZATION:
+ *    - Admin access is only validated on the frontend
+ *    - Malicious users can bypass these checks
+ *    - All server endpoints MUST implement proper admin role verification
+ *
+ * 2. MISSING SERVER-SIDE VALIDATION:
+ *    - API endpoints must verify admin role before processing requests
+ *    - JWT tokens or session data must be validated server-side
+ *    - Implement proper RBAC (Role-Based Access Control) on the backend
+ *
+ * 3. REQUIRED SERVER-SIDE FIXES:
+ *    - Add middleware to verify admin role for all admin endpoints
+ *    - Implement proper session management with HttpOnly cookies
+ *    - Add rate limiting to prevent admin API abuse
+ *    - Log all admin actions for security audit
+ *    - Add CSRF protection for state-changing operations
+ *
+ * 4. IMMEDIATE ACTIONS REQUIRED:
+ *    - Review and secure all admin API endpoints
+ *    - Implement proper authentication middleware
+ *    - Add authorization checks in backend controllers
+ *    - Audit all admin operations for proper access control
+ *
+ * DO NOT use this in production without proper server-side security!
+ */
+
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
@@ -68,12 +99,10 @@ const UserManagement = () => {
      // Check session validity on page load
      const checkInitialSession = async () => {
        try {
-         // Debug: Check what's in localStorage
-         console.log('localStorage adminToken:', localStorage.getItem('adminToken'));
-         console.log('sessionStorage keys:', Object.keys(sessionStorage));
+         // Debug: Check session state (sanitized for security)
+         console.log('Checking admin authentication state...');
          
          const url = API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.ADMIN.USERS);
-         console.log('Initial session check URL:', url);
          const response = await fetch(url, {
            method: 'HEAD', // Lightweight check
            credentials: 'include',
@@ -82,8 +111,7 @@ const UserManagement = () => {
            },
          });
          
-         console.log('Initial session check response status:', response.status);
-         console.log('Initial session check response headers:', response.headers);
+         console.log('Admin authentication check completed with status:', response.status);
         
         if (response.status === 401 || response.status === 403) {
           handleUnauthorizedAccess('access the user management page');
@@ -107,8 +135,7 @@ const UserManagement = () => {
      setLoading(true);
      try {
        const url = API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.ADMIN.USERS, { page, limit });
-       console.log('Fetching users from URL:', url);
-       console.log('Admin USERS endpoint:', API_CONFIG.ENDPOINTS.ADMIN.USERS);
+       console.log('Fetching users data...');
        const response = await fetch(url, {
          credentials: 'include',
          headers: {
@@ -116,9 +143,7 @@ const UserManagement = () => {
          },
        });
        
-       console.log('Response status:', response.status);
-       console.log('Response headers:', response.headers);
-       console.log('Response ok:', response.ok);
+       console.log('Fetch users response status:', response.status);
       
       // Check if response indicates unauthorized access
       if (checkAuthStatus(response, 'view users')) {
@@ -131,11 +156,7 @@ const UserManagement = () => {
       }
       
              const data = await response.json();
-       console.log('Users data received:', data); // Debug log
-       console.log('Data type:', typeof data);
-       console.log('Data keys:', Object.keys(data));
-       console.log('Users array:', data.users);
-       console.log('Total count:', data.total);
+       console.log('Users data received successfully');
        setUsers(data.users || []);
        setTotal(data.total || 0);
     } catch (error) {
@@ -190,7 +211,7 @@ const UserManagement = () => {
   const handleAddRecommendation = (maidId) => {
     if (!selectedUser) return;
     
-    console.log('Adding recommendation for user:', selectedUser.id, 'maid:', maidId); // Debug log
+    console.log('Adding recommendation...'); // Debug log
     const maid = availableMaids.find(m => m.id === maidId);
     if (!maid) return;
 
@@ -255,7 +276,7 @@ const UserManagement = () => {
   const handleRemoveRecommendation = async (maidId) => {
     if (!selectedUser) return;
 
-    console.log('Removing recommendation for user:', selectedUser.id, 'maid:', maidId); // Debug log
+    console.log('Removing recommendation...'); // Debug log
 
     setDeletingRecommendation(maidId);
 
@@ -567,8 +588,7 @@ const UserManagement = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredUsers.map((user) => {
-                    console.log('User data:', user); // Debug log
-                    console.log('User recommendations:', user.recommendations); // Debug log
+                    console.log('User data loaded for management'); // Debug log
                     return (
                     <tr key={user.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{user.id}</td>
