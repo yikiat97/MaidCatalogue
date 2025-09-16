@@ -443,7 +443,7 @@ export default function MaidCardVariation1({
                   </Typography>
                   {(maid.height && maid.height > 0) || (maid.weight && maid.weight > 0) ? (
                     <Box sx={{
-                      width: '1.5px',
+                      width: '2px',
                       height: '16px',
                       backgroundColor: brandColors.textSecondary,
                       opacity: 1,
@@ -469,7 +469,7 @@ export default function MaidCardVariation1({
                   </Typography>
                   {maid.weight && maid.weight > 0 && (
                     <Box sx={{
-                      width: '1.5px',
+                      width: '2px',
                       height: '16px',
                       backgroundColor: brandColors.textSecondary,
                       opacity: 1,
