@@ -7,22 +7,15 @@ import {
   CardContent,
   Button,
   Stack,
-  useTheme,
-  useMediaQuery,
-  Fade,
-  Modal,
-  Skeleton
+  Fade
 } from '@mui/material';
 import RecommendIcon from '@mui/icons-material/Recommend';
-import StarIcon from '@mui/icons-material/Star';
 import ExploreIcon from '@mui/icons-material/Explore';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import API_CONFIG from '../../config/api.js';
 import MaidCardVariation1 from '../../components/Catalogue/variations/MaidCardVariation1';
 import Header from '../../components/common/Header';
-import logoBlack from '../../assets/logoBlack.png';
 
 // Brand colors
 const brandColors = {
@@ -43,168 +36,73 @@ const brandColors = {
 };
 
 export default function Recommended() {
-  const [recommendedMaids, setRecommendedMaids] = useState([]);
+  const [topMaids, setTopMaids] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userFavorites, setUserFavorites] = useState([]);
-  const [favoriteHelpers, setFavoriteHelpers] = useState([]);
-  const [allHelpers, setAllHelpers] = useState([]); // Combined recommended + favorites
   const [selectedMaids, setSelectedMaids] = useState([]);
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [selectedMaid, setSelectedMaid] = useState(null);
   const [loading, setLoading] = useState(true);
-  const location = useLocation();
-  const navigate = useNavigate();
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     const fetchAllData = async () => {
-      console.log('🚀 Recommend page useEffect triggered');
-      console.log('📍 Current location:', location.pathname + location.search);
-      const params = new URLSearchParams(location.search);
-      const token = params.get('token');
-      console.log('🔑 Token from URL:', token ? 'exists' : 'not found');
-
       try {
-        // 1️⃣ Check if user is logged in first
-        console.log('🔐 Checking authentication...');
+        // 1. Check authentication status
         const authRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.PROFILE), {
           credentials: 'include',
         });
-        
-        console.log('📡 Auth response status:', authRes.status);
-        
+
         if (authRes.ok) {
-          const authData = await authRes.json();
-          console.log('✅ Auth data:', authData);
           setIsAuthenticated(true);
-          
-          // Check if user has role 131 (customer)
-          if (authData.user && authData.user.role === 131) {
-            console.log('👤 User is authenticated as customer (role 131)');
-          } else {
-            console.log('⚠️ User is not a customer, role:', authData.user?.role);
-          }
 
-          // 2️⃣ If authenticated, fetch user's personal recommendations (ignore token)
-          console.log('🔐 User is authenticated, fetching personal recommendations...');
-          const recRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.USER.RECOMMENDED), {
-            credentials: 'include',
-          });
-          
-          console.log('📡 Personal recommendations response status:', recRes.status);
-          
-          if (recRes.ok) {
-            const recData = await recRes.json();
-            console.log('✅ Authenticated user recommendations:', recData);
-            console.log('📊 Number of recommendations:', recData.length);
-            setRecommendedMaids(recData);
-          } else {
-            console.error('❌ Failed to fetch authenticated user recommendations:', recRes.status);
-            const errorText = await recRes.text();
-            console.error('📄 Error response:', errorText);
-            setRecommendedMaids([]);
-          }
+          // Fetch user favorites if authenticated
+          try {
+            const favRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.USER.FAVORITES), {
+              credentials: 'include',
+            });
 
-          // 3️⃣ Fetch user favorites if authenticated
-          console.log('❤️ Fetching user favorites...');
-          const favRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.USER.FAVORITES), {
-            credentials: 'include',
-          });
-          
-          console.log('📡 Favorites response status:', favRes.status);
-          
-          if (favRes.ok) {
-            const favData = await favRes.json();
-            if (Array.isArray(favData)) {
-              // Store complete maid objects for display
-              setFavoriteHelpers(favData);
-              // Extract maid IDs for heart state management
-              const favoriteIds = favData.map(maid => maid.id);
-              console.log('✅ User favorites loaded:', favoriteIds.length, 'favorites');
-              setUserFavorites(favoriteIds);
+            if (favRes.ok) {
+              const favData = await favRes.json();
+              if (Array.isArray(favData)) {
+                const favoriteIds = favData.map(maid => maid.id);
+                setUserFavorites(favoriteIds);
+              } else {
+                setUserFavorites([]);
+              }
             } else {
-              setFavoriteHelpers([]);
               setUserFavorites([]);
             }
-          } else if (favRes.status === 401) {
-            // User not authenticated, set empty favorites
-            setFavoriteHelpers([]);
-            setUserFavorites([]);
-            console.log('❌ User not authenticated, no favorites');
-          } else {
-            console.error('❌ Failed to fetch favorites:', favRes.status);
-            setFavoriteHelpers([]);
+          } catch (err) {
+            console.error('Error fetching favorites:', err);
             setUserFavorites([]);
           }
         } else {
-          console.log('❌ User is not authenticated');
-          setIsAuthenticated(false); // not logged in
+          setIsAuthenticated(false);
           setUserFavorites([]);
-          setFavoriteHelpers([]);
-          
-          // 4️⃣ If not authenticated and has token, fetch anonymous recommendations
-          if (token) {
-            console.log('👤 User not authenticated, fetching anonymous recommendations with token...');
-            const fetchURL = API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.USER.RECOMMENDED}/${token}`);
-            console.log('🌐 Fetching from:', fetchURL);
-            
-            const recRes = await fetch(fetchURL, {
-              credentials: 'include',
-            });
-            
-            console.log('📡 Anonymous recommendations response status:', recRes.status);
-            
-            if (recRes.ok) {
-              const recData = await recRes.json();
-              console.log('✅ Anonymous recommendations:', recData);
-              console.log('📊 Number of recommendations:', recData.length);
-              setRecommendedMaids(recData);
-            } else {
-              console.error('❌ Failed to fetch anonymous recommendations:', recRes.status);
-              const errorText = await recRes.text();
-              console.error('📄 Error response:', errorText);
-              setRecommendedMaids([]);
-            }
-          } else {
-            console.log('❌ No token and user not authenticated, setting empty recommendations');
-            setRecommendedMaids([]);
-          }
         }
-      } catch (err) {
-        console.error('Error loading recommended page:', err);
-        setIsAuthenticated(false);
+
+        // 2. Fetch top maids (public data - no authentication required)
+        const topMaidsRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.CATALOGUE.TOP_MAIDS), {
+          credentials: 'include',
+        });
+
+        if (topMaidsRes.ok) {
+          const topMaidsData = await topMaidsRes.json();
+          setTopMaids(topMaidsData);
+        } else {
+          console.error('Failed to fetch top maids:', topMaidsRes.status);
+          setTopMaids([]);
+        }
+      } catch (error) {
+        console.error('Error loading top maids:', error);
+        setTopMaids([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchAllData();
-  }, [location, isAuthenticated]);
+  }, []);
 
-  // Combine recommended maids and favorite helpers into one array
-  useEffect(() => {
-    const combined = [];
-
-    // Add recommended maids first
-    if (recommendedMaids.length > 0) {
-      combined.push(...recommendedMaids);
-    }
-
-    // Add favorite helpers that aren't already in recommendations
-    if (favoriteHelpers.length > 0) {
-      const recommendedIds = new Set(recommendedMaids.map(maid => maid.id));
-      const uniqueFavorites = favoriteHelpers.filter(fav => !recommendedIds.has(fav.id));
-      combined.push(...uniqueFavorites);
-    }
-
-    console.log('🔄 Combined helpers:', combined.length, 'total helpers');
-    console.log('   - Recommended:', recommendedMaids.length);
-    console.log('   - Unique favorites:', favoriteHelpers.filter(fav => !recommendedMaids.some(rec => rec.id === fav.id)).length);
-
-    setAllHelpers(combined);
-  }, [recommendedMaids, favoriteHelpers]);
 
   // Handle maid selection
   const handleMaidSelection = (maidId, isSelected) => {
@@ -233,11 +131,11 @@ export default function Recommended() {
 
     if (selectedMaids.length === 0) return;
 
-    // Get selected maid details from all helpers (recommended + favorites)
-    const selectedMaidDetails = allHelpers.filter(maid => selectedMaids.includes(maid.id));
+    // Get selected maid details
+    const selectedMaidDetails = topMaids.filter(maid => selectedMaids.includes(maid.id));
 
     // Generate WhatsApp message
-    let message = `Hi! I'm interested in the following recommended helpers:\n\n`;
+    let message = `Hi! I'm interested in the following top recommended helpers:\n\n`;
 
     selectedMaidDetails.forEach((maid, index) => {
       const profileLink = generateProfileLink(maid.id);
@@ -252,44 +150,6 @@ export default function Recommended() {
     window.open(whatsappUrl, '_blank');
   };
 
-  // Auto-show login prompt for non-authenticated users with recommendation token
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const token = params.get('token');
-    
-    // If there's a recommendation token and user is not authenticated, show login prompt
-    if (token && !isAuthenticated && recommendedMaids.length > 0) {
-      // Set a small delay to ensure the page has loaded
-      const timer = setTimeout(() => {
-        setShowLoginPrompt(true);
-      }, 1000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [location, isAuthenticated, recommendedMaids.length]);
-
-
-  // Handle login navigation
-  const handleLogin = () => {
-    const currentUrl = window.location.href;
-    // Store current URL in localStorage to redirect back after login
-    localStorage.setItem('redirectAfterLogin', currentUrl);
-    navigate('/login');
-  };
-
-  // Handle signup navigation
-  const handleSignup = () => {
-    const currentUrl = window.location.href;
-    // Store current URL in localStorage to redirect back after signup
-    localStorage.setItem('redirectAfterLogin', currentUrl);
-    navigate('/signup');
-  };
-
-  // Handle cancel - close modal
-  const handleCancel = () => {
-    setShowLoginPrompt(false);
-    setSelectedMaid(null);
-  };
 
   return (
     <>
@@ -331,7 +191,7 @@ export default function Recommended() {
                         color: brandColors.text,
                         fontSize: { xs: '1.5rem', md: '2rem' }
                       }}>
-                        Your Recommended Helpers
+                        Top Recommended Helpers
                       </Typography>
                     </Box>
                     <Typography variant="body1" sx={{
@@ -339,7 +199,7 @@ export default function Recommended() {
                       fontSize: '1rem',
                       ml: { xs: 0, md: 5 }
                     }}>
-                      Personalized suggestions based on your preferences
+                      Our most popular and highly rated helpers
                     </Typography>
                   </Box>
 
@@ -423,9 +283,9 @@ export default function Recommended() {
                       </div>
                     ))}
                   </div>
-                ) : allHelpers.length > 0 ? (
+                ) : topMaids.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4">
-                    {allHelpers.map((maid) => (
+                    {topMaids.map((maid) => (
                       <div key={maid.id} className="w-full">
                         <MaidCardVariation1
                           maid={maid}
@@ -475,7 +335,7 @@ export default function Recommended() {
                           color: brandColors.text,
                           fontWeight: 600
                         }}>
-                          No Recommendations Available
+                          No Top Helpers Available
                         </Typography>
                         <Typography variant="body1" sx={{
                           color: brandColors.textSecondary,
@@ -483,7 +343,7 @@ export default function Recommended() {
                           maxWidth: 450,
                           lineHeight: 1.6
                         }}>
-                          We don't have personalized recommendations ready for you yet. Browse our catalogue to discover amazing helpers or contact us for assistance.
+                          We don't have top recommended helpers available right now. Browse our catalogue to discover amazing helpers or contact us for assistance.
                         </Typography>
                       </Box>
 
@@ -593,98 +453,6 @@ export default function Recommended() {
         )}
       </div>
 
-      {/* Login Prompt Modal */}
-      <Modal
-        open={showLoginPrompt}
-        onClose={handleCancel}
-        aria-labelledby="login-prompt-modal"
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 2
-        }}
-      >
-        <Box sx={{
-          background: brandColors.surface,
-          borderRadius: 3,
-          p: 4,
-          maxWidth: 400,
-          width: '100%',
-          textAlign: 'center',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
-          border: `1px solid ${brandColors.border}`
-        }}>
-          <Typography variant="h5" sx={{ 
-            fontWeight: 600,
-            color: brandColors.text,
-            mb: 2
-          }}>
-            View Clear Images
-          </Typography>
-          
-          <Typography variant="body1" sx={{ 
-            color: brandColors.textSecondary,
-            mb: 3
-          }}>
-            {selectedMaid 
-              ? `To see ${selectedMaid.name}'s clear photo and full details, please sign in or create an account.`
-              : "You have personalized maid recommendations! Sign in or create an account to view clear photos and full details."
-            }
-          </Typography>
-
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column',
-            gap: 2,
-            mt: 3
-          }}>
-            <Button
-              variant="contained"
-              onClick={handleLogin}
-              sx={{
-                background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryDark} 100%)`,
-                color: 'white',
-                py: 1.5,
-                '&:hover': {
-                  background: `linear-gradient(135deg, ${brandColors.primaryDark} 0%, ${brandColors.primary} 100%)`,
-                }
-              }}
-            >
-              Sign In
-            </Button>
-            
-            <Button
-              variant="outlined"
-              onClick={handleSignup}
-              sx={{
-                borderColor: brandColors.primary,
-                color: brandColors.primary,
-                py: 1.5,
-                '&:hover': {
-                  borderColor: brandColors.primaryDark,
-                  background: `${brandColors.primary}10`,
-                }
-              }}
-            >
-              Create Account
-            </Button>
-            
-            <Button
-              variant="text"
-              onClick={handleCancel}
-              sx={{
-                color: brandColors.textSecondary,
-                '&:hover': {
-                  background: `${brandColors.textSecondary}10`,
-                }
-              }}
-            >
-              Continue with Blurred Images
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
     </>
   );
 }
