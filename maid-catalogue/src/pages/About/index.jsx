@@ -107,7 +107,7 @@ const AboutPage = () => {
 
                       {/* Personal story */}
                       <div className="space-y-4">
-                        <p className="text-base md:text-lg lg:text-xl font-light font-inter text-gray-200 leading-relaxed text-justify">
+                        <p className="text-base md:text-lg lg:text-xl font-light font-inter text-gray-200 leading-relaxed text-justify italic">
                           Hi, I'm Li Ling, founder of Easy Hire. I started this agency after seeing my own family struggle with hidden fees and poor support when hiring a helper. Easy Hire is built on transparency, fair treatment, and real after-care so both employers and helpers feel respected from day one. No surprises, just honest guidance and support that leaves an impact.
                         </p>
                       </div>
@@ -151,7 +151,7 @@ const AboutPage = () => {
 
                       {/* Personal story */}
                       <div className="space-y-4">
-                        <p className="text-base md:text-lg lg:text-xl font-light font-inter text-gray-200 leading-relaxed text-justify">
+                        <p className="text-base md:text-lg lg:text-xl font-light font-inter text-gray-200 leading-relaxed text-justify italic">
                           I am Yikiat. I build the systems that make hiring simple and seamless. My focus is to build responsibly, protect data, and keep things steady without extra fuss. If something can be simpler or safer, that's what I work on next.
                         </p>
                       </div>
@@ -226,7 +226,7 @@ const AboutPage = () => {
 
                       {/* Personal story */}
                       <div className="space-y-4">
-                        <p className="text-base md:text-lg lg:text-xl font-light font-inter text-gray-200 leading-relaxed text-justify">
+                        <p className="text-base md:text-lg lg:text-xl font-light font-inter text-gray-200 leading-relaxed text-justify italic">
                           Hi there, my name is Fetrin. I want to make hiring helpers easy, reliable, and supportive for both families and helpers. I am committed to helping employers find the right helper while ensuring every helper is treated with fairness and respect.
                         </p>
                       </div>
