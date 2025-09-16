@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import WavyCard from '../ui/WavyCard';
 import { getCountryFlag } from '../../utils/flagUtils';
 
 const ServicePricingCards = () => {
   const [activeTab, setActiveTab] = useState('new');
   const [isVisible, setIsVisible] = useState(true);
+  const navigate = useNavigate();
 
   const serviceTiers = [
     // New Helper Packages
@@ -80,7 +82,7 @@ const ServicePricingCards = () => {
       subtitle: 'Experienced Helper Package',
       variant: 'default',
       country: 'Myanmar',
-      price: '$620',
+      price: '$998',
       period: 'total cost',
       category: 'experienced',
       description: 'Package for experienced Myanmar domestic helpers with proven work history.',
@@ -91,11 +93,11 @@ const ServicePricingCards = () => {
         'Medical check up: $80',
         'Transportation upon arrival: $140',
         'Air Ticket: $250',
-        'Agency Fee: WAIVED'
+        'Agency Fee: $378'
       ],
       ctaText: 'Find a Helper',
       popular: true,
-      waiveFee: true,
+      waiveFee: false,
     },
     {
       title: 'Indonesian Helper',
@@ -143,9 +145,29 @@ const ServicePricingCards = () => {
     },
   ];
 
-  const handleServiceSelect = (serviceTitle) => {
-    console.log(`Selected service: ${serviceTitle}`);
-    // Handle service selection logic - could redirect to booking or contact form
+  const handleServiceSelect = (service) => {
+    // Map service country to filter value
+    let country;
+    switch (service.country) {
+      case 'Myanmar':
+        country = 'Myanmar';
+        break;
+      case 'Indonesia':
+        country = 'Indonesia';
+        break;
+      case 'Philippines':
+        country = 'Philippines';
+        break;
+      default:
+        country = service.country;
+    }
+
+    // Create URL parameters - only filter by country
+    const searchParams = new URLSearchParams();
+    searchParams.append('country', country);
+
+    // Navigate to catalogue with country filter only
+    navigate(`/catalogue?${searchParams.toString()}`);
   };
 
   const handleTabChange = (newTab) => {
@@ -211,7 +233,7 @@ const ServicePricingCards = () => {
             isVisible ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          {displayedPackages.map((service, index) => (
+          {displayedPackages.map((service) => (
             <WavyCard
               key={service.title}
               title={service.title}
@@ -329,7 +351,7 @@ const ServicePricingCards = () => {
                 {/* CTA Button - Always positioned at bottom */}
                 <div className="mt-6">
                   <button
-                    onClick={() => handleServiceSelect(service.title)}
+                    onClick={() => handleServiceSelect(service)}
                     className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 ${
                       service.waiveFee
                         ? 'bg-gradient-to-r from-[#ff690d] to-[#ff914d] text-white shadow-xl font-bold text-lg py-4'
