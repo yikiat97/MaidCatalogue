@@ -185,7 +185,7 @@ const AboutPage = () => {
           }}
         >
           {/* Dark overlay for text readability */}
-          <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
+          <div className="absolute inset-0 bg-black bg-opacity-60 z-10"></div>
 
           <div className="max-w-[1440px] w-full mx-auto px-4 relative z-20">
             <div

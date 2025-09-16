@@ -851,10 +851,10 @@ export default function MaidCard({ maid, isAuthenticated, userFavorites = [], is
           </Box>
           
           {/* Physical Stats Row - Age, Height, Weight */}
-          <Box sx={{ 
-            display: 'flex', 
-            gap: 0,
-            mb: 1.25, 
+          <Box sx={{
+            display: 'flex',
+            gap: isMobile ? 0.5 : 0.75,
+            mb: 1.25,
             alignItems: 'center',
             flexWrap: 'nowrap'
           }}>
@@ -869,17 +869,18 @@ export default function MaidCard({ maid, isAuthenticated, userFavorites = [], is
                     fontWeight: 500,
                     letterSpacing: '0.01em',
                     whiteSpace: 'nowrap',
-                    px: isMobile ? 0.8 : 1
+                    pl: 0, pr: isMobile ? 0.4 : 0.5
                   }}
                 >
                   {maidAge}yr
                 </Typography>
                 {(maid.height && maid.height > 0) || (maid.weight && maid.weight > 0) ? (
-                  <Box sx={{ 
-                    width: '1px', 
-                    height: '14px', 
-                    backgroundColor: brandColors.border,
-                    opacity: 0.8
+                  <Box sx={{
+                    width: '1.5px',
+                    height: '16px',
+                    backgroundColor: brandColors.textSecondary,
+                    opacity: 1,
+                    borderRadius: '1px'
                   }} />
                 ) : null}
               </>
@@ -895,17 +896,18 @@ export default function MaidCard({ maid, isAuthenticated, userFavorites = [], is
                     fontWeight: 500,
                     letterSpacing: '0.01em',
                     whiteSpace: 'nowrap',
-                    px: isMobile ? 0.8 : 1
+                    pl: 0, pr: isMobile ? 0.4 : 0.5
                   }}
                 >
                   {maid.height}cm
                 </Typography>
                 {maid.weight && maid.weight > 0 && (
-                  <Box sx={{ 
-                    width: '1px', 
-                    height: '14px', 
-                    backgroundColor: brandColors.border,
-                    opacity: 0.8
+                  <Box sx={{
+                    width: '1.5px',
+                    height: '16px',
+                    backgroundColor: brandColors.textSecondary,
+                    opacity: 1,
+                    borderRadius: '1px'
                   }} />
                 )}
               </>
@@ -920,7 +922,7 @@ export default function MaidCard({ maid, isAuthenticated, userFavorites = [], is
                   fontWeight: 500,
                   letterSpacing: '0.01em',
                   whiteSpace: 'nowrap',
-                  px: isMobile ? 0.8 : 1
+                  pl: 0, pr: isMobile ? 0.4 : 0.5
                 }}
               >
                 {maid.weight}kg
@@ -1006,6 +1008,7 @@ export default function MaidCard({ maid, isAuthenticated, userFavorites = [], is
             <Divider
               sx={{
                 my: isMobile ? 1.5 : isTablet ? 1.75 : 2,
+                mx: isMobile ? 1 : isTablet ? 1.5 : 2,
                 borderColor: brandColors.border,
                 opacity: 0.6
               }}

@@ -421,7 +421,7 @@ export default function MaidCardVariation1({
             {/* Physical Stats Row - Age, Height, Weight */}
             <Box sx={{
               display: 'flex',
-              gap: 0,
+              gap: isMobile ? 0.5 : 0.75,
               mb: 0.5,
               alignItems: 'center',
               flexWrap: 'nowrap'
@@ -436,17 +436,18 @@ export default function MaidCardVariation1({
                       fontWeight: 500,
                       letterSpacing: '0.01em',
                       whiteSpace: 'nowrap',
-                      px: isMobile ? 0.8 : 1
+                      pl: 0, pr: isMobile ? 0.4 : 0.5
                     }}
                   >
                     {maidAge}yr
                   </Typography>
                   {(maid.height && maid.height > 0) || (maid.weight && maid.weight > 0) ? (
                     <Box sx={{
-                      width: '1px',
-                      height: '12px',
-                      backgroundColor: brandColors.border,
-                      opacity: 0.8
+                      width: '1.5px',
+                      height: '16px',
+                      backgroundColor: brandColors.textSecondary,
+                      opacity: 1,
+                      borderRadius: '1px'
                     }} />
                   ) : null}
                 </>
@@ -461,17 +462,18 @@ export default function MaidCardVariation1({
                       fontWeight: 500,
                       letterSpacing: '0.01em',
                       whiteSpace: 'nowrap',
-                      px: isMobile ? 0.8 : 1
+                      pl: 0, pr: isMobile ? 0.4 : 0.5
                     }}
                   >
                     {maid.height}cm
                   </Typography>
                   {maid.weight && maid.weight > 0 && (
                     <Box sx={{
-                      width: '1px',
-                      height: '12px',
-                      backgroundColor: brandColors.border,
-                      opacity: 0.8
+                      width: '1.5px',
+                      height: '16px',
+                      backgroundColor: brandColors.textSecondary,
+                      opacity: 1,
+                      borderRadius: '1px'
                     }} />
                   )}
                 </>
@@ -485,7 +487,7 @@ export default function MaidCardVariation1({
                     fontWeight: 500,
                     letterSpacing: '0.01em',
                     whiteSpace: 'nowrap',
-                    px: isMobile ? 0.8 : 1
+                    pl: 0, pr: isMobile ? 0.4 : 0.5
                   }}
                 >
                   {maid.weight}kg
