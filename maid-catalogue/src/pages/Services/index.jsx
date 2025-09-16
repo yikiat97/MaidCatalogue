@@ -69,17 +69,15 @@ const ServicesPage = () => {
               Join hundreds of satisfied families who have found their perfect domestic helper through our comprehensive services.
             </p>
             <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center px-4">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-white text-[#ff690d] hover:bg-gray-100 px-6 md:px-8 py-3 text-base md:text-lg font-semibold transition-all duration-200 transform hover:scale-105 w-full sm:w-auto">
-              >
                 FIND A HELPER NOW
               </Button>
-              <Button 
+              <Button
                 variant="outline"
-                size="lg" 
+                size="lg"
                 className="border-white text-white hover:bg-white hover:text-[#ff690d] px-6 md:px-8 py-3 text-base md:text-lg font-semibold transition-all duration-200 w-full sm:w-auto">
-              >
                 SPEAK TO CONSULTANT
               </Button>
             </div>

@@ -16,6 +16,7 @@ import { Link } from 'react-router-dom';
 import API_CONFIG from '../../config/api.js';
 import MaidCardVariation1 from '../../components/Catalogue/variations/MaidCardVariation1';
 import MaidCardSkeleton from '../../components/Catalogue/MaidCardSkeleton';
+import FilterSidebar from '../../components/Catalogue/FilterSidebar';
 import Header from '../../components/common/Header';
 
 // Brand colors
@@ -42,6 +43,14 @@ export default function Recommended() {
   const [userFavorites, setUserFavorites] = useState([]);
   const [selectedMaids, setSelectedMaids] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Filter states
+  const [salaryRange, setSalaryRange] = useState([400, 1000]);
+  const [ageRange, setAgeRange] = useState([18, 60]);
+  const [selectedCountries, setSelectedCountries] = useState([]);
+  const [skillsets, setSkillsets] = useState([]);
+  const [languages, setLanguages] = useState([]);
+  const [types, setTypes] = useState([]);
 
 
   useEffect(() => {
@@ -104,6 +113,32 @@ export default function Recommended() {
     fetchAllData();
   }, []);
 
+  // Function to calculate age from DOB
+  const calculateAge = (dob) => {
+    if (!dob) return null;
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    return age;
+  };
+
+  // Filter logic for top maids
+  const filteredTopMaids = topMaids.filter((maid) => {
+    const countryMatch = selectedCountries.length === 0 || selectedCountries.includes(maid.country);
+    const salaryMatch = maid.salary >= salaryRange[0] && maid.salary <= salaryRange[1];
+    const age = calculateAge(maid.DOB);
+    const ageInRange = age >= ageRange[0] && age <= ageRange[1];
+    const skillMatch = skillsets.length === 0 || skillsets.some((s) => maid.skills.includes(s));
+    const languageMatch = languages.length === 0 || languages.some((l) => maid.languages.includes(l));
+    const typeMatch = types.length === 0 || types.some((t) => maid.type.includes(t));
+    return countryMatch && salaryMatch && ageInRange && skillMatch && languageMatch && typeMatch;
+  });
 
   // Handle maid selection
   const handleMaidSelection = (maidId, isSelected) => {
@@ -132,8 +167,8 @@ export default function Recommended() {
 
     if (selectedMaids.length === 0) return;
 
-    // Get selected maid details
-    const selectedMaidDetails = topMaids.filter(maid => selectedMaids.includes(maid.id));
+    // Get selected maid details from filtered maids
+    const selectedMaidDetails = filteredTopMaids.filter(maid => selectedMaids.includes(maid.id));
 
     // Generate WhatsApp message
     let message = `Hi! I'm interested in the following top recommended helpers:\n\n`;
@@ -153,232 +188,189 @@ export default function Recommended() {
 
 
   return (
-    <>
-      <div className="min-h-screen bg-white">
+    <div className="h-screen bg-gray-50 flex flex-col">
+      <div className="w-full px-2 sm:px-4 pt-2 md:pt-3 flex-1 flex flex-col">
+        {/* Navigation Header */}
         <Header />
-        <Box sx={{
-          minHeight: '100vh',
-          background: `linear-gradient(135deg, ${brandColors.background} 0%, ${brandColors.surface} 100%)`,
-          pb: 4
-        }}>
-          <Container maxWidth="xl" sx={{ pt: { xs: 2, md: 3 }, px: { xs: 0, md: 3 } }}>
-            {/* Main Content */}
-            <Box sx={{ flexGrow: 1, mt: { xs: 12, md: 14 } }}>
-              {/* Results Container */}
-              <Box sx={{
-                background: brandColors.surface,
-                borderRadius: 3,
-                px: { xs: 2, md: 3 },
-                py: { xs: 2, md: 3 },
-                boxShadow: '0 4px 20px rgba(12, 25, 27, 0.08)',
-                border: `1px solid ${brandColors.border}`
-              }}>
-                {/* Results Header */}
-                <Box sx={{
-                  display: 'flex',
-                  flexDirection: { xs: 'column', md: 'row' },
-                  justifyContent: 'space-between',
-                  alignItems: { xs: 'flex-start', md: 'center' },
-                  gap: { xs: 2, md: 0 },
-                  mb: 3,
-                  pb: 3,
-                  borderBottom: `2px solid ${brandColors.border}`
+
+        {/* Main Content */}
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-5 lg:gap-6 mt-[104px] flex-1 min-h-0 bg-white">
+          {/* Sidebar with Filters */}
+          <div className="flex-shrink-0 w-full lg:w-80 lg:sticky lg:top-[120px] lg:self-start mb-4 lg:mb-0 lg:h-fit bg-white">
+            <FilterSidebar
+              selectedCountries={selectedCountries}
+              setSelectedCountries={setSelectedCountries}
+              skillsets={skillsets}
+              setSkillsets={setSkillsets}
+              languages={languages}
+              setLanguages={setLanguages}
+              types={types}
+              setTypes={setTypes}
+              defaultSalaryRange={salaryRange}
+              defaultAgeRange={ageRange}
+              onSalaryChange={setSalaryRange}
+              onAgeChange={setAgeRange}
+            />
+          </div>
+
+          {/* Available Helper Section */}
+          <div className="flex-1 flex flex-col min-h-0 bg-white relative">
+            {/* Gap Filler - Fills space between navbar and Available Helper header */}
+            <div className="lg:sticky lg:top-[96px] bg-white h-2 lg:z-20 border-b-0"></div>
+
+            {/* Full Background Coverage - Prevents any content bleeding */}
+            <div className="absolute inset-0 bg-white z-0"></div>
+
+            {/* Available Helper Header - Sticky with Higher Z-Index */}
+            <div className="lg:sticky lg:top-[104px] lg:z-30 bg-white shadow-sm border-b border-gray-200 px-4 lg:px-0 py-3 relative">
+              <div className="flex justify-between items-center gap-3">
+                {/* Available Helper Title - Left Side */}
+                <div className="flex items-center gap-3">
+                  <RecommendIcon sx={{ color: brandColors.primary, fontSize: '1.5rem' }} />
+                  <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
+                    Top Recommended Helpers
+                  </h2>
+                </div>
+
+                {/* Contact Selected Button - Right Side (Desktop Only) */}
+                <div className="hidden lg:flex flex-shrink-0">
+                  {selectedMaids.length > 0 && (
+                    <Button
+                      onClick={handleBulkContact}
+                      startIcon={<WhatsAppIcon />}
+                      variant="contained"
+                      size="small"
+                      sx={{
+                        background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
+                        color: '#FFFFFF',
+                        borderRadius: '8px',
+                        fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        padding: { xs: '6px 12px', sm: '6px 16px' },
+                        minHeight: '36px',
+                        boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #128C7E 0%, #075E54 100%)',
+                          boxShadow: '0 6px 16px rgba(37, 211, 102, 0.4)',
+                          transform: 'translateY(-1px)',
+                        },
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      Schedule Interview ({selectedMaids.length} {selectedMaids.length === 1 ? 'helper' : 'helpers'})
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Maid Cards Grid - Scrollable Container */}
+            <div className="flex-1 overflow-y-auto lg:px-0 pb-4 pt-4 relative z-10">
+            {loading ? (
+              <Fade in={loading} timeout={300}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(355px, 1fr))',
+                  gap: '0.75rem'
                 }}>
-                  <Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-                      <RecommendIcon sx={{ color: brandColors.primary, fontSize: '1.5rem' }} />
-                      <Typography variant="h4" sx={{
-                        fontWeight: 700,
-                        color: brandColors.text,
-                        fontSize: { xs: '1.5rem', md: '2rem' }
-                      }}>
-                        Top Recommended Helpers
-                      </Typography>
-                    </Box>
-                    <Typography variant="body1" sx={{
-                      color: brandColors.textSecondary,
-                      fontSize: '1rem',
-                      ml: { xs: 0, md: 5 }
-                    }}>
-                      Our most popular and highly rated helpers
-                    </Typography>
-                  </Box>
-
-                  <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2
-                  }}>
-                    {/* Contact Selected Button - Desktop Only */}
-                    <div className="hidden lg:flex flex-shrink-0">
-                      {selectedMaids.length > 0 && (
-                        <Button
-                          onClick={handleBulkContact}
-                          startIcon={<WhatsAppIcon />}
-                          variant="contained"
-                          size="small"
-                          sx={{
-                            background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
-                            color: '#FFFFFF',
-                            borderRadius: '8px',
-                            fontSize: { xs: '0.7rem', sm: '0.75rem' },
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            padding: { xs: '6px 12px', sm: '6px 16px' },
-                            minHeight: '36px',
-                            boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)',
-                            '&:hover': {
-                              background: 'linear-gradient(135deg, #128C7E 0%, #075E54 100%)',
-                              boxShadow: '0 6px 16px rgba(37, 211, 102, 0.4)',
-                              transform: 'translateY(-1px)',
-                            },
-                            transition: 'all 0.2s ease',
-                          }}
-                        >
-                          Schedule Interview ({selectedMaids.length} {selectedMaids.length === 1 ? 'helper' : 'helpers'})
-                        </Button>
-                      )}
+                  {Array.from({ length: 12 }).map((_, index) => (
+                    <div key={index} className="p-1.5 sm:p-2 lg:p-3">
+                      <MaidCardSkeleton />
                     </div>
-                  </Box>
-                </Box>
+                  ))}
+                </div>
+              </Fade>
+            ) : filteredTopMaids.length > 0 ? (
+              <Fade in={!loading} timeout={300}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(355px, 1fr))',
+                  gap: '0.75rem'
+                }}>
+                  {filteredTopMaids.map((maid) => (
+                    <div key={maid.id} className="p-1.5 sm:p-2 lg:p-3">
+                      <MaidCardVariation1
+                        maid={maid}
+                        isAuthenticated={isAuthenticated}
+                        userFavorites={userFavorites}
+                        isSelected={selectedMaids.includes(maid.id)}
+                        onSelectionChange={handleMaidSelection}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </Fade>
+            ) : topMaids.length > 0 ? (
+              <Fade in={!loading} timeout={300}>
+                <div className="text-center py-12">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
+                    No helpers match your filters
+                  </h3>
+                  <p className="text-sm sm:text-base text-gray-600">
+                    Try adjusting your filters to see more results
+                  </p>
+                </div>
+              </Fade>
+            ) : (
+              <Fade in={!loading} timeout={300}>
+                <div className="text-center py-12">
+                  <div className="flex flex-col items-center gap-6">
+                    {/* Empty Icon */}
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center border-4 border-orange-300">
+                      <RecommendIcon sx={{
+                        fontSize: '3rem',
+                        color: brandColors.primary,
+                        opacity: 0.7
+                      }} />
+                    </div>
 
-                {/* Maid Cards Grid */}
-                {loading ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4">
-                    {Array.from({ length: 8 }).map((_, index) => (
-                      <div key={index} className="w-full">
-                        <MaidCardSkeleton />
-                      </div>
-                    ))}
+                    {/* Empty State Text */}
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
+                        No Top Helpers Available
+                      </h3>
+                      <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto">
+                        We don't have top recommended helpers available right now. Browse our catalogue to discover amazing helpers.
+                      </p>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button
+                        component={Link}
+                        to="/catalogue"
+                        variant="contained"
+                        size="large"
+                        startIcon={<ExploreIcon />}
+                        sx={{
+                          background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryDark} 100%)`,
+                          color: 'white',
+                          px: 4,
+                          py: 1.5,
+                          borderRadius: 3,
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          fontSize: '1rem',
+                          boxShadow: '0 4px 20px rgba(255, 145, 77, 0.3)',
+                          '&:hover': {
+                            background: `linear-gradient(135deg, ${brandColors.primaryDark} 0%, ${brandColors.primary} 100%)`,
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 6px 25px rgba(255, 145, 77, 0.4)',
+                          }
+                        }}
+                      >
+                        Browse All Helpers
+                      </Button>
+                    </div>
                   </div>
-                ) : topMaids.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4">
-                    {topMaids.map((maid) => (
-                      <div key={maid.id} className="w-full">
-                        <MaidCardVariation1
-                          maid={maid}
-                          isAuthenticated={isAuthenticated}
-                          userFavorites={userFavorites}
-                          isSelected={selectedMaids.includes(maid.id)}
-                          onSelectionChange={handleMaidSelection}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <Box sx={{
-                    textAlign: 'center',
-                    py: 8,
-                    px: 2
-                  }}>
-                    {/* Empty State */}
-                    <Box sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: 3
-                    }}>
-                      {/* Empty Icon */}
-                      <Box sx={{
-                        width: 120,
-                        height: 120,
-                        borderRadius: '50%',
-                        background: `linear-gradient(135deg, ${brandColors.primary}20 0%, ${brandColors.primaryLight}20 100%)`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: `3px solid ${brandColors.primary}30`
-                      }}>
-                        <RecommendIcon sx={{
-                          fontSize: '3rem',
-                          color: brandColors.primary,
-                          opacity: 0.7
-                        }} />
-                      </Box>
-
-                      {/* Empty State Text */}
-                      <Box>
-                        <Typography variant="h5" sx={{
-                          mb: 2,
-                          color: brandColors.text,
-                          fontWeight: 600
-                        }}>
-                          No Top Helpers Available
-                        </Typography>
-                        <Typography variant="body1" sx={{
-                          color: brandColors.textSecondary,
-                          mb: 4,
-                          maxWidth: 450,
-                          lineHeight: 1.6
-                        }}>
-                          We don't have top recommended helpers available right now. Browse our catalogue to discover amazing helpers or contact us for assistance.
-                        </Typography>
-                      </Box>
-
-                      {/* Action Buttons */}
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <Button
-                          component={Link}
-                          to="/catalogue"
-                          variant="contained"
-                          size="large"
-                          startIcon={<ExploreIcon />}
-                          sx={{
-                            background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryDark} 100%)`,
-                            color: 'white',
-                            px: 4,
-                            py: 1.5,
-                            borderRadius: 3,
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            fontSize: '1rem',
-                            boxShadow: '0 4px 20px rgba(255, 145, 77, 0.3)',
-                            '&:hover': {
-                              background: `linear-gradient(135deg, ${brandColors.primaryDark} 0%, ${brandColors.primary} 100%)`,
-                              transform: 'translateY(-2px)',
-                              boxShadow: '0 6px 25px rgba(255, 145, 77, 0.4)',
-                            }
-                          }}
-                        >
-                          Browse All Helpers
-                        </Button>
-
-                        <Button
-                          onClick={() => {
-                            const message = "Hi, I'd like to learn more about your premium domestic helper services. Could you help me find suitable matches?";
-                            window.open(`https://wa.me/88270086?text=${encodeURIComponent(message)}`, '_blank');
-                          }}
-                          variant="outlined"
-                          size="large"
-                          sx={{
-                            borderColor: brandColors.success,
-                            color: brandColors.success,
-                            px: 4,
-                            py: 1.5,
-                            borderRadius: 3,
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            fontSize: '1rem',
-                            borderWidth: 2,
-                            '&:hover': {
-                              borderColor: brandColors.success,
-                              backgroundColor: `${brandColors.success}08`,
-                              borderWidth: 2,
-                            }
-                          }}
-                        >
-                          Contact Us
-                        </Button>
-                      </Stack>
-                    </Box>
-                  </Box>
-                )}
-              </Box>
-            </Box>
-
-
-          </Container>
-        </Box>
+                </div>
+              </Fade>
+            )}
+            </div>
+          </div>
+        </div>
+      </div>
 
         {/* Floating Contact Selected Button - Mobile Only */}
         {selectedMaids.length > 0 && (
@@ -419,8 +411,6 @@ export default function Recommended() {
             </Fade>
           </div>
         )}
-      </div>
-
-    </>
+    </div>
   );
 }

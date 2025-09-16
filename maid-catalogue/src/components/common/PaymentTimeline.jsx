@@ -194,7 +194,6 @@ const PaymentTimeline = () => {
           }}
           transition={{ duration: 0.8, delay: 0.6 }}
           className="mt-8 md:mt-10 lg:mt-12 text-center">
-        >
           <Card className="bg-gradient-to-r from-[#ff690d]/5 to-[#ff914d]/5 border border-[#ff690d]/20 p-4 md:p-6 max-w-4xl mx-auto">
             <div className="flex items-center justify-center mb-4">
               <CheckCircle className="w-6 h-6 text-[#ff690d] mr-2" />
