@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
-import PhoneFramedVideo from '../../components/common/PhoneFramedVideo';
+import PhoneFramedYouTube from '../../components/common/PhoneFramedYouTube';
 import { useAnimation } from '../../hooks/useAnimation';
 
 const AboutPage = () => {
@@ -181,10 +181,13 @@ const AboutPage = () => {
         <section
           className="py-8 md:py-12 lg:py-16 relative z-10 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: "url('/assets/vision-bg.jpg')"
+            backgroundImage: "url('/images/Fetrin-bg.jpeg')"
           }}
         >
-          <div className="max-w-[1440px] w-full mx-auto px-4 relative z-10">
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
+
+          <div className="max-w-[1440px] w-full mx-auto px-4 relative z-20">
             <div
               ref={fetrinRef}
               className={`transition-all duration-1000 ease-out ${
@@ -271,14 +274,11 @@ const AboutPage = () => {
                     </p>
                   </div>
                   
-                  <PhoneFramedVideo
-                    sources={[
-                      { src: '/assets/aboutfounder.mov', type: 'video/quicktime' }
-                    ]}
-                    videoId="about-founder"
+                  <PhoneFramedYouTube
+                    videoId="https://www.youtube.com/shorts/ctPfJZD1m9c"
+                    title="About Our Founder"
                     autoplay={false}
                     muted={true}
-                    loop={false}
                     ariaLabel="Video about EasyHire founder and company vision"
                     className="mx-auto"
                   />
@@ -295,14 +295,11 @@ const AboutPage = () => {
                     </p>
                   </div>
                   
-                  <PhoneFramedVideo
-                    sources={[
-                      { src: '/assets/historyofEH.mov', type: 'video/quicktime' }
-                    ]}
-                    videoId="history-eh"
+                  <PhoneFramedYouTube
+                    videoId="https://www.youtube.com/shorts/ctPfJZD1m9c"
+                    title="EasyHire Story"
                     autoplay={false}
                     muted={true}
-                    loop={false}
                     ariaLabel="Video about EasyHire company history and growth"
                     className="mx-auto"
                   />
