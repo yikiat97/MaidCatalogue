@@ -441,8 +441,8 @@ export default function MaidCard({ maid, isAuthenticated, userFavorites = [], is
     const calculatedSize = Math.floor(availableWidth / skillCount);
     
     // Define min/max sizes based on breakpoint
-    const minSize = isMobile ? 14 : isTablet ? 15 : 16;
-    const maxSize = isMobile ? 22 : isTablet ? 24 : 26;
+    const minSize = isMobile ? 18 : isTablet ? 19 : 20;
+    const maxSize = isMobile ? 28 : isTablet ? 30 : 32;
     
     return Math.max(minSize, Math.min(maxSize, calculatedSize));
   };

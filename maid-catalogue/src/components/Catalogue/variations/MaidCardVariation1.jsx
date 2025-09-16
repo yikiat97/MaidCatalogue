@@ -407,30 +407,89 @@ export default function MaidCardVariation1({
               </IconButton>
             </Box>
             
-            {/* Country and Age */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-              <Typography variant="body2" sx={{ 
-                color: brandColors.textSecondary, 
+            {/* Country */}
+            <Box sx={{ mb: 0.5 }}>
+              <Typography variant="body2" sx={{
+                color: brandColors.textSecondary,
                 fontSize: '0.8rem',
                 fontWeight: 500
               }}>
                 {maid.country}
               </Typography>
+            </Box>
+
+            {/* Physical Stats Row - Age, Height, Weight */}
+            <Box sx={{
+              display: 'flex',
+              gap: 0,
+              mb: 0.5,
+              alignItems: 'center',
+              flexWrap: 'nowrap'
+            }}>
               {maidAge && (
                 <>
-                  <Box sx={{ 
-                    width: '1px', 
-                    height: '12px', 
-                    backgroundColor: brandColors.border 
-                  }} />
-                  <Typography variant="body2" sx={{ 
-                    color: brandColors.textSecondary, 
-                    fontSize: '0.8rem',
-                    fontWeight: 500
-                  }}>
-                    {maidAge}yo
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: brandColors.textSecondary,
+                      fontSize: isMobile ? '0.65rem' : '0.75rem',
+                      fontWeight: 500,
+                      letterSpacing: '0.01em',
+                      whiteSpace: 'nowrap',
+                      px: isMobile ? 0.8 : 1
+                    }}
+                  >
+                    {maidAge}yr
                   </Typography>
+                  {(maid.height && maid.height > 0) || (maid.weight && maid.weight > 0) ? (
+                    <Box sx={{
+                      width: '1px',
+                      height: '12px',
+                      backgroundColor: brandColors.border,
+                      opacity: 0.8
+                    }} />
+                  ) : null}
                 </>
+              )}
+              {maid.height && maid.height > 0 && (
+                <>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: brandColors.textSecondary,
+                      fontSize: isMobile ? '0.65rem' : '0.75rem',
+                      fontWeight: 500,
+                      letterSpacing: '0.01em',
+                      whiteSpace: 'nowrap',
+                      px: isMobile ? 0.8 : 1
+                    }}
+                  >
+                    {maid.height}cm
+                  </Typography>
+                  {maid.weight && maid.weight > 0 && (
+                    <Box sx={{
+                      width: '1px',
+                      height: '12px',
+                      backgroundColor: brandColors.border,
+                      opacity: 0.8
+                    }} />
+                  )}
+                </>
+              )}
+              {maid.weight && maid.weight > 0 && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: brandColors.textSecondary,
+                    fontSize: isMobile ? '0.65rem' : '0.75rem',
+                    fontWeight: 500,
+                    letterSpacing: '0.01em',
+                    whiteSpace: 'nowrap',
+                    px: isMobile ? 0.8 : 1
+                  }}
+                >
+                  {maid.weight}kg
+                </Typography>
               )}
             </Box>
             
@@ -456,11 +515,11 @@ export default function MaidCardVariation1({
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          width: 20,
-                          height: 20,
+                          width: 26,
+                          height: 26,
                           borderRadius: '4px',
                           backgroundColor: `${brandColors.primary}15`,
-                          fontSize: '12px',
+                          fontSize: '15px',
                           flexShrink: 0,
                         }}
                       >
