@@ -15,6 +15,7 @@ import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { Link } from 'react-router-dom';
 import API_CONFIG from '../../config/api.js';
 import MaidCardVariation1 from '../../components/Catalogue/variations/MaidCardVariation1';
+import MaidCardSkeleton from '../../components/Catalogue/MaidCardSkeleton';
 import Header from '../../components/common/Header';
 
 // Brand colors
@@ -243,43 +244,10 @@ export default function Recommended() {
 
                 {/* Maid Cards Grid */}
                 {loading ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 3xl:grid-cols-5">
-                    {Array.from({ length: 10 }).map((_, index) => (
-                      <div key={index} className="w-full h-full p-0.5 sm:p-2 lg:p-3">
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" style={{ height: '474px' }}>
-                          {/* Image skeleton */}
-                          <Box
-                            sx={{
-                              width: '100%',
-                              height: '240px',
-                              bgcolor: 'grey.200'
-                            }}
-                          />
-
-                          {/* Content skeleton */}
-                          <div className="p-3 space-y-2">
-                            {/* Name */}
-                            <Box sx={{ height: '24px', bgcolor: 'grey.200', borderRadius: 1 }} />
-
-                            {/* Country & Age */}
-                            <Box sx={{ height: '16px', bgcolor: 'grey.100', borderRadius: 1, width: '60%' }} />
-
-                            {/* Skills */}
-                            <div className="space-y-1">
-                              <Box sx={{ height: '14px', bgcolor: 'grey.100', borderRadius: 1, width: '90%' }} />
-                              <Box sx={{ height: '14px', bgcolor: 'grey.100', borderRadius: 1, width: '70%' }} />
-                            </div>
-
-                            {/* Salary */}
-                            <Box sx={{ height: '20px', bgcolor: 'grey.200', borderRadius: 1, width: '50%' }} />
-
-                            {/* Buttons */}
-                            <div className="pt-2 space-y-1">
-                              <Box sx={{ height: '32px', bgcolor: 'grey.100', borderRadius: 1 }} />
-                              <Box sx={{ height: '32px', bgcolor: 'grey.100', borderRadius: 1 }} />
-                            </div>
-                          </div>
-                        </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4">
+                    {Array.from({ length: 8 }).map((_, index) => (
+                      <div key={index} className="w-full">
+                        <MaidCardSkeleton />
                       </div>
                     ))}
                   </div>

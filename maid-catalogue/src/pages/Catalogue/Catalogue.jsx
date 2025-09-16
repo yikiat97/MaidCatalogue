@@ -4,6 +4,7 @@ import { Button, Skeleton, Fade, Alert } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import MaidCard from '../../components/Catalogue/MaidCard';
+import MaidCardVerticalSkeleton from '../../components/Catalogue/MaidCardVerticalSkeleton';
 import FilterSidebar from '../../components/Catalogue/FilterSidebar';
 import Header from '../../components/common/Header';
 import LoginPromptModal from '../../components/Catalogue/LoginPromptModal';
@@ -270,43 +271,6 @@ export default function Catalogue() {
     window.open(whatsappUrl, '_blank');
   };
 
-  // Loading skeleton component
-  const MaidCardSkeleton = () => (
-    <div className="w-full h-full p-1.5 sm:p-2 lg:p-3">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        {/* Image skeleton */}
-        <Skeleton 
-          variant="rectangular" 
-          width="100%" 
-          height={200}
-          sx={{ bgcolor: 'grey.100' }}
-        />
-        
-        {/* Content skeleton */}
-        <div className="p-3 space-y-2">
-          {/* Name */}
-          <Skeleton variant="text" width="80%" height={24} sx={{ bgcolor: 'grey.100' }} />
-          
-          {/* Country & Age */}
-          <Skeleton variant="text" width="60%" height={16} sx={{ bgcolor: 'grey.100' }} />
-          
-          {/* Salary */}
-          <Skeleton variant="text" width="50%" height={20} sx={{ bgcolor: 'grey.100' }} />
-          
-          {/* Skills */}
-          <div className="space-y-1">
-            <Skeleton variant="text" width="90%" height={14} sx={{ bgcolor: 'grey.100' }} />
-            <Skeleton variant="text" width="70%" height={14} sx={{ bgcolor: 'grey.100' }} />
-          </div>
-          
-          {/* Button */}
-          <div className="pt-2">
-            <Skeleton variant="rounded" width="100%" height={32} sx={{ bgcolor: 'grey.100' }} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
@@ -392,7 +356,9 @@ export default function Catalogue() {
                 <Fade in={isLoading} timeout={300}>
                   <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 3xl:grid-cols-5">
                     {Array.from({ length: 20 }).map((_, index) => (
-                      <MaidCardSkeleton key={index} />
+                      <div key={index} className="w-full h-full p-1.5 sm:p-2 lg:p-3">
+                        <MaidCardVerticalSkeleton />
+                      </div>
                     ))}
                   </div>
                 </Fade>
