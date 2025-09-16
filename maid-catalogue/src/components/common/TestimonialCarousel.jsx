@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Star } from 'lucide-react';
+import { Star, ExternalLink } from 'lucide-react';
 import { Card } from '../ui/card';
 import {
   Carousel,
@@ -56,33 +56,58 @@ const defaultTestimonials = [
 
 const TestimonialCard = ({ testimonial }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   // Character limit for approximately 3 lines of text
   const CHARACTER_LIMIT = 200;
   const isLongText = testimonial.text.length > CHARACTER_LIMIT;
+
+  // Check if testimonial has a Google review URL
+  const hasGoogleReviewUrl = testimonial.authorUrl && testimonial.authorUrl.includes('google.com');
   
   // Get truncated text for collapsed state
   const getTruncatedText = () => {
     if (!isLongText) return testimonial.text;
-    
+
     // Find a good breaking point (avoid cutting words)
     let truncateAt = CHARACTER_LIMIT;
     while (truncateAt > CHARACTER_LIMIT - 20 && testimonial.text[truncateAt] !== ' ') {
       truncateAt--;
     }
-    
+
     return testimonial.text.slice(0, truncateAt);
   };
 
+  // Handle "Read more" click - always expand text locally
+  const handleReadMoreClick = () => {
+    setIsExpanded(true);
+  };
+
+  // Handle "Read less" click
+  const handleReadLessClick = () => {
+    setIsExpanded(false);
+  };
+
+  // Handle "Read all reviews" button click
+  const handleReadAllReviewsClick = () => {
+    if (hasGoogleReviewUrl) {
+      window.open(testimonial.authorUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
-    <Card variant="elevated" padding="large" className="min-h-[300px] md:min-h-[280px] bg-white relative flex flex-col transition-all duration-500 ease-in-out p-6 md:p-8">
+    <Card
+      variant="elevated"
+      padding="large"
+      className="min-h-[300px] md:min-h-[280px] bg-white relative flex flex-col transition-all duration-500 ease-in-out p-6 md:p-8"
+    >
       {/* Opening quotation mark */}
-      <img 
-        src="/images/quotation-right-mark-svgrepo-com.svg" 
+      <img
+        src="/images/quotation-right-mark-svgrepo-com.svg"
         alt="quotation mark"
         className="absolute -top-[-10px] -right-[-10px] w-10 h-10 opacity-15"
         style={{ filter: 'brightness(0) saturate(100%) invert(39%) sepia(93%) saturate(7471%) hue-rotate(14deg) brightness(101%) contrast(102%)' }}
       />
+
       
       {/* Rating Stars */}
       <div className="flex items-center gap-1 mb-4">
@@ -101,7 +126,7 @@ const TestimonialCard = ({ testimonial }) => {
             <>
               {testimonial.text}{' '}
               <button
-                onClick={() => setIsExpanded(false)}
+                onClick={handleReadLessClick}
                 className="text-[#ff690d] hover:text-[#ff8a3d] font-inter font-medium text-sm transition-colors duration-200 focus:outline-none focus:underline cursor-pointer inline-block mt-2"
               >
                 Read less
@@ -112,11 +137,12 @@ const TestimonialCard = ({ testimonial }) => {
               {getTruncatedText()}
               {isLongText && (
                 <button
-                  onClick={() => setIsExpanded(true)}
+                  onClick={handleReadMoreClick}
                   className="text-[#ff690d] hover:text-[#ff8a3d] font-inter font-medium text-sm transition-colors duration-200 focus:outline-none cursor-pointer ml-1"
                   title="Click to read full testimonial"
+                  aria-label="Expand full testimonial"
                 >
-                  ...
+                  Read more
                 </button>
               )}
             </>
@@ -125,29 +151,43 @@ const TestimonialCard = ({ testimonial }) => {
       </div>
 
       {/* Client Info */}
-      <div className="flex items-center gap-3 mt-auto">
-        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
-          <img 
-            src={testimonial.image} 
-            alt={testimonial.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.style.display = 'none';
-              e.target.nextSibling.style.display = 'flex';
-            }}
-          />
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#ff690d] to-[#ff8a3d] items-center justify-center text-white font-semibold text-lg hidden">
-            {testimonial.name.split(' ').map(n => n.charAt(0)).join('')}
+      <div className="flex items-center justify-between mt-auto">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+            <img
+              src={testimonial.image}
+              alt={testimonial.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#ff690d] to-[#ff8a3d] items-center justify-center text-white font-semibold text-lg hidden">
+              {testimonial.name.split(' ').map(n => n.charAt(0)).join('')}
+            </div>
+          </div>
+          <div>
+            <h4 className="font-inter font-semibold text-gray-900 text-sm">
+              {testimonial.name}
+            </h4>
+            <p className="font-inter text-gray-600 text-xs">
+              {testimonial.role}
+            </p>
           </div>
         </div>
-        <div>
-          <h4 className="font-inter font-semibold text-gray-900 text-sm">
-            {testimonial.name}
-          </h4>
-          <p className="font-inter text-gray-600 text-xs">
-            {testimonial.role}
-          </p>
-        </div>
+
+        {/* Read all reviews button for Google reviews */}
+        {hasGoogleReviewUrl && (
+          <button
+            onClick={handleReadAllReviewsClick}
+            className="text-[#ff690d] hover:text-[#ff8a3d] text-xs font-medium inline-flex items-center gap-1 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#ff690d] focus:ring-opacity-20 rounded px-2 py-1 min-h-[44px]"
+            aria-label={`Read all reviews by ${testimonial.name} on Google`}
+          >
+            Read all reviews
+            <ExternalLink className="w-3 h-3" aria-hidden="true" />
+          </button>
+        )}
       </div>
     </Card>
   );
