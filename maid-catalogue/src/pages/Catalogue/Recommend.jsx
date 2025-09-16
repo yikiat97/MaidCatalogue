@@ -18,6 +18,7 @@ import MaidCardVariation1 from '../../components/Catalogue/variations/MaidCardVa
 import MaidCardSkeleton from '../../components/Catalogue/MaidCardSkeleton';
 import FilterSidebar from '../../components/Catalogue/FilterSidebar';
 import Header from '../../components/common/Header';
+import { useAuth } from '../../context/AuthContext';
 
 // Brand colors
 const brandColors = {
@@ -39,10 +40,14 @@ const brandColors = {
 
 export default function Recommended() {
   const [topMaids, setTopMaids] = useState([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userFavorites, setUserFavorites] = useState([]);
   const [selectedMaids, setSelectedMaids] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  // Use AuthContext for authentication state
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
 
   // Filter states
   const [salaryRange, setSalaryRange] = useState([400, 1000]);
@@ -54,24 +59,34 @@ export default function Recommended() {
 
 
   useEffect(() => {
-    const fetchAllData = async () => {
+    // Don't fetch data if authentication is still loading
+    if (authLoading) {
+      console.log('🔍 [DEBUG] Auth still loading, waiting...');
+      return;
+    }
+
+    const fetchAllData = async (retry = false) => {
+      if (retry) {
+        console.log('🔍 [DEBUG] Retrying data fetch, attempt:', retryCount + 1);
+      } else {
+        console.log('🔍 [DEBUG] Starting to fetch data for Recommend page...');
+        setError(null); // Clear any previous errors
+      }
+
+      console.log('🔍 [DEBUG] AuthContext state:', { isAuthenticated, user, authLoading });
+
       try {
-        // 1. Check authentication status
-        const authRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.PROFILE), {
-          credentials: 'include',
-        });
-
-        if (authRes.ok) {
-          setIsAuthenticated(true);
-
-          // Fetch user favorites if authenticated
+        // Fetch user favorites if authenticated
+        if (isAuthenticated) {
           try {
+            console.log('🔍 [DEBUG] User is authenticated, fetching user favorites...');
             const favRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.USER.FAVORITES), {
               credentials: 'include',
             });
 
             if (favRes.ok) {
               const favData = await favRes.json();
+              console.log('🔍 [DEBUG] Favorites data:', favData);
               if (Array.isArray(favData)) {
                 const favoriteIds = favData.map(maid => maid.id);
                 setUserFavorites(favoriteIds);
@@ -79,6 +94,7 @@ export default function Recommended() {
                 setUserFavorites([]);
               }
             } else {
+              console.log('🔍 [DEBUG] Failed to fetch favorites, status:', favRes.status);
               setUserFavorites([]);
             }
           } catch (err) {
@@ -86,32 +102,208 @@ export default function Recommended() {
             setUserFavorites([]);
           }
         } else {
-          setIsAuthenticated(false);
+          console.log('🔍 [DEBUG] User not authenticated, skipping favorites');
           setUserFavorites([]);
         }
 
-        // 2. Fetch top maids (public data - no authentication required)
-        const topMaidsRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.CATALOGUE.TOP_MAIDS), {
+        // Fetch top maids (public data - no authentication required)
+        console.log('🔍 [DEBUG] Fetching top maids from API...');
+        const topMaidsUrl = API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.CATALOGUE.TOP_MAIDS);
+        console.log('🔍 [DEBUG] Top maids URL:', topMaidsUrl);
+
+        const topMaidsRes = await fetch(topMaidsUrl, {
           credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
         });
 
+        console.log('🔍 [DEBUG] Top maids response status:', topMaidsRes.status);
+
         if (topMaidsRes.ok) {
+          const contentType = topMaidsRes.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error(`Expected JSON response but got: ${contentType}`);
+          }
+
           const topMaidsData = await topMaidsRes.json();
-          setTopMaids(topMaidsData);
+          console.log('🔍 [DEBUG] Top maids response data:', topMaidsData);
+          console.log('🔍 [DEBUG] Top maids data type:', typeof topMaidsData);
+          console.log('🔍 [DEBUG] Is top maids data an array?', Array.isArray(topMaidsData));
+
+          // Handle different response structures
+          let maidsArray = [];
+          if (Array.isArray(topMaidsData)) {
+            console.log('🔍 [DEBUG] Setting top maids directly (array format)');
+            maidsArray = topMaidsData;
+          } else if (topMaidsData && Array.isArray(topMaidsData.maids)) {
+            console.log('🔍 [DEBUG] Setting top maids from nested object format');
+            maidsArray = topMaidsData.maids;
+          } else if (topMaidsData && Array.isArray(topMaidsData.data)) {
+            console.log('🔍 [DEBUG] Setting top maids from data property');
+            maidsArray = topMaidsData.data;
+          } else if (topMaidsData && topMaidsData.success === false) {
+            throw new Error(topMaidsData.message || 'API returned unsuccessful response');
+          } else {
+            console.warn('🔍 [DEBUG] Unexpected response format for top maids:', topMaidsData);
+            maidsArray = [];
+          }
+
+          // Validate maid objects
+          const validMaids = maidsArray.filter(maid => {
+            const isValid = maid && typeof maid === 'object' && maid.id && maid.name;
+            if (!isValid) {
+              console.warn('🔍 [DEBUG] Invalid maid object:', maid);
+            }
+            return isValid;
+          });
+
+          console.log(`🔍 [DEBUG] Valid maids: ${validMaids.length}/${maidsArray.length}`);
+          setTopMaids(validMaids);
+          setError(null);
+          setRetryCount(0); // Reset retry count on success
+        } else if (topMaidsRes.status >= 500) {
+          // Server error - might be temporary, can retry
+          const errorMessage = `Server error (${topMaidsRes.status}). This might be temporary.`;
+          console.error('🔍 [DEBUG] Server error:', errorMessage);
+          throw new Error(errorMessage);
         } else {
-          console.error('Failed to fetch top maids:', topMaidsRes.status);
+          // Client error - likely permanent, don't retry
+          const errorText = await topMaidsRes.text().catch(() => 'Unable to read error response');
+          const errorMessage = `Failed to fetch top maids (${topMaidsRes.status}): ${errorText}`;
+          console.error('🔍 [DEBUG] Client error:', errorMessage);
+          setError(errorMessage);
           setTopMaids([]);
         }
       } catch (error) {
-        console.error('Error loading top maids:', error);
+        console.error('🔍 [DEBUG] Network error loading top maids:', error);
+        const errorMessage = error.message || 'Network error occurred while fetching data';
+
+        // Check if we should retry (max 3 attempts)
+        if (retryCount < 2 && (error.message.includes('Server error') || error.message.includes('fetch'))) {
+          console.log('🔍 [DEBUG] Will retry after error:', errorMessage);
+          setRetryCount(prev => prev + 1);
+          setError(`${errorMessage} (Retrying...)`);
+
+          // Retry after a delay
+          setTimeout(() => {
+            fetchAllData(true);
+          }, (retryCount + 1) * 2000); // 2s, 4s, 6s delays
+          return;
+        }
+
+        setError(errorMessage);
         setTopMaids([]);
       } finally {
         setLoading(false);
+        console.log('🔍 [DEBUG] Finished loading data');
       }
     };
 
     fetchAllData();
-  }, []);
+  }, [isAuthenticated, authLoading, user]);
+
+  // Manual retry function
+  const handleRetry = () => {
+    setLoading(true);
+    setError(null);
+    setRetryCount(0);
+
+    // Re-run the effect by calling fetchAllData directly
+    const fetchData = async () => {
+      if (authLoading) return;
+
+      const fetchAllData = async () => {
+        console.log('🔍 [DEBUG] Manual retry - Starting to fetch data for Recommend page...');
+        setError(null);
+
+        try {
+          // Fetch user favorites if authenticated
+          if (isAuthenticated) {
+            try {
+              const favRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.USER.FAVORITES), {
+                credentials: 'include',
+              });
+
+              if (favRes.ok) {
+                const favData = await favRes.json();
+                if (Array.isArray(favData)) {
+                  const favoriteIds = favData.map(maid => maid.id);
+                  setUserFavorites(favoriteIds);
+                } else {
+                  setUserFavorites([]);
+                }
+              } else {
+                setUserFavorites([]);
+              }
+            } catch (err) {
+              console.error('Error fetching favorites:', err);
+              setUserFavorites([]);
+            }
+          } else {
+            setUserFavorites([]);
+          }
+
+          // Fetch top maids
+          const topMaidsUrl = API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.CATALOGUE.TOP_MAIDS);
+          const topMaidsRes = await fetch(topMaidsUrl, {
+            credentials: 'include',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (topMaidsRes.ok) {
+            const contentType = topMaidsRes.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+              throw new Error(`Expected JSON response but got: ${contentType}`);
+            }
+
+            const topMaidsData = await topMaidsRes.json();
+
+            // Handle different response structures
+            let maidsArray = [];
+            if (Array.isArray(topMaidsData)) {
+              maidsArray = topMaidsData;
+            } else if (topMaidsData && Array.isArray(topMaidsData.maids)) {
+              maidsArray = topMaidsData.maids;
+            } else if (topMaidsData && Array.isArray(topMaidsData.data)) {
+              maidsArray = topMaidsData.data;
+            } else if (topMaidsData && topMaidsData.success === false) {
+              throw new Error(topMaidsData.message || 'API returned unsuccessful response');
+            } else {
+              maidsArray = [];
+            }
+
+            // Validate maid objects
+            const validMaids = maidsArray.filter(maid => {
+              return maid && typeof maid === 'object' && maid.id && maid.name;
+            });
+
+            setTopMaids(validMaids);
+            setError(null);
+          } else {
+            const errorText = await topMaidsRes.text().catch(() => 'Unable to read error response');
+            const errorMessage = `Failed to fetch top maids (${topMaidsRes.status}): ${errorText}`;
+            setError(errorMessage);
+            setTopMaids([]);
+          }
+        } catch (error) {
+          console.error('Manual retry error:', error);
+          setError(error.message || 'Network error occurred while fetching data');
+          setTopMaids([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      await fetchAllData();
+    };
+
+    fetchData();
+  };
 
   // Function to calculate age from DOB
   const calculateAge = (dob) => {
@@ -129,16 +321,124 @@ export default function Recommended() {
   };
 
   // Filter logic for top maids
-  const filteredTopMaids = topMaids.filter((maid) => {
-    const countryMatch = selectedCountries.length === 0 || selectedCountries.includes(maid.country);
-    const salaryMatch = maid.salary >= salaryRange[0] && maid.salary <= salaryRange[1];
-    const age = calculateAge(maid.DOB);
-    const ageInRange = age >= ageRange[0] && age <= ageRange[1];
-    const skillMatch = skillsets.length === 0 || skillsets.some((s) => maid.skills.includes(s));
-    const languageMatch = languages.length === 0 || languages.some((l) => maid.languages.includes(l));
-    const typeMatch = types.length === 0 || types.some((t) => maid.type.includes(t));
-    return countryMatch && salaryMatch && ageInRange && skillMatch && languageMatch && typeMatch;
-  });
+  const filteredTopMaids = React.useMemo(() => {
+    console.log('🔍 [FILTER] Starting to filter top maids...');
+    console.log('🔍 [FILTER] Total top maids before filtering:', topMaids.length);
+    console.log('🔍 [FILTER] Filter criteria:', {
+      selectedCountries,
+      salaryRange,
+      ageRange,
+      skillsets,
+      languages,
+      types
+    });
+
+    const filtered = topMaids.filter((maid, index) => {
+      // Ensure maid object is valid
+      if (!maid || typeof maid !== 'object') {
+        console.warn(`🔍 [FILTER] Invalid maid object at index ${index}:`, maid);
+        return false;
+      }
+
+      // Country filter - be more permissive with country matching
+      const countryMatch = selectedCountries.length === 0 ||
+        (maid.country && selectedCountries.includes(maid.country)) ||
+        (maid.nationality && selectedCountries.includes(maid.nationality));
+
+      // Salary filter - handle missing or invalid salary values
+      const salary = parseFloat(maid.salary) || 0;
+      const salaryMatch = salary === 0 || (salary >= salaryRange[0] && salary <= salaryRange[1]);
+
+      // Age filter - handle missing DOB gracefully
+      const age = calculateAge(maid.DOB);
+      const ageInRange = !age || (age >= ageRange[0] && age <= ageRange[1]);
+
+      // Skills filter - handle different skill formats (string, array, comma-separated)
+      let maidSkills = [];
+      if (Array.isArray(maid.skills)) {
+        maidSkills = maid.skills;
+      } else if (typeof maid.skills === 'string') {
+        maidSkills = maid.skills.split(',').map(s => s.trim());
+      }
+      const skillMatch = skillsets.length === 0 ||
+        maidSkills.length === 0 ||
+        skillsets.some((s) => maidSkills.some(skill => skill.toLowerCase().includes(s.toLowerCase())));
+
+      // Languages filter - handle different language formats
+      let maidLanguages = [];
+      if (Array.isArray(maid.languages)) {
+        maidLanguages = maid.languages;
+      } else if (typeof maid.languages === 'string') {
+        maidLanguages = maid.languages.split(',').map(l => l.trim());
+      }
+      const languageMatch = languages.length === 0 ||
+        maidLanguages.length === 0 ||
+        languages.some((l) => maidLanguages.some(lang => lang.toLowerCase().includes(l.toLowerCase())));
+
+      // Type filter - handle different type formats
+      let maidTypes = [];
+      if (Array.isArray(maid.type)) {
+        maidTypes = maid.type;
+      } else if (typeof maid.type === 'string') {
+        maidTypes = maid.type.split(',').map(t => t.trim());
+      }
+      const typeMatch = types.length === 0 ||
+        maidTypes.length === 0 ||
+        types.some((t) => maidTypes.some(type => type.toLowerCase().includes(t.toLowerCase())));
+
+      const passes = countryMatch && salaryMatch && ageInRange && skillMatch && languageMatch && typeMatch;
+
+      // Log detailed filtering info for debugging (first 5 maids and failed ones)
+      if (index < 5 || !passes) {
+        console.log(`🔍 [FILTER] Maid ${maid.id || maid.name || index}:`, {
+          name: maid.name,
+          country: maid.country,
+          nationality: maid.nationality,
+          salary: maid.salary,
+          parsedSalary: salary,
+          age,
+          skills: maid.skills,
+          parsedSkills: maidSkills,
+          languages: maid.languages,
+          parsedLanguages: maidLanguages,
+          type: maid.type,
+          parsedTypes: maidTypes,
+          filters: {
+            countryMatch,
+            salaryMatch,
+            ageInRange,
+            skillMatch,
+            languageMatch,
+            typeMatch
+          },
+          passes
+        });
+      }
+
+      return passes;
+    });
+
+    console.log('🔍 [FILTER] Filtered maids count:', filtered.length);
+
+    // Log filter impact summary
+    if (topMaids.length > 0) {
+      const filterImpact = {
+        original: topMaids.length,
+        filtered: filtered.length,
+        removed: topMaids.length - filtered.length,
+        removalRate: Math.round(((topMaids.length - filtered.length) / topMaids.length) * 100)
+      };
+
+      console.log('🔍 [FILTER] Filter Impact:', filterImpact);
+
+      // Warn if filters are too restrictive
+      if (filterImpact.removalRate > 80 && filtered.length === 0) {
+        console.warn('🔍 [FILTER] ⚠️ Filters may be too restrictive - removed >80% of results');
+      }
+    }
+
+    return filtered;
+  }, [topMaids, selectedCountries, salaryRange, ageRange, skillsets, languages, types]);
 
   // Handle maid selection
   const handleMaidSelection = (maidId, isSelected) => {
@@ -267,8 +567,8 @@ export default function Recommended() {
 
             {/* Maid Cards Grid - Scrollable Container */}
             <div className="flex-1 overflow-y-auto lg:px-0 pb-4 pt-4 relative z-10">
-            {loading ? (
-              <Fade in={loading} timeout={300}>
+            {(loading || authLoading) ? (
+              <Fade in={loading || authLoading} timeout={300}>
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(355px, 1fr))',
@@ -282,7 +582,7 @@ export default function Recommended() {
                 </div>
               </Fade>
             ) : filteredTopMaids.length > 0 ? (
-              <Fade in={!loading} timeout={300}>
+              <Fade in={!loading && !authLoading} timeout={300}>
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(355px, 1fr))',
@@ -302,7 +602,7 @@ export default function Recommended() {
                 </div>
               </Fade>
             ) : topMaids.length > 0 ? (
-              <Fade in={!loading} timeout={300}>
+              <Fade in={!loading && !authLoading} timeout={300}>
                 <div className="text-center py-12">
                   <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
                     No helpers match your filters
@@ -313,30 +613,83 @@ export default function Recommended() {
                 </div>
               </Fade>
             ) : (
-              <Fade in={!loading} timeout={300}>
+              <Fade in={!loading && !authLoading} timeout={300}>
                 <div className="text-center py-12">
                   <div className="flex flex-col items-center gap-6">
-                    {/* Empty Icon */}
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center border-4 border-orange-300">
-                      <RecommendIcon sx={{
-                        fontSize: '3rem',
-                        color: brandColors.primary,
-                        opacity: 0.7
-                      }} />
-                    </div>
+                    {/* Icon - Different for error vs empty state */}
+                    {error ? (
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center border-4 border-red-300">
+                        <ExploreIcon sx={{
+                          fontSize: '3rem',
+                          color: '#dc2626',
+                          opacity: 0.7
+                        }} />
+                      </div>
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center border-4 border-orange-300">
+                        <RecommendIcon sx={{
+                          fontSize: '3rem',
+                          color: brandColors.primary,
+                          opacity: 0.7
+                        }} />
+                      </div>
+                    )}
 
-                    {/* Empty State Text */}
+                    {/* Error or Empty State Text */}
                     <div>
-                      <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
-                        No Top Helpers Available
-                      </h3>
-                      <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto">
-                        We don't have top recommended helpers available right now. Browse our catalogue to discover amazing helpers.
-                      </p>
+                      {error ? (
+                        <>
+                          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
+                            Unable to Load Top Helpers
+                          </h3>
+                          <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto mb-2">
+                            {error.includes('Network error') || error.includes('fetch')
+                              ? "There seems to be a connection issue. Please check your internet connection and try again."
+                              : "We encountered an issue while loading the recommended helpers."
+                            }
+                          </p>
+                          <p className="text-xs text-gray-500 max-w-lg mx-auto">
+                            Error details: {error}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
+                            No Top Helpers Available
+                          </h3>
+                          <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto">
+                            We don't have top recommended helpers available right now. Browse our catalogue to discover amazing helpers.
+                          </p>
+                        </>
+                      )}
                     </div>
 
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-3">
+                      {error && (
+                        <Button
+                          onClick={handleRetry}
+                          variant="outlined"
+                          size="large"
+                          sx={{
+                            borderColor: brandColors.primary,
+                            color: brandColors.primary,
+                            px: 4,
+                            py: 1.5,
+                            borderRadius: 3,
+                            fontWeight: 600,
+                            textTransform: 'none',
+                            fontSize: '1rem',
+                            '&:hover': {
+                              borderColor: brandColors.primaryDark,
+                              backgroundColor: `${brandColors.primary}10`,
+                              transform: 'translateY(-2px)',
+                            }
+                          }}
+                        >
+                          Try Again
+                        </Button>
+                      )}
                       <Button
                         component={Link}
                         to="/catalogue"
