@@ -150,10 +150,10 @@ const Footer = () => {
                       <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
                     </svg>
                     <a
-                      href="mailto:hello@easyhire.sg"
+                      href="mailto:easyhiresg@gmail.com"
                       className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
                     >
-                      hello@easyhire.sg
+                      easyhiresg@gmail.com
                     </a>
                   </div>
 
@@ -162,21 +162,13 @@ const Footer = () => {
                       <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
                     </svg>
                     <a
-                      href="tel:+6591234567"
+                      href="tel:+6588270086"
                       className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
                     >
-                      +65 9123 4567
+                      +65 8827 0086
                     </a>
                   </div>
 
-                  <div className="flex items-start space-x-3">
-                    <svg className="w-4 h-4 text-[#ff690d] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
-                    </svg>
-                    <span className="text-white font-inter text-sm">
-                      Singapore
-                    </span>
-                  </div>
                 </div>
               </div>
 
@@ -186,9 +178,9 @@ const Footer = () => {
                   Operating Hours
                 </h4>
                 <p className="text-white font-inter text-sm">
-                  Mon - Fri: 9:00 AM - 6:00 PM<br />
-                  Sat: 9:00 AM - 2:00 PM<br />
-                  Sun: Closed
+                  Mon - Fri: 11am - 8pm<br />
+                  Sat: 11am - 2pm<br />
+                  Sun: By appointment basis
                 </p>
               </div>
             </div>
