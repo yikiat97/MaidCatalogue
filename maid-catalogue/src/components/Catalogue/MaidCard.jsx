@@ -370,7 +370,7 @@ export default function MaidCard({ maid, isAuthenticated, userFavorites = [], is
   const getResponsiveStyles = () => {
     if (isVerySmall) {
       return {
-        cardHeight: 474,
+        cardHeight: 490,
         chipFontSize: '0.65rem',
         chipHeight: '20px',
         nameFontSize: '1rem',
@@ -384,7 +384,7 @@ export default function MaidCard({ maid, isAuthenticated, userFavorites = [], is
       };
     } else if (isMobile) {
       return {
-        cardHeight: 474,
+        cardHeight: 490,
         chipFontSize: '0.65rem',
         chipHeight: '20px',
         nameFontSize: '1rem',

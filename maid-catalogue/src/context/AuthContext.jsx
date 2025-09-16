@@ -24,26 +24,68 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize authentication state by checking with server
+  // Initialize authentication state by checking localStorage first, then server
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        // Try to get user profile using cookies (no token needed)
-        const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.PROFILE), {
-          method: 'GET',
-          credentials: 'include',
-        });
+        // First, check if user data exists in localStorage
+        const storedUser = getStoredUser();
 
-        if (response.ok) {
-          const data = await response.json();
-          if (data.user) {
-            setIsAuthenticated(true);
-            setUser(data.user);
-            setStoredUser(data.user);
+        if (storedUser) {
+          // Set initial authentication state from localStorage
+          setIsAuthenticated(true);
+          setUser(storedUser);
+          console.log('Authentication restored from localStorage:', storedUser);
+        }
+
+        // Then verify with server (background verification for security)
+        try {
+          const response = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.PROFILE), {
+            method: 'GET',
+            credentials: 'include',
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.user) {
+              // Update with fresh server data
+              setIsAuthenticated(true);
+              setUser(data.user);
+              setStoredUser(data.user);
+              console.log('Authentication verified with server:', data.user);
+            } else if (!storedUser) {
+              // No server data and no localStorage data
+              setIsAuthenticated(false);
+              setUser(null);
+            }
+          } else {
+            // Server verification failed
+            if (response.status === 401 && storedUser) {
+              // Authentication expired - clear everything
+              console.log('Server authentication expired, clearing stored data');
+              removeStoredUser();
+              setIsAuthenticated(false);
+              setUser(null);
+            } else if (!storedUser) {
+              // No localStorage data and server failed
+              setIsAuthenticated(false);
+              setUser(null);
+            }
+            // If storedUser exists but server is unreachable (not 401), keep localStorage state
+          }
+        } catch (serverError) {
+          console.warn('Server verification failed, using localStorage state:', serverError.message);
+          // Keep localStorage authentication state if server is unreachable
+          if (!storedUser) {
+            setIsAuthenticated(false);
+            setUser(null);
           }
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
+        // Fallback to logged out state
+        setIsAuthenticated(false);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
