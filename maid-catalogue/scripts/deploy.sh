@@ -2,6 +2,7 @@
 
 # Frontend Deployment Script
 echo "🚀 Starting Maid Agency Frontend Deployment..."
+echo "📅 $(date)"
 
 # Navigate to frontend directory
 cd /var/www/maid-agency/frontend/maid-catalogue
@@ -31,5 +32,15 @@ sudo chmod -R 755 /var/www/html/
 echo "🔄 Reloading Nginx..."
 sudo systemctl reload nginx
 
+# Health check
+echo "🏥 Running health checks..."
+sleep 5
+if curl -f -k https://yikiat.com > /dev/null; then
+  echo "✅ Frontend health check passed"
+else
+  echo "❌ Frontend health check failed"
+  exit 1
+fi
+
 echo "✅ Frontend deployment completed successfully!"
-echo "🌐 Frontend is now live at: http://52.74.200.108"
+echo "🌐 Frontend: https://yikiat.com"
