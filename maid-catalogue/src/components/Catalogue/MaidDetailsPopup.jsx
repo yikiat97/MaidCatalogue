@@ -8,8 +8,8 @@ import {
   DialogTitle,
   DialogClose 
 } from '../ui/dialog';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
+import { Card, CardContent } from '../ui/card';
+import  Button  from '../ui/button';
 import { Badge } from '../ui/badge';
 import { cn } from '../../lib/utils';
 import { X, MessageCircle, User, Ruler, Weight, Users, Church, GraduationCap, Building, Lock, Star } from 'lucide-react';

@@ -12,7 +12,7 @@ import {
 import RecommendIcon from '@mui/icons-material/Recommend';
 import ExploreIcon from '@mui/icons-material/Explore';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import API_CONFIG from '../../config/api.js';
 import MaidCardVariation1 from '../../components/Catalogue/variations/MaidCardVariation1';
 import MaidCardSkeleton from '../../components/Catalogue/MaidCardSkeleton';
@@ -45,9 +45,12 @@ export default function Recommended() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [tokenRecommendations, setTokenRecommendations] = useState([]);
 
   // Use AuthContext for authentication state
   const { isAuthenticated, user, isLoading: authLoading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // Filter states
   const [salaryRange, setSalaryRange] = useState([400, 1000]);
@@ -57,6 +60,54 @@ export default function Recommended() {
   const [languages, setLanguages] = useState([]);
   const [types, setTypes] = useState([]);
 
+  // Function to fetch recommendations by token from backend
+  const fetchRecommendationsByToken = async (token) => {
+    try {
+      const response = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.USER.RECOMMENDED}/${token}`), {
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('🔍 [DEBUG] Token recommendations from backend:', data);
+        return Array.isArray(data) ? data : [];
+      } else {
+        console.error('Failed to fetch recommendations by token:', response.status);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching recommendations by token:', error);
+      return [];
+    }
+  };
+
+  // Function to save token in cookie
+  const saveTokenInCookie = (token) => {
+    const expires = new Date();
+    expires.setDate(expires.getDate() + 7); // 7 days
+    document.cookie = `recommendation_token=${token}; expires=${expires.toUTCString()}; path=/`;
+  };
+
+  // Function to get token from cookie
+  const getTokenFromCookie = () => {
+    const name = 'recommendation_token=';
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) === 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return null;
+  };
 
   useEffect(() => {
     // Don't fetch data if authentication is still loading
@@ -74,6 +125,51 @@ export default function Recommended() {
       }
 
       console.log('🔍 [DEBUG] AuthContext state:', { isAuthenticated, user, authLoading });
+
+      // Check for token in URL parameters
+      const urlParams = new URLSearchParams(location.search);
+      const token = urlParams.get('token');
+      
+      if (token) {
+        console.log('🔍 [DEBUG] Token found in URL:', token);
+        saveTokenInCookie(token);
+        
+        // Fetch recommendations from backend using token
+        const tokenMaids = await fetchRecommendationsByToken(token);
+        console.log('🔍 [DEBUG] Fetched recommendations from backend:', tokenMaids);
+        
+        if (tokenMaids.length > 0) {
+          setTokenRecommendations(tokenMaids);
+          setTopMaids(tokenMaids);
+          
+          // If user is authenticated, associate the recommendations (optional)
+          if (isAuthenticated) {
+            try {
+              const callbackRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
+                method: 'POST',
+                credentials: 'include',
+              });
+              
+              if (callbackRes.ok) {
+                console.log('🔍 [DEBUG] Successfully associated recommendations with user');
+                // Clear the token from URL and cookie after successful association
+                navigate('/recommend', { replace: true });
+                document.cookie = 'recommendation_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+              }
+            } catch (err) {
+              console.error('Error associating recommendations:', err);
+            }
+          }
+          // Note: If user is not authenticated, they can still view the recommendations
+          // The token will remain in cookie for later association if they choose to login
+        } else {
+          console.error('🔍 [DEBUG] No recommendations found for token');
+          setError('No recommendations found for this token');
+        }
+        
+        setLoading(false);
+        return;
+      }
 
       try {
         // Fetch user favorites if authenticated
@@ -106,78 +202,83 @@ export default function Recommended() {
           setUserFavorites([]);
         }
 
-        // Fetch top maids (public data - no authentication required)
-        console.log('🔍 [DEBUG] Fetching top maids from API...');
-        const topMaidsUrl = API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.CATALOGUE.TOP_MAIDS);
-        console.log('🔍 [DEBUG] Top maids URL:', topMaidsUrl);
+        // Fetch user-specific recommendations (requires authentication)
+        if (isAuthenticated) {
+          console.log('🔍 [DEBUG] Fetching user-specific recommendations...');
+          const recommendationsUrl = API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.USER.RECOMMENDED);
+          console.log('🔍 [DEBUG] Recommendations URL:', recommendationsUrl);
 
-        const topMaidsRes = await fetch(topMaidsUrl, {
-          credentials: 'include',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
-        });
-
-        console.log('🔍 [DEBUG] Top maids response status:', topMaidsRes.status);
-
-        if (topMaidsRes.ok) {
-          const contentType = topMaidsRes.headers.get('content-type');
-          if (!contentType || !contentType.includes('application/json')) {
-            throw new Error(`Expected JSON response but got: ${contentType}`);
-          }
-
-          const topMaidsData = await topMaidsRes.json();
-          console.log('🔍 [DEBUG] Top maids response data:', topMaidsData);
-          console.log('🔍 [DEBUG] Top maids data type:', typeof topMaidsData);
-          console.log('🔍 [DEBUG] Is top maids data an array?', Array.isArray(topMaidsData));
-
-          // Handle different response structures
-          let maidsArray = [];
-          if (Array.isArray(topMaidsData)) {
-            console.log('🔍 [DEBUG] Setting top maids directly (array format)');
-            maidsArray = topMaidsData;
-          } else if (topMaidsData && Array.isArray(topMaidsData.maids)) {
-            console.log('🔍 [DEBUG] Setting top maids from nested object format');
-            maidsArray = topMaidsData.maids;
-          } else if (topMaidsData && Array.isArray(topMaidsData.data)) {
-            console.log('🔍 [DEBUG] Setting top maids from data property');
-            maidsArray = topMaidsData.data;
-          } else if (topMaidsData && topMaidsData.success === false) {
-            throw new Error(topMaidsData.message || 'API returned unsuccessful response');
-          } else {
-            console.warn('🔍 [DEBUG] Unexpected response format for top maids:', topMaidsData);
-            maidsArray = [];
-          }
-
-          // Validate maid objects
-          const validMaids = maidsArray.filter(maid => {
-            const isValid = maid && typeof maid === 'object' && maid.id && maid.name;
-            if (!isValid) {
-              console.warn('🔍 [DEBUG] Invalid maid object:', maid);
+          const recommendationsRes = await fetch(recommendationsUrl, {
+            credentials: 'include',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
             }
-            return isValid;
           });
 
-          console.log(`🔍 [DEBUG] Valid maids: ${validMaids.length}/${maidsArray.length}`);
-          setTopMaids(validMaids);
-          setError(null);
-          setRetryCount(0); // Reset retry count on success
-        } else if (topMaidsRes.status >= 500) {
-          // Server error - might be temporary, can retry
-          const errorMessage = `Server error (${topMaidsRes.status}). This might be temporary.`;
-          console.error('🔍 [DEBUG] Server error:', errorMessage);
-          throw new Error(errorMessage);
+          console.log('🔍 [DEBUG] Recommendations response status:', recommendationsRes.status);
+
+          if (recommendationsRes.ok) {
+            const contentType = recommendationsRes.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+              throw new Error(`Expected JSON response but got: ${contentType}`);
+            }
+
+            const recommendationsData = await recommendationsRes.json();
+            console.log('🔍 [DEBUG] Recommendations response data:', recommendationsData);
+            console.log('🔍 [DEBUG] Recommendations data type:', typeof recommendationsData);
+            console.log('🔍 [DEBUG] Is recommendations data an array?', Array.isArray(recommendationsData));
+
+            // Handle different response structures
+            let maidsArray = [];
+            if (Array.isArray(recommendationsData)) {
+              console.log('🔍 [DEBUG] Setting recommendations directly (array format)');
+              maidsArray = recommendationsData;
+            } else if (recommendationsData && Array.isArray(recommendationsData.maids)) {
+              console.log('🔍 [DEBUG] Setting recommendations from nested object format');
+              maidsArray = recommendationsData.maids;
+            } else if (recommendationsData && Array.isArray(recommendationsData.data)) {
+              console.log('🔍 [DEBUG] Setting recommendations from data property');
+              maidsArray = recommendationsData.data;
+            } else if (recommendationsData && recommendationsData.success === false) {
+              throw new Error(recommendationsData.message || 'API returned unsuccessful response');
+            } else {
+              console.warn('🔍 [DEBUG] Unexpected response format for recommendations:', recommendationsData);
+              maidsArray = [];
+            }
+
+            // Validate maid objects
+            const validMaids = maidsArray.filter(maid => {
+              const isValid = maid && typeof maid === 'object' && maid.id && maid.name;
+              if (!isValid) {
+                console.warn('🔍 [DEBUG] Invalid maid object:', maid);
+              }
+              return isValid;
+            });
+
+            console.log(`🔍 [DEBUG] Valid recommendations: ${validMaids.length}/${maidsArray.length}`);
+            setTopMaids(validMaids);
+            setError(null);
+            setRetryCount(0); // Reset retry count on success
+          } else if (recommendationsRes.status >= 500) {
+            // Server error - might be temporary, can retry
+            const errorMessage = `Server error (${recommendationsRes.status}). This might be temporary.`;
+            console.error('🔍 [DEBUG] Server error:', errorMessage);
+            throw new Error(errorMessage);
+          } else {
+            // Client error - likely permanent, don't retry
+            const errorText = await recommendationsRes.text().catch(() => 'Unable to read error response');
+            const errorMessage = `Failed to fetch recommendations (${recommendationsRes.status}): ${errorText}`;
+            console.error('🔍 [DEBUG] Client error:', errorMessage);
+            setError(errorMessage);
+            setTopMaids([]);
+          }
         } else {
-          // Client error - likely permanent, don't retry
-          const errorText = await topMaidsRes.text().catch(() => 'Unable to read error response');
-          const errorMessage = `Failed to fetch top maids (${topMaidsRes.status}): ${errorText}`;
-          console.error('🔍 [DEBUG] Client error:', errorMessage);
-          setError(errorMessage);
+          console.log('🔍 [DEBUG] User not authenticated, cannot fetch recommendations');
           setTopMaids([]);
         }
       } catch (error) {
-        console.error('🔍 [DEBUG] Network error loading top maids:', error);
+        console.error('🔍 [DEBUG] Network error loading recommendations:', error);
         const errorMessage = error.message || 'Network error occurred while fetching data';
 
         // Check if we should retry (max 3 attempts)
@@ -245,51 +346,6 @@ export default function Recommended() {
             setUserFavorites([]);
           }
 
-          // Fetch top maids
-          const topMaidsUrl = API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.CATALOGUE.TOP_MAIDS);
-          const topMaidsRes = await fetch(topMaidsUrl, {
-            credentials: 'include',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            }
-          });
-
-          if (topMaidsRes.ok) {
-            const contentType = topMaidsRes.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-              throw new Error(`Expected JSON response but got: ${contentType}`);
-            }
-
-            const topMaidsData = await topMaidsRes.json();
-
-            // Handle different response structures
-            let maidsArray = [];
-            if (Array.isArray(topMaidsData)) {
-              maidsArray = topMaidsData;
-            } else if (topMaidsData && Array.isArray(topMaidsData.maids)) {
-              maidsArray = topMaidsData.maids;
-            } else if (topMaidsData && Array.isArray(topMaidsData.data)) {
-              maidsArray = topMaidsData.data;
-            } else if (topMaidsData && topMaidsData.success === false) {
-              throw new Error(topMaidsData.message || 'API returned unsuccessful response');
-            } else {
-              maidsArray = [];
-            }
-
-            // Validate maid objects
-            const validMaids = maidsArray.filter(maid => {
-              return maid && typeof maid === 'object' && maid.id && maid.name;
-            });
-
-            setTopMaids(validMaids);
-            setError(null);
-          } else {
-            const errorText = await topMaidsRes.text().catch(() => 'Unable to read error response');
-            const errorMessage = `Failed to fetch top maids (${topMaidsRes.status}): ${errorText}`;
-            setError(errorMessage);
-            setTopMaids([]);
-          }
         } catch (error) {
           console.error('Manual retry error:', error);
           setError(error.message || 'Network error occurred while fetching data');
@@ -304,6 +360,43 @@ export default function Recommended() {
 
     fetchData();
   };
+
+  // Handle token association after login
+  useEffect(() => {
+    const handleTokenAssociation = async () => {
+      const token = getTokenFromCookie();
+      if (token && isAuthenticated && !authLoading) {
+        console.log('🔍 [DEBUG] User logged in with token, fetching and associating recommendations...');
+        
+        try {
+          // Fetch recommendations using the token
+          const tokenMaids = await fetchRecommendationsByToken(token);
+          if (tokenMaids.length > 0) {
+            setTokenRecommendations(tokenMaids);
+            setTopMaids(tokenMaids);
+            
+            // Associate the recommendations with the user
+            const callbackRes = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.CALLBACK), {
+              method: 'POST',
+              credentials: 'include',
+            });
+            
+            if (callbackRes.ok) {
+              console.log('🔍 [DEBUG] Successfully associated recommendations with user');
+              // Clear the token from cookie after successful association
+              document.cookie = 'recommendation_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+              // Refresh the page to show user's personal recommendations
+              window.location.reload();
+            }
+          }
+        } catch (err) {
+          console.error('Error associating recommendations:', err);
+        }
+      }
+    };
+
+    handleTokenAssociation();
+  }, [isAuthenticated, authLoading]);
 
   // Function to calculate age from DOB
   const calculateAge = (dob) => {
@@ -460,18 +553,13 @@ export default function Recommended() {
 
   // Handle bulk WhatsApp contact for selected helpers
   const handleBulkContact = () => {
-    if (!isAuthenticated) {
-      // Could show a login prompt here if needed
-      return;
-    }
-
     if (selectedMaids.length === 0) return;
 
     // Get selected maid details from filtered maids
     const selectedMaidDetails = filteredTopMaids.filter(maid => selectedMaids.includes(maid.id));
 
     // Generate WhatsApp message
-    let message = `Hi! I'm interested in the following top recommended helpers:\n\n`;
+    let message = `Hi! I'm interested in the following ${isAuthenticated ? 'recommended' : 'selected'} helpers:\n\n`;
 
     selectedMaidDetails.forEach((maid, index) => {
       const profileLink = generateProfileLink(maid.id);
@@ -528,9 +616,29 @@ export default function Recommended() {
                 <div className="flex items-center gap-3">
                   <RecommendIcon sx={{ color: brandColors.primary, fontSize: '1.5rem' }} />
                   <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
-                    Top Recommended Helpers
+                    {tokenRecommendations.length > 0 
+                      ? (isAuthenticated ? 'Recommended for You' : 'Recommended Helpers') 
+                      : 'Your Personal Recommendations'} ({filteredTopMaids.length})
                   </h2>
                 </div>
+                
+                {/* Optional login prompt for token-based recommendations */}
+                {tokenRecommendations.length > 0 && !isAuthenticated && (
+                  <div className="text-sm text-blue-600 bg-blue-50 px-4 py-3 rounded-lg border border-blue-200 mb-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-medium">Viewing recommended helpers</span>
+                        <span className="text-gray-600 ml-2">• You can browse without logging in</span>
+                      </div>
+                      <Link 
+                        to="/login" 
+                        className="bg-blue-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-blue-700 transition-colors"
+                      >
+                        Login to Save
+                      </Link>
+                    </div>
+                  </div>
+                )}
 
                 {/* Contact Selected Button - Right Side (Desktop Only) */}
                 <div className="hidden lg:flex flex-shrink-0">
@@ -640,12 +748,12 @@ export default function Recommended() {
                       {error ? (
                         <>
                           <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
-                            Unable to Load Top Helpers
+                            Unable to Load Recommendations
                           </h3>
                           <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto mb-2">
                             {error.includes('Network error') || error.includes('fetch')
                               ? "There seems to be a connection issue. Please check your internet connection and try again."
-                              : "We encountered an issue while loading the recommended helpers."
+                              : "We encountered an issue while loading your personal recommendations."
                             }
                           </p>
                           <p className="text-xs text-gray-500 max-w-lg mx-auto">
@@ -655,10 +763,10 @@ export default function Recommended() {
                       ) : (
                         <>
                           <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
-                            No Top Helpers Available
+                            No Personal Recommendations Yet
                           </h3>
                           <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto">
-                            We don't have top recommended helpers available right now. Browse our catalogue to discover amazing helpers.
+                            We don't have personalized recommendations for you yet. Browse our catalogue to discover amazing helpers and we'll learn your preferences.
                           </p>
                         </>
                       )}

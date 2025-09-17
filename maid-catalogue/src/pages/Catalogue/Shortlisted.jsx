@@ -203,28 +203,14 @@ export default function Shortlisted() {
     return age;
   };
 
-  // Combine recommended maids and favorite helpers into one array
+  // Show only favorite helpers (no recommendations)
   useEffect(() => {
-    const combined = [];
-
-    // Add recommended maids first
-    if (recommendedMaids.length > 0) {
-      combined.push(...recommendedMaids);
-    }
-
-    // Add favorite helpers that aren't already in recommendations
-    if (favoriteHelpers.length > 0) {
-      const recommendedIds = new Set(recommendedMaids.map(maid => maid.id));
-      const uniqueFavorites = favoriteHelpers.filter(fav => !recommendedIds.has(fav.id));
-      combined.push(...uniqueFavorites);
-    }
-
-    console.log('🔄 Combined helpers:', combined.length, 'total helpers');
-    console.log('   - Recommended:', recommendedMaids.length);
-    console.log('   - Unique favorites:', favoriteHelpers.filter(fav => !recommendedMaids.some(rec => rec.id === fav.id)).length);
-
-    setAllHelpers(combined);
-  }, [recommendedMaids, favoriteHelpers]);
+    console.log('🔄 Setting helpers to favorites only:', favoriteHelpers.length, 'favorites');
+    console.log('   - Favorite helpers:', favoriteHelpers);
+    
+    // Only show favorite helpers, no recommendations
+    setAllHelpers(favoriteHelpers);
+  }, [favoriteHelpers]);
 
   // Filter logic for combined helpers
   const filteredHelpers = allHelpers.filter((maid) => {
@@ -365,7 +351,7 @@ export default function Shortlisted() {
                 <div className="flex items-center gap-3">
                   <StarIcon sx={{ color: brandColors.primary, fontSize: '1.5rem' }} />
                   <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
-                    Your Personal Shortlist
+                    Your Favorites ({filteredHelpers.length})
                   </h2>
                 </div>
 
@@ -465,10 +451,10 @@ export default function Shortlisted() {
                     {/* Empty State Text */}
                     <div>
                       <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
-                        No Personal Shortlist Available
+                        No Favorites Yet
                       </h3>
                       <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto">
-                        We don't have personalized recommendations or favorites ready for you yet. Browse our catalogue to discover amazing helpers.
+                        You haven't added any helpers to your favorites yet. Browse our catalogue and click the heart icon to add helpers to your favorites.
                       </p>
                     </div>
 

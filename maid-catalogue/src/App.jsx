@@ -38,7 +38,7 @@ function ConditionalFloatingWhatsApp() {
 
 // Component to get authentication state
 function AppContent() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <Router>
@@ -64,20 +64,46 @@ function AppContent() {
         <Route
           path="/maid/:id"
           element={
-            isAuthenticated ? <MaidDetails /> : <Navigate to="/login" replace />
+            isLoading ? (
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                height: '100vh',
+                fontSize: '18px'
+              }}>
+                Loading...
+              </div>
+            ) : isAuthenticated ? (
+              <MaidDetails />
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
         <Route
           path="/shortlisted"
           element={
-            isAuthenticated ? <Shortlisted /> : <Navigate to="/login" replace />
+            isLoading ? (
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                height: '100vh',
+                fontSize: '18px'
+              }}>
+                Loading...
+              </div>
+            ) : isAuthenticated ? (
+              <Shortlisted />
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
         <Route
           path="/recommend"
-          element={
-            isAuthenticated ? <Recommend /> : <Navigate to="/login" replace />
-          }
+          element={<Recommend />}
         />
         <Route path="/signup" element={<Signup />} />
         <Route

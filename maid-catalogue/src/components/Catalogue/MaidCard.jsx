@@ -118,14 +118,31 @@ export default function MaidCard({ maid, isAuthenticated, userFavorites = [], is
   const [imageError, setImageError] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showDetailsPopup, setShowDetailsPopup] = useState(false);
-  const [isFavorited, setIsFavorited] = useState(
-    Array.isArray(userFavorites) && userFavorites.includes(maid.id)
-  );
+  const [isFavorited, setIsFavorited] = useState(() => {
+    const maidId = String(maid.id);
+    const favoriteIds = Array.isArray(userFavorites) ? userFavorites.map(id => String(id)) : [];
+    return favoriteIds.includes(maidId);
+  });
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
 
   // Initialize and update favorites state based on userFavorites prop
   useEffect(() => {
-    setIsFavorited(Array.isArray(userFavorites) && userFavorites.includes(maid.id));
+    // Handle both string and number types for comparison
+    const maidId = String(maid.id);
+    const favoriteIds = Array.isArray(userFavorites) ? userFavorites.map(id => String(id)) : [];
+    const isCurrentlyFavorited = favoriteIds.includes(maidId);
+    
+    console.log('🔍 Favorite Debug:', {
+      maidId: maid.id,
+      maidIdType: typeof maid.id,
+      maidIdString: maidId,
+      userFavorites,
+      favoriteIds,
+      isCurrentlyFavorited,
+      includesCheck: favoriteIds.includes(maidId)
+    });
+    
+    setIsFavorited(isCurrentlyFavorited);
   }, [userFavorites, maid.id]);
 
   // Reset image loading state when maid changes
@@ -703,6 +720,7 @@ export default function MaidCard({ maid, isAuthenticated, userFavorites = [], is
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
+            console.log('🔍 Heart clicked! Current state:', { isFavorited, maidId: maid.id, userFavorites });
             toggleFavorite();
           }}
           disabled={isFavoriteLoading}

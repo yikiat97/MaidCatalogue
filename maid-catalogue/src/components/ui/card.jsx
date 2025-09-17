@@ -1,61 +1,67 @@
-import * as React from "react"
+import React from 'react';
+import PropTypes from 'prop-types';
 
-import { cn } from "../../lib/utils"
+export const CardContent = ({ children, className = '', ...props }) => (
+  <div className={`py-2 ${className}`} {...props}>
+    {children}
+  </div>
+);
+export const CardHeader = ({ children, className = '', ...props }) => (
+  <div className={`border-b pb-3 mb-3 ${className}`} {...props}>
+    {children}
+  </div>
+);
 
-const Card = React.forwardRef(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
-      className
-    )}
-    {...props}
-  />
-))
-Card.displayName = "Card"
+export const Card = ({ 
+  children, 
+  className = '', 
+  variant = 'default',
+  padding = 'medium',
+  shadow = true,
+  rounded = true,
+  ...props 
+}) => {
+  const baseClasses = 'bg-white transition-all duration-200';
+  
+  const variants = {
+    default: 'border border-gray-200',
+    elevated: 'border-none',
+    outlined: 'border-2 border-[#ff690d26]',
+  };
 
-const CardHeader = React.forwardRef(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
-    {...props}
-  />
-))
-CardHeader.displayName = "CardHeader"
+  const paddings = {
+    none: 'p-0',
+    small: 'p-2',
+    medium: 'p-4',
+    large: 'p-6',
+  };
 
-const CardTitle = React.forwardRef(({ className, ...props }, ref) => (
-  <h3
-    ref={ref}
-    className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
-      className
-    )}
-    {...props}
-  />
-))
-CardTitle.displayName = "CardTitle"
+  const shadows = {
+    true: 'shadow-[0_2px_5px_rgba(0,0,0,0.1)]',
+    false: '!shadow-none',
+  };
 
-const CardDescription = React.forwardRef(({ className, ...props }, ref) => (
-  <p
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
-  />
-))
-CardDescription.displayName = "CardDescription"
+  const roundings = {
+    true: 'rounded-[30px]',
+    false: '',
+  };
 
-const CardContent = React.forwardRef(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
-))
-CardContent.displayName = "CardContent"
+  const cardClasses = `${baseClasses} ${variants[variant]} ${paddings[padding]} ${shadows[shadow]} ${roundings[rounded]} ${className}`;
 
-const CardFooter = React.forwardRef(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
-    {...props}
-  />
-))
-CardFooter.displayName = "CardFooter"
+  return (
+    <div className={cardClasses} {...props}>
+      {children}
+    </div>
+  );
+};
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+Card.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
+  variant: PropTypes.oneOf(['default', 'elevated', 'outlined']),
+  padding: PropTypes.oneOf(['none', 'small', 'medium', 'large']),
+  shadow: PropTypes.bool,
+  rounded: PropTypes.bool,
+};
+
+export default Card;

@@ -1,0 +1,278 @@
+{
+  "info": {
+    "name": "MaidCatalogue Admin API",
+    "description": "Complete API collection for MaidCatalogue Admin endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@easyhire.sg\",\n  \"password\": \"adminSecurePassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Admin Auth Callback",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/auth/callback",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "auth", "callback"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Maid Management",
+      "item": [
+        {
+          "name": "Get All Maids (Admin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/maids",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "maids"]
+            }
+          }
+        },
+        {
+          "name": "Search Maids (Admin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/maids/search?query=maria",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "maids", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "maria",
+                  "description": "Search by name or ID"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Maid by ID (Admin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/maids/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "maids", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create New Maid",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "data",
+                  "value": "{\n  \"name\": \"Maria Santos\",\n  \"country\": \"Philippines\",\n  \"salary\": 600,\n  \"loan\": 5000,\n  \"height\": 160,\n  \"weight\": 55,\n  \"DOB\": \"1990-05-15\",\n  \"Religion\": \"Catholic\",\n  \"maritalStatus\": \"Single\",\n  \"NumChildren\": 0,\n  \"skills\": [\"Cooking\", \"Cleaning\", \"Childcare\"],\n  \"languages\": [\"English\", \"Tagalog\"],\n  \"type\": [\"New/Fresh\"],\n  \"supplier\": \"ABC Agency\",\n  \"isActive\": true,\n  \"isEmployed\": false,\n  \"maidDetails\": {\n    \"englishRating\": 4,\n    \"chineseRating\": 2,\n    \"dialectRating\": 3,\n    \"restDay\": 1,\n    \"highestEducation\": \"High School\",\n    \"description\": \"Experienced maid with excellent references\"\n  }\n}",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional image file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/maid",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "maid"]
+            }
+          }
+        },
+        {
+          "name": "Update Maid",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "data",
+                  "value": "{\n  \"name\": \"Maria Santos Updated\",\n  \"country\": \"Philippines\",\n  \"salary\": 650,\n  \"loan\": 5000,\n  \"height\": 160,\n  \"weight\": 55,\n  \"DOB\": \"1990-05-15\",\n  \"Religion\": \"Catholic\",\n  \"maritalStatus\": \"Single\",\n  \"NumChildren\": 0,\n  \"skills\": [\"Cooking\", \"Cleaning\", \"Childcare\", \"Elderly Care\"],\n  \"languages\": [\"English\", \"Tagalog\"],\n  \"type\": [\"New/Fresh\"],\n  \"supplier\": \"ABC Agency\",\n  \"isActive\": true,\n  \"isEmployed\": false,\n  \"maidDetails\": {\n    \"englishRating\": 4,\n    \"chineseRating\": 2,\n    \"dialectRating\": 3,\n    \"restDay\": 1,\n    \"highestEducation\": \"High School\",\n    \"description\": \"Updated description\"\n  }\n}",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional new image file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/maid/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "maid", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Maid",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/maids/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "maids", "1"]
+            }
+          }
+        },
+        {
+          "name": "Bulk Delete Maids",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maidIds\": [1, 2, 3, 4, 5]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/maids",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "maids"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users?page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number (default: 1)"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Items per page (default: 10)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete User Recommendation",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/123/recommendations/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users", "123", "recommendations", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recommendation Management",
+      "item": [
+        {
+          "name": "Generate User Recommendation Link",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maidIds\": [1, 2, 3],\n  \"filters\": {\n    \"country\": \"Philippines\",\n    \"salary\": 600\n  },\n  \"userId\": 123\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/generate-link",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "generate-link"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Maid Recommendation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recommended\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/maid/1/recommendation",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "maid", "1", "recommendation"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

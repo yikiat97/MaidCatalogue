@@ -110,15 +110,25 @@ export default function Catalogue() {
               credentials: 'include',
             });
             
+            console.log('🔍 Favorites API Response:', {
+              status: favRes.status,
+              ok: favRes.ok
+            });
+            
             if (favRes.ok) {
               const favData = await favRes.json();
+              console.log('🔍 Raw Favorites Data:', favData);
+              
               if (Array.isArray(favData)) {
                 const favoriteIds = favData.map(maid => maid.id);
+                console.log('🔍 Processed Favorite IDs:', favoriteIds);
                 setUserFavorites(favoriteIds);
               } else {
+                console.log('🔍 Favorites data is not an array:', favData);
                 setUserFavorites([]);
               }
             } else {
+              console.log('🔍 Favorites API failed with status:', favRes.status);
               setUserFavorites([]);
             }
           } catch (err) {
