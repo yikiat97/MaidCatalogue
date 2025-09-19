@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API_CONFIG from '../../config/api.js';
+import { useAdminSession } from '../../hooks/useAdminSession';
 
 import { Search, Home, Package, Users, UserCheck, ShoppingCart, Store, Settings, LogOut, Bell, X, Plus, Trash2, Filter, ChevronDown, ChevronUp, Menu } from 'lucide-react';
 import AddMaidModal from '../../components/admin/AddMaidModal';
@@ -21,35 +22,12 @@ const Dashboard = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { checkAuthStatus, authenticatedFetch } = useAdminSession();
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const { userId: userIdParam } = useParams(); // ✅ use clearer alias
   const [userId, setUserId] = useState(null);
   const [recommendedIds, setRecommendedIds] = useState([]);
-  
-  // Handle unauthorized access by redirecting to login
-  const handleUnauthorizedAccess = (action = 'perform this action') => {
-    // Clear any stored data
-    localStorage.removeItem('adminToken');
-    sessionStorage.clear();
-    
-    // Show error message briefly
-    setError(`Access denied or session expired. You cannot ${action}. Redirecting to login...`);
-    
-    // Redirect to admin login after a short delay
-    setTimeout(() => {
-      navigate('/system-access');
-    }, 2000);
-  };
-
-  // Check if response indicates unauthorized access
-  const checkAuthStatus = (response, action = 'perform this action') => {
-    if (response.status === 401 || response.status === 403) {
-      handleUnauthorizedAccess(action);
-      return true; // Indicates unauthorized
-    }
-    return false; // Authorized
-  };
 
   // Manual logout function that redirects to login
   const handleLogout = async () => {
@@ -1228,15 +1206,15 @@ const Dashboard = () => {
 
         <nav className="mt-8">
           <div className="px-6 space-y-2">
-            <a href="#" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+            <a href="/admin" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
               <Home className="w-5 h-5" />
               <span>Dashboard</span>
             </a>
-            <a href="/admin" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-blue-600 bg-blue-50">
+            <a href="/admin/maidManagement" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-blue-600 bg-blue-50">
               <Package className="w-5 h-5" />
               <span>Maid Management</span>
             </a>
-            <a href="/userManagement" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+            <a href="/admin/userManagement" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
               <Users className="w-5 h-5" />
               <span>Users Management</span>
             </a>

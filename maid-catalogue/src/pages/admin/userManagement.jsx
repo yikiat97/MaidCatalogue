@@ -395,15 +395,15 @@ const UserManagement = () => {
 
         <nav className="mt-8">
           <div className="px-6 space-y-2">
-            <a href="#" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+            <a href="/admin" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
               <Home className="w-5 h-5" />
               <span>Dashboard</span>
             </a>
-            <a href="/admin" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+            <a href="/admin/maidManagement" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
               <Package className="w-5 h-5" />
               <span>Maid Management</span>
             </a>
-            <a href="/userManagement" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-blue-600 bg-blue-50">
+            <a href="/admin/userManagement" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-blue-600 bg-blue-50">
               <Users className="w-5 h-5" />
               <span>Users Management</span>
             </a>

@@ -96,7 +96,7 @@ const AddMaidModal = ({
           handleSubmit(e);
         }} className="p-6 space-y-6">
           {/* Debug Section */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          {/* <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <h4 className="text-lg font-medium text-yellow-800 mb-2">Debug Info</h4>
             <div className="text-sm text-yellow-700 space-y-1">
               <p>Name: {formData.name || 'EMPTY'}</p>
@@ -117,7 +117,7 @@ const AddMaidModal = ({
             >
               Log Form State
             </button>
-          </div>
+          </div> */}
 
           {/* Image Upload Section */}
           <div className="bg-gray-50 rounded-lg p-4">
@@ -407,7 +407,7 @@ const AddMaidModal = ({
                   </div>
                 </div>
 
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Languages *
                   </label>
@@ -430,7 +430,7 @@ const AddMaidModal = ({
                       </label>
                     ))}
                   </div>
-                </div>
+                </div> */}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -2,8 +2,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Plus, Trash2, X, Camera, Save } from 'lucide-react';
 import API_CONFIG from '../../config/api.js';
+import { useAdminSession } from '../../hooks/useAdminSession';
 
 const MaidDetailModal = ({ maidId, onClose }) => {
+  const { checkAuthStatus, authenticatedFetch } = useAdminSession();
   const [maid, setMaid] = useState(null);
   const [formData, setFormData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -13,9 +15,14 @@ const MaidDetailModal = ({ maidId, onClose }) => {
   useEffect(() => {
     const fetchMaid = async () => {
       try {
-        const response = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.ADMIN.MAIDS}/${maidId}`), {
-      credentials: 'include'
-    });
+        const { response, isUnauthorized } = await authenticatedFetch(
+          API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.ADMIN.MAIDS}/${maidId}`)
+        );
+
+        if (isUnauthorized) {
+          return;
+        }
+
         const data = await response.json();
         setMaid(data);
         setFormData({
@@ -199,11 +206,17 @@ const MaidDetailModal = ({ maidId, onClose }) => {
         maidFormData.append('data', JSON.stringify(maidData));
 
         // Send directly to maid update endpoint
-        const response = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.ADMIN.MAID}/${maidId}`), {
-          method: 'PUT',
-          credentials: 'include',
-          body: maidFormData,
-        });
+        const { response, isUnauthorized } = await authenticatedFetch(
+          API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.ADMIN.MAID}/${maidId}`),
+          {
+            method: 'PUT',
+            body: maidFormData,
+          }
+        );
+
+        if (isUnauthorized) {
+          return;
+        }
 
         if (response.ok) {
           const result = await response.json();
@@ -239,14 +252,20 @@ const MaidDetailModal = ({ maidId, onClose }) => {
           }))
         };
 
-        const response = await fetch(API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.ADMIN.MAID}/${maidId}`), {
-          method: 'PUT',              
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(submitData),
-        });
+        const { response, isUnauthorized } = await authenticatedFetch(
+          API_CONFIG.buildUrl(`${API_CONFIG.ENDPOINTS.ADMIN.MAID}/${maidId}`),
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(submitData),
+          }
+        );
+
+        if (isUnauthorized) {
+          return;
+        }
 
         if (response.ok) {
           const result = await response.json();
