@@ -767,7 +767,7 @@ const UserManagement = () => {
                     <h4 className="text-sm font-medium text-gray-700">Recommended Maids</h4>
                     <div className="flex items-center space-x-2">
                       <div
-                        onClick={() => navigate(`/admin/${selectedUser.id}`)}
+                        onClick={() => navigate(`/admin/maidManagement/${selectedUser.id}`)}
                         className="cursor-pointer hover:bg-gray-100 p-2 lg:p-4 rounded text-sm lg:text-base"
                       >
                         add maid

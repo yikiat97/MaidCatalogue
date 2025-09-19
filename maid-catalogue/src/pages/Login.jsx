@@ -84,7 +84,7 @@ export default function Login() {
   };
 
   const handleForgotPassword = async () => {
-    if (!email) {
+    if (!forgotEmail) {
       setError('Please enter your email address first.');
       return;
     }
@@ -94,7 +94,7 @@ export default function Login() {
       const res = await fetch(API_CONFIG.buildUrl(API_CONFIG.ENDPOINTS.AUTH.FORGOT_PASSWORD), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: forgotEmail }),
       });
 
       if (res.ok) {

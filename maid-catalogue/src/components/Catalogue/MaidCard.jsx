@@ -55,6 +55,7 @@ const OptimizedCardMedia = ({ imageUrl, alt, isAuthenticated, sx, onLoad, onErro
         width: '100%',
         height: '100%',
         objectFit: 'cover',
+        objectPosition: 'top center',
         transition: 'all 0.3s ease',
         filter: isAuthenticated ? 'none' : 'blur(12px)',
         transform: isAuthenticated ? 'none' : 'scale(1.1)',
