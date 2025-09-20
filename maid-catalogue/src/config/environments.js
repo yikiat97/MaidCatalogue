@@ -13,7 +13,7 @@ const ENVIRONMENTS = {
   },
   
   production: {
-    API_BASE_URL: 'https://easyhiresg.com', // Direct API calls to yikiat.com
+    API_BASE_URL: 'https://easyhiresg.com', // Direct API calls to easyhiresg.com
     API_PORT: 3000,
     NODE_ENV: 'production',
   },
