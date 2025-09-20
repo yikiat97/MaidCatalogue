@@ -35,7 +35,7 @@ sudo systemctl reload nginx
 # Health check
 echo "🏥 Running health checks..."
 sleep 5
-if curl -f -k https://yikiat.com > /dev/null; then
+if curl -f -k https://easyhiresg.com > /dev/null; then
   echo "✅ Frontend health check passed"
 else
   echo "❌ Frontend health check failed"
@@ -43,4 +43,4 @@ else
 fi
 
 echo "✅ Frontend deployment completed successfully!"
-echo "🌐 Frontend: https://yikiat.com"
+echo "🌐 Frontend: https://easyhiresg.com"

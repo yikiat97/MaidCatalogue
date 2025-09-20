@@ -239,7 +239,7 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
   // Generate profile link for WhatsApp sharing
   const generateProfileLink = (maidId) => {
     // Use appropriate base URL based on environment
-    const baseUrl = import.meta.env.DEV ? 'http://localhost:5173' : 'https://yikiat.com';
+    const baseUrl = import.meta.env.DEV ? 'http://localhost:5173' : 'https://easyhiresg.com';
     return `${baseUrl}/maid/${maidId}`;
   };
 

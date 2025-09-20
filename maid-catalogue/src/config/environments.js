@@ -1,19 +1,19 @@
 // Environment Configuration
 const ENVIRONMENTS = {
   development: {
-    API_BASE_URL: '', // Use Vite proxy - routes /api to https://yikiat.com/api
+    API_BASE_URL: '', // Use Vite proxy - routes /api to https://easyhiresg.com/api
     API_PORT: 3000,
     NODE_ENV: 'development',
   },
   
   staging: {
-    API_BASE_URL: 'https://yikiat.com',
+    API_BASE_URL: 'https://easyhiresg.com',
     API_PORT: 3000,
     NODE_ENV: 'staging',
   },
   
   production: {
-    API_BASE_URL: 'https://yikiat.com', // Direct API calls to yikiat.com
+    API_BASE_URL: 'https://easyhiresg.com', // Direct API calls to yikiat.com
     API_PORT: 3000,
     NODE_ENV: 'production',
   },

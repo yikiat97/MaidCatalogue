@@ -39,12 +39,12 @@ const ENVIRONMENTS = {
     NODE_ENV: 'development',
   },
   staging: {
-    API_BASE_URL: 'https://yikiat.com',
+    API_BASE_URL: 'https://easyhiresg.com',
     API_PORT: 3000,
     NODE_ENV: 'staging',
   },
   production: {
-    API_BASE_URL: 'https://yikiat.com',
+    API_BASE_URL: 'https://easyhiresg.com',
     API_PORT: 3000,
     NODE_ENV: 'production',
   }
@@ -835,7 +835,7 @@ fetch('/api/admin/generate-link', {
 **Response:**
 ```json
 {
-  "link": "https://yikiat.com/recommend?token=abc123xyz",
+  "link": "https://easyhiresg.com/recommend?token=abc123xyz",
   "token": "abc123xyz",
   "expiresAt": "2024-12-31T23:59:59Z"
 }

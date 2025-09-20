@@ -748,7 +748,7 @@
 		{
 			"key": "base_url",
 			"value": "http://localhost:3000",
-			"description": "Base URL for the API. Change this to your actual server URL (e.g., https://yikiat.com for production)"
+			"description": "Base URL for the API. Change this to your actual server URL (e.g., https://easyhiresg.com for production)"
 		}
 	]
 }

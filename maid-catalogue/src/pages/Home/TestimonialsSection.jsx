@@ -18,9 +18,9 @@ const TestimonialsSection = () => {
     const fetchReviews = async () => {
       const placeId = import.meta.env.VITE_GOOGLE_PLACE_ID;
       const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
-      
+
       // Skip if Place ID is not configured or is placeholder
-      if (!placeId || placeId === 'ChIJ_YOUR_PLACE_ID_HERE') {
+      if (!placeId || placeId === 'ChIJ3-sJcgkX2jERZLFJwJX-e6E') {
         console.log('ℹ️ Google Place ID not configured, using fallback testimonials');
         return;
       }

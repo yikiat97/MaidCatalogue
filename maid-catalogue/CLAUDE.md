@@ -74,7 +74,7 @@ src/
 
 ### API Configuration
 - Centralized API configuration in `src/config/api.js`
-- Environment-based API URLs (dev: localhost:3000, prod: yikiat.com)
+- Environment-based API URLs (dev: localhost:3000, prod: easyhiresg.com)
 - Structured endpoint organization for auth, admin, catalogue, and user operations
 
 ### Key Features
@@ -87,7 +87,7 @@ src/
 
 The app uses environment-based configuration:
 - **Development**: `http://localhost:3000`
-- **Production/Staging**: `https://yikiat.com`
+- **Production/Staging**: `https://easyhiresg.com`
 - Environment determined by `VITE_NODE_ENV` variable
 
 ## Custom Styling System

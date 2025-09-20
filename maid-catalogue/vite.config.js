@@ -7,11 +7,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://yikiat.com',
+        target: 'https://easyhiresg.com',
         changeOrigin: true,
         secure: true,
         headers: {
-          'Origin': 'https://yikiat.com'
+          'Origin': 'https://easyhiresg.com'
         },
         configure: (proxy, options) => {
           proxy.on('proxyReq', (proxyReq, req, res) => {
@@ -26,8 +26,8 @@ export default defineConfig({
                 'http://localhost:5173', // Vite dev server
                 'http://localhost:5174', // Alternative dev port
                 'http://localhost:3000', // Backend dev
-                'https://yikiat.com',    // Production
-                'https://www.yikiat.com' // Production www
+                'https://easyhiresg.com',    // Production
+                'https://www.easyhiresg.com' // Production www
               ];
 
               const origin = req.headers.origin;
@@ -56,8 +56,8 @@ export default defineConfig({
               'http://localhost:5173', // Vite dev server
               'http://localhost:5174', // Alternative dev port
               'http://localhost:3000', // Backend dev
-              'https://yikiat.com',    // Production
-              'https://www.yikiat.com' // Production www
+              'https://easyhiresg.com',    // Production
+              'https://www.easyhiresg.com' // Production www
             ];
 
             const origin = req.headers.origin;
@@ -88,7 +88,7 @@ export default defineConfig({
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https: blob:",
-              "connect-src 'self' https://yikiat.com https://maps.googleapis.com",
+              "connect-src 'self' https://easyhiresg.com https://maps.googleapis.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

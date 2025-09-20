@@ -16,7 +16,7 @@ This document summarizes the security improvements implemented for the MaidCatal
    - **Issue**: Wildcard origins (`*`) with credentials enabled
    - **Fix**: Implemented specific origin allowlist with proper validation
    - **File**: `vite.config.js`
-   - **Allowed Origins**: localhost:5173, localhost:5174, localhost:3000, yikiat.com, www.yikiat.com
+   - **Allowed Origins**: localhost:5173, localhost:5174, localhost:3000, easyhiresg.com, www.easyhiresg.com
 
 ### HIGH Priority Issues Resolved
 
