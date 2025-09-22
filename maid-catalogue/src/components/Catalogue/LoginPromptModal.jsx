@@ -73,6 +73,7 @@ export default function LoginPromptModal({ open, onClose }) {
           background: `linear-gradient(135deg, ${brandColors.surface} 0%, ${brandColors.background} 100%)`,
           border: `2px solid ${brandColors.border}`,
           boxShadow: '0 20px 60px rgba(12, 25, 27, 0.3)',
+          zIndex: 9999,
         }
       }}
     >
