@@ -52,6 +52,8 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
   const [imageError, setImageError] = useState(false);
   const [detailedMaid, setDetailedMaid] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [contactLoading, setContactLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Fetch detailed maid data when popup opens
   useEffect(() => {
@@ -243,45 +245,79 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
     return `${baseUrl}/maid/${maidId}`;
   };
 
-  const handleWhatsAppContact = () => {
+  const handleWhatsAppContact = async () => {
     if (!isAuthenticated) {
       onClose();
       navigate('/login');
       return;
     }
 
-    // Generate WhatsApp message with profile link
-    const profileLink = generateProfileLink(displayMaid.id);
-    const message = `Hi! I'm interested in the following domestic helper:\n\n${displayMaid.name} (ID: ${displayMaid.id})\nView Profile: ${profileLink}\n\nCould you provide more information about their availability and arrange an interview? Thank you!`;
+    setContactLoading(true);
+    setErrorMessage('');
 
-    window.open(`https://wa.me/88270086?text=${encodeURIComponent(message)}`, '_blank');
+    try {
+      // Generate WhatsApp message with profile link
+      const profileLink = generateProfileLink(displayMaid.id);
+      const message = `Hi! I'm interested in the following domestic helper:\n\n${displayMaid.name} (ID: ${displayMaid.id})\nView Profile: ${profileLink}\n\nCould you provide more information about their availability and arrange an interview? Thank you!`;
+
+      // Small delay to show loading state
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Check if WhatsApp can be opened
+      const whatsappUrl = `https://wa.me/88270086?text=${encodeURIComponent(message)}`;
+      const newWindow = window.open(whatsappUrl, '_blank');
+
+      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        throw new Error('Popup blocked. Please allow popups for this site to contact via WhatsApp.');
+      }
+
+      // Success feedback
+      setErrorMessage('');
+    } catch (error) {
+      console.error('Error opening WhatsApp:', error);
+      setErrorMessage(error.message || 'Unable to open WhatsApp. Please try again or contact us directly.');
+    } finally {
+      setContactLoading(false);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent 
-        className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 bg-white"
+      <DialogContent
+        className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 bg-white focus:outline-none"
         data-popup-id={displayMaid.id}
+        aria-labelledby="maid-profile-title"
+        aria-describedby="maid-profile-description"
       >
         {/* Header */}
         <DialogHeader className="relative border-b border-gray-200 p-6 pb-4">
-          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
+          <DialogClose
+            className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:pointer-events-none"
+            aria-label={`Close ${displayMaid.name} profile dialog`}
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+            <span className="sr-only">Close profile</span>
           </DialogClose>
-          
+
           <div className="flex items-center gap-3 pr-12">
-            <img 
-              src={getCountryFlag(displayMaid.country)} 
+            <img
+              src={getCountryFlag(displayMaid.country)}
               alt={`${displayMaid.country} flag`}
               className="w-6 h-4 rounded-sm border border-gray-200"
             />
             <div>
-              <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
-                {displayMaid.name}
+              <DialogTitle
+                id="maid-profile-title"
+                className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight"
+              >
+                {displayMaid.name} - Domestic Helper Profile
               </DialogTitle>
-              <p className="text-sm text-gray-600 font-medium mt-1">
-                From {displayMaid.country} {maidAge && `• ${maidAge} years old`}
+              <p
+                id="maid-profile-description"
+                className="text-sm text-gray-600 font-medium mt-1"
+              >
+                From {displayMaid.country} {maidAge && `• ${maidAge} years old`} •
+                Experience level: {displayLabel} • Monthly salary: ${displayMaid.salary}
               </p>
             </div>
           </div>
@@ -591,21 +627,69 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
             </div>
           </div>
         </div>
-        
+
         {/* Footer Actions */}
         <DialogFooter className="border-t border-gray-200 p-6">
-          <Button
-            onClick={handleWhatsAppContact}
-            className={cn(
-              "w-full sm:w-auto font-bold transition-all duration-200 hover:scale-105",
-              isAuthenticated 
-                ? "bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl" 
-                : "bg-orange-500 hover:bg-orange-600 text-white shadow-lg hover:shadow-xl"
+          <div className="w-full space-y-3">
+            {/* Error Message - Full Width */}
+            {errorMessage && (
+              <div
+                role="alert"
+                aria-live="assertive"
+                className="w-full p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
+              >
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <svg className="h-4 w-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-2">
+                    <span className="font-medium">Error: </span>
+                    {errorMessage}
+                  </div>
+                </div>
+              </div>
             )}
-          >
-            <MessageCircle className="w-4 h-4 mr-2" />
-            {isAuthenticated ? 'Contact via WhatsApp' : 'Sign in to Contact'}
-          </Button>
+
+            {/* Button Container - Right Aligned */}
+            <div className="flex justify-end">
+              <Button
+                onClick={handleWhatsAppContact}
+                disabled={contactLoading}
+                loading={contactLoading}
+                loadingText={isAuthenticated ? "Opening WhatsApp..." : "Redirecting to login..."}
+                aria-label={
+                  isAuthenticated
+                    ? `Contact ${displayMaid.name} via WhatsApp for domestic helper services`
+                    : `Sign in to contact ${displayMaid.name} and view complete profile`
+                }
+                aria-describedby="contact-description"
+                className={cn(
+                  "min-w-[200px] sm:min-w-[240px] font-bold transition-all duration-200 hover:scale-105 focus:ring-4 focus:ring-offset-2",
+                  isAuthenticated
+                    ? "bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl focus:ring-green-500/50"
+                    : "bg-orange-500 hover:bg-orange-600 text-white shadow-lg hover:shadow-xl focus:ring-orange-500/50"
+                )}
+              >
+                {!contactLoading && (
+                  <MessageCircle className="w-4 h-4 mr-2" aria-hidden="true" />
+                )}
+                {isAuthenticated ? 'Contact via WhatsApp' : 'Sign in to Contact'}
+              </Button>
+            </div>
+
+            {/* Hidden description for screen readers */}
+            <div
+              id="contact-description"
+              className="sr-only"
+            >
+              {isAuthenticated
+                ? `Send a WhatsApp message to inquire about ${displayMaid.name}'s availability and services. Message includes profile link and helper details.`
+                : `Signing in allows you to contact domestic helpers directly via WhatsApp and access complete profiles with clear photos and detailed information.`
+              }
+            </div>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

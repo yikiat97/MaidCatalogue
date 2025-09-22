@@ -67,6 +67,8 @@ export default function MaidDetails() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [isFavorited, setIsFavorited] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [signupLoading, setSignupLoading] = useState(false);
 
   // Calculate age from DOB
   const calculateAge = (dob) => {
@@ -330,6 +332,22 @@ export default function MaidDetails() {
     setIsFavorited(false);
     // Redirect to catalogue page
     window.location.href = '/catalogue';
+  };
+
+  // Handle login navigation with loading state
+  const handleLoginClick = async () => {
+    setLoginLoading(true);
+    // Small delay to show loading state
+    await new Promise(resolve => setTimeout(resolve, 300));
+    navigate('/login');
+  };
+
+  // Handle signup navigation with loading state
+  const handleSignupClick = async () => {
+    setSignupLoading(true);
+    // Small delay to show loading state
+    await new Promise(resolve => setTimeout(resolve, 300));
+    navigate('/signup');
   };
 
   if (loading) return (
@@ -616,7 +634,11 @@ export default function MaidDetails() {
                            variant="contained"
                            size="large"
                            fullWidth
-                           onClick={() => navigate('/login')}
+                           onClick={handleLoginClick}
+                           disabled={loginLoading}
+                           aria-label={`Login to view full profile of ${maid.name}`}
+                           aria-describedby="login-description"
+                           aria-busy={loginLoading}
                            sx={{
                              background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryDark} 100%)`,
                              fontWeight: 700,
@@ -628,16 +650,60 @@ export default function MaidDetails() {
                                boxShadow: '0 6px 16px rgba(255, 145, 77, 0.4)',
                                transform: 'translateY(-1px)'
                              },
+                             '&:focus': {
+                               outline: '3px solid #2563eb',
+                               outlineOffset: '2px'
+                             },
+                             '&:disabled': {
+                               background: 'rgba(255, 145, 77, 0.6)',
+                               color: '#fff'
+                             }
+                           }}
+                           startIcon={loginLoading ? (
+                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                               <Box
+                                 sx={{
+                                   width: 16,
+                                   height: 16,
+                                   border: '2px solid #fff',
+                                   borderTop: '2px solid transparent',
+                                   borderRadius: '50%',
+                                   animation: 'spin 1s linear infinite',
+                                   '@keyframes spin': {
+                                     '0%': { transform: 'rotate(0deg)' },
+                                     '100%': { transform: 'rotate(360deg)' }
+                                   }
+                                 }}
+                               />
+                             </Box>
+                           ) : undefined}
+                         >
+                           {loginLoading ? 'Redirecting...' : 'Login to View Full Profile'}
+                         </Button>
+
+                         {/* Hidden description for screen readers */}
+                         <Typography
+                           id="login-description"
+                           sx={{
+                             position: 'absolute',
+                             left: '-10000px',
+                             width: '1px',
+                             height: '1px',
+                             overflow: 'hidden'
                            }}
                          >
-                           Login to View Full Profile
-                         </Button>
+                           Signing in will unlock the complete profile including clear photos, contact information, and detailed work history for {maid.name}
+                         </Typography>
 
                          <Button
                            variant="outlined"
                            size="large"
                            fullWidth
-                           onClick={() => navigate('/signup')}
+                           onClick={handleSignupClick}
+                           disabled={signupLoading}
+                           aria-label={`Create account to contact ${maid.name} and view all domestic helper profiles`}
+                           aria-describedby="signup-description"
+                           aria-busy={signupLoading}
                            sx={{
                              fontWeight: 700,
                              borderRadius: 2,
@@ -650,10 +716,50 @@ export default function MaidDetails() {
                                borderColor: brandColors.primaryDark,
                                transform: 'translateY(-1px)'
                              },
+                             '&:focus': {
+                               outline: '3px solid #2563eb',
+                               outlineOffset: '2px'
+                             },
+                             '&:disabled': {
+                               borderColor: 'rgba(255, 145, 77, 0.6)',
+                               color: 'rgba(255, 145, 77, 0.6)'
+                             }
+                           }}
+                           startIcon={signupLoading ? (
+                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                               <Box
+                                 sx={{
+                                   width: 16,
+                                   height: 16,
+                                   border: '2px solid currentColor',
+                                   borderTop: '2px solid transparent',
+                                   borderRadius: '50%',
+                                   animation: 'spin 1s linear infinite',
+                                   '@keyframes spin': {
+                                     '0%': { transform: 'rotate(0deg)' },
+                                     '100%': { transform: 'rotate(360deg)' }
+                                   }
+                                 }}
+                               />
+                             </Box>
+                           ) : undefined}
+                         >
+                           {signupLoading ? 'Redirecting...' : 'Sign Up'}
+                         </Button>
+
+                         {/* Hidden description for screen readers */}
+                         <Typography
+                           id="signup-description"
+                           sx={{
+                             position: 'absolute',
+                             left: '-10000px',
+                             width: '1px',
+                             height: '1px',
+                             overflow: 'hidden'
                            }}
                          >
-                           Sign Up
-                         </Button>
+                           Create a free account to access complete profiles, contact domestic helpers directly, and save your favorites
+                         </Typography>
                        </>
                      )}
                    </Stack>
