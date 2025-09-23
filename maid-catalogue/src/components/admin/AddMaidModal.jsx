@@ -538,47 +538,56 @@ const AddMaidModal = ({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Language Ratings (0-5)
+                    Language Ratings (1-5)
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">English</label>
-                      <input
-                        type="number"
+                      <select
                         name="englishRating"
                         value={formData.maidDetails.englishRating}
                         onChange={handleMaidDetailChange}
-                        min="0"
-                        max="5"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
-                        placeholder="3"
-                      />
+                      >
+                        <option value="0">Select rating</option>
+                        <option value="1">1 - Basic</option>
+                        <option value="2">2 - Elementary</option>
+                        <option value="3">3 - Intermediate</option>
+                        <option value="4">4 - Advanced</option>
+                        <option value="5">5 - Fluent</option>
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">Chinese</label>
-                      <input
-                        type="number"
+                      <select
                         name="chineseRating"
                         value={formData.maidDetails.chineseRating}
                         onChange={handleMaidDetailChange}
-                        min="0"
-                        max="5"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
-                        placeholder="2"
-                      />
+                      >
+                        <option value="0">Select rating</option>
+                        <option value="1">1 - Basic</option>
+                        <option value="2">2 - Elementary</option>
+                        <option value="3">3 - Intermediate</option>
+                        <option value="4">4 - Advanced</option>
+                        <option value="5">5 - Fluent</option>
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">Dialect</label>
-                      <input
-                        type="number"
+                      <select
                         name="dialectRating"
                         value={formData.maidDetails.dialectRating}
                         onChange={handleMaidDetailChange}
-                        min="0"
-                        max="5"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-orange"
-                        placeholder="4"
-                      />
+                      >
+                        <option value="0">Select rating</option>
+                        <option value="1">1 - Basic</option>
+                        <option value="2">2 - Elementary</option>
+                        <option value="3">3 - Intermediate</option>
+                        <option value="4">4 - Advanced</option>
+                        <option value="5">5 - Fluent</option>
+                      </select>
                     </div>
                   </div>
                 </div>

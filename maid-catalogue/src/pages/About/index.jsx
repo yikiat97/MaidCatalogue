@@ -296,7 +296,7 @@ const AboutPage = () => {
                   </div>
                   
                   <PhoneFramedYouTube
-                    videoId="https://www.youtube.com/shorts/ctPfJZD1m9c"
+                    videoId="https://youtube.com/shorts/sO_quJeuVUU?si=gbYW8rKBPYyNFH4f"
                     title="EasyHire Story"
                     autoplay={false}
                     muted={true}

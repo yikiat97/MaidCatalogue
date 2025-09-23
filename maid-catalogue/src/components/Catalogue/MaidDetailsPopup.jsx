@@ -57,6 +57,7 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
 
   // Fetch detailed maid data when popup opens
   useEffect(() => {
+    
     if (open && maid?.id) {
       setImageLoaded(false);
       setImageError(false);
@@ -84,6 +85,7 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
 
           if (response.ok) {
             const data = await response.json();
+            console.log('MaidDetailsPopup useEffect', data);
             setDetailedMaid(data);
           } else {
             console.error('Failed to fetch detailed maid:', response.status);
@@ -517,7 +519,7 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
                 <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <Building className="w-6 h-6 text-orange-500" />
                   <div>
-                    <p className="text-xs text-gray-600 font-medium">Supplier</p>
+                    <p className="text-xs text-gray-600 font-medium">Helper Group</p>
                     <p className="text-lg font-bold text-gray-900">{displayMaid.supplier}</p>
                   </div>
                 </div>

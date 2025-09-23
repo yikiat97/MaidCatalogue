@@ -689,6 +689,7 @@ const Dashboard = () => {
 
       // Debug logging - show what we're working with
       console.log('Original formData:', formData);
+      console.log('formData.maidDetails:', formData.maidDetails);
       console.log('Processed maidData:', maidData);
       console.log('Key fields check:');
       console.log('- name:', maidData.name);

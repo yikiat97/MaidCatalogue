@@ -662,11 +662,6 @@ const MaidDetailModal = ({ maidId, onClose }) => {
                     <option value="English" />
                     <option value="Chinese" />
                     <option value="Dialect" />
-                    <option value="Malay" />
-                    <option value="Tamil" />
-                    <option value="Hindi" />
-                    <option value="Bengali" />
-                    <option value="Tagalog" />
                   </datalist>
                 </div>
 
