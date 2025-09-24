@@ -45,7 +45,7 @@ export default function Catalogue() {
     try {
       const res = await fetch(API_CONFIG.buildUrlWithParams(API_CONFIG.ENDPOINTS.CATALOGUE.MAIDS, {
         page: page.toString(),
-        limit: '20'
+        limit: '1000'
       }), {
         credentials: 'include',
       });
