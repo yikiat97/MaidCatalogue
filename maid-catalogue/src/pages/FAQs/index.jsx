@@ -12,67 +12,75 @@ const FAQsPage = () => {
 
   const leftColumnFAQs = [
     {
-      title: "Is there really no agency fee ?",
-      content: "Yes, we offer packages with no agency fees to make our services accessible to every family in Singapore."
+      title: "Who is eligible to hire a maid?",
+      content: "Singapore Citizens, Permanent Residents, and expatriates with a valid work pass may hire a Migrant Domestic Worker (MDW), subject to the Ministry of Manpower's (MOM) approval based on the stated reason for employment.\n\nExpatriates must also show proof that their family members live with them at the time of application.\n\nTo qualify as an employer, you must:\n• Be at least 21 years old.\n• Not be an undischarged bankrupt.\n• Have the mental capacity to understand and fulfill employer responsibilities.\n• Demonstrate sufficient financial resources to employ, maintain, and provide proper housing for the helper."
     },
     {
-      title: "Why should I choose Easy Hire to hire a maid?",
-      content: "We provide transparent pricing, comprehensive support, and have over 10 years of experience in the industry."
+      title: "Do I need to give my maid rest days?",
+      content: "Yes. MDWs are entitled to one rest day every week, with the specific day agreed upon between you and your helper.\n• If the maid agrees in writing to work on her rest day, you must compensate her.\n• Since **1 January 2023**, all employers must grant their helper **at least one non-negotiable rest day each month.**\n\nIf the helper chooses to work on other rest days, compensation can be either:\n1. An additional day's wages (separate from basic salary), or\n2. A replacement rest day within the same month."
     },
     {
-      title: "Do I need to provide rest days to my maid?",
-      content: "Yes, according to Singapore law, domestic workers are entitled to at least one rest day per week."
+      title: "What are my responsibilities as an employer?",
+      content: "Under MOM regulations, employers must:\n• Pay the helper on time.\n• Cover all her living expenses.\n• Safeguard her general welfare while she resides in Singapore."
     },
     {
-      title: "What responsibilities do I hold as an employer towards my maid?",
-      content: "As an employer, you are responsible for providing fair wages, adequate accommodation, medical care, and ensuring their safety and well-being."
+      title: "What is the average salary of a maid?",
+      content: "• **Indonesian MDWs:** Starting salary is about **$550 SGD**, with potential increments depending on skills and experience.\n• **Myanmar MDWs:** Starting salary is between **$500–$550 SGD**, also subject to experience and ability."
     },
     {
-      title: "What is the average salary of a maid from Indonesia?",
-      content: "The average salary ranges from $600 to $750 per month, depending on experience and specific requirements."
+      title: "How long does it take to hire a maid from overseas?",
+      content: "The process typically takes **3–6 weeks**, depending on the maid's country of origin and document readiness.\n• If documents (e.g., passport) are in order, work permit approval may take less than a week.\n• Once approved, the maid can usually arrive within a month, subject to MOM's Entry Approval scheduling.\n• If extra processing is needed due to country-specific rules, the process may extend to 1–2 months.\n• On arrival, the maid must complete a medical check-up and, if it is her first time in Singapore, the **Settling-In Programme**.\n• The work permit must be issued within **14 days of arrival** after passing the medical exam."
     },
     {
-      title: "What is the average salary of a maid from Philippines?",
-      content: "Filipino domestic workers typically earn between $650 to $800 per month based on their experience and skills."
+      title: "What are transfer maids?",
+      content: "Transfer maids are MDWs already in Singapore under another employer who are looking for new employment.\nThis often happens when a two-year contract ends or when either party decides to terminate the employment earlier."
     },
     {
-      title: "What is the average salary of a maid from Myanmar?",
-      content: "Myanmar domestic workers usually earn between $580 to $700 per month depending on their experience level."
+      title: "How do I transfer my maid?",
+      content: "• Provide written consent to the agency to begin the process.\n• You must continue paying the levy until the new Work Permit is issued.\n• If the maid's 6-Monthly Medical Examination (6ME) is due, you are responsible for arranging it.\n• If the transfer is unsuccessful and the Work Permit is cancelled or expires, you must repatriate the maid within **14 days**.\n• The maid can only start work with the new employer after the new Work Permit is issued.\n• Any outstanding salary must be paid on the release date."
     },
     {
-      title: "What are the benefits of using a maid agency for hiring a maid",
-      content: "Using an agency provides professional screening, legal compliance, ongoing support, and replacement services if needed."
+      title: "What should I do if my maid goes missing?",
+      content: "• Cancel her Work Permit immediately to stop levy payments.\n• You have **1 month** to locate and repatriate her, or you risk losing the **$5,000 security deposit**."
     }
   ];
 
   const rightColumnFAQs = [
     {
-      title: "Who can hire a maid?",
-      content: "Singapore citizens and permanent residents can hire domestic workers. Work permit holders may also hire with proper documentation."
+      title: "What happens if my maid becomes pregnant?",
+      content: "Work permit holders, including MDWs, are not allowed to become pregnant or give birth in Singapore unless they are legally married to a Singapore Citizen or PR with prior government approval.\n\nIf your helper becomes pregnant:\n• Notify MOM.\n• Terminate her contract.\n• Cancel her Work Permit.\n• Pay for her air ticket home.\n\nFailure to comply may result in forfeiture of the **$5,000 security deposit**."
     },
     {
-      title: "My maid got pregnant. What should I do?",
-      content: "Contact us immediately. We will guide you through the legal requirements and help arrange for replacement if needed."
+      title: "Can I hire a maid part-time?",
+      content: "No. MOM does not allow MDWs to work part-time."
     },
     {
-      title: "Is it possible to hire a maid on part-time basis?",
-      content: "Yes, we offer part-time domestic helper services for families who do not require full-time assistance."
+      title: "Why should I use a maid agency?",
+      content: "Agencies handle the complex processes of hiring, including:\n• Training, work permit application, levy and insurance arrangements.\n• Security bond, travel, and immigration clearance.\n• Medical screening and other administrative steps.\n\nYou do not pay an agency fee — only the direct costs of hiring."
     },
     {
-      title: "My maid went missing. What should I do?",
-      content: "Report to the police immediately and contact us. We will assist with the necessary procedures and replacement arrangements."
+      title: "How much is the maid levy?",
+      content: "• **Standard levy:** $300/month ($9.87/day).\n• **Additional MDWs:** $450/month ($14.80/day).\n• **Concessionary levy:** $60/month (for households with children under 16 or elderly above 67, who are Singapore Citizens).\n\nPayment rules:\n• Levy is deducted monthly via GIRO.\n• Missing GIRO payments will lead to Work Permit cancellation.\n• For first-time helpers, the levy starts from the **5th day after arrival** (excluding arrival day). For others, it starts the day after arrival.\n• Payment must be completed by the **17th of the following month** (next working day if it falls on a holiday/weekend)."
     },
     {
-      title: "What is a security bond ($5,000 security deposit)?",
-      content: "The security bond is a mandatory deposit required by the government to ensure compliance with work permit conditions."
+      title: "What is the $5,000 security bond?",
+      content: "Employers must provide a **$5,000 bond** to ensure obligations are met (timely salary, proper care, repatriation).\n• If the employer breaches MOM conditions, the bond may be forfeited.\n• If the maid herself breaches conditions (e.g., pregnancy), the employer is not penalized.\n• If the maid absconds and repatriation is impossible, half the bond will be forfeited, provided you show reasonable effort to locate her."
     },
     {
-      title: "What other options do I have instead of the $5,000 security deposit?",
-      content: "You can opt for security bond insurance which costs significantly less than the full deposit amount."
+      title: "Are there alternatives to the $5,000 bond?",
+      content: "Yes. Employers may purchase maid insurance instead, which is generally cheaper and may include coverage for \"runaway\" situations.\nHowever, if you fail to repatriate the helper when required, you may still be liable for bond forfeiture unless your policy specifically covers it."
     },
     {
-      title: "What is the duration required to hire a maid from overseas?",
-      content: "The process typically takes 4-8 weeks depending on the country of origin and documentation requirements."
+      title: "Can I claim tax relief on the maid levy?",
+      content: "Yes, if you are:\n• A married woman who opted for separate tax assessment.\n• Married but your husband is not a Singapore resident.\n• Divorced, widowed, or separated and living with an unmarried child for whom you can claim child relief."
+    },
+    {
+      title: "Who pays for the maid's medical expenses?",
+      content: "You, as the employer, must cover all her medical costs (both inpatient and outpatient), as required by the Employment of Foreign Manpower Act."
+    },
+    {
+      title: "What documents are needed for first-time employers?",
+      content: "**For local employers:**\n• NRIC (yours and household members').\n• Proof of income (e.g., Notice of Assessment, or consent for MOM to verify income with IRAS).\n• If returning from overseas, a company letter confirming your job title, monthly salary, and start date.\n• If you did not file income tax:\n◦ Overseas tax assessment, and/or\n◦ CPF contribution statements for the last 3 months.\n\n**For expatriate employers:**\n• Passport copies (yours and family members').\n• Employment pass and dependent passes of family members living with you.\n\nThese documents are required for the Work Permit application process."
     }
   ];
 

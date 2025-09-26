@@ -1,6 +1,78 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
+// Helper function to parse text with bold formatting
+const parseTextWithBold = (text) => {
+  if (!text || typeof text !== 'string') {
+    return text;
+  }
+
+  // Split text by **bold** markers while preserving the markers
+  const parts = text.split(/(\*\*.*?\*\*)/);
+
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+      // Remove the ** markers and wrap in strong tag
+      const boldText = part.slice(2, -2);
+      return <strong key={index} className="font-bold text-white">{boldText}</strong>;
+    }
+    return part; // Return regular text as is
+  });
+};
+
+// Utility function to format FAQ content with proper line breaks, bullet points, and bold text
+const formatFAQContent = (content) => {
+  if (typeof content !== 'string') {
+    return content; // If it's already JSX, return as is
+  }
+
+  const lines = content.split('\n');
+  const elements = [];
+
+  lines.forEach((line, index) => {
+    const trimmedLine = line.trim();
+
+    if (!trimmedLine) {
+      // Empty line - add some spacing
+      elements.push(<div key={`space-${index}`} className="h-2" />);
+    } else if (trimmedLine.startsWith('•')) {
+      // Main bullet point
+      const bulletContent = trimmedLine.replace('•', '').trim();
+      elements.push(
+        <div key={index} className="flex items-start mb-2">
+          <span className="text-white mr-2 mt-1 flex-shrink-0">•</span>
+          <span className="text-white">{parseTextWithBold(bulletContent)}</span>
+        </div>
+      );
+    } else if (trimmedLine.startsWith('◦')) {
+      // Sub bullet point (indented)
+      const bulletContent = trimmedLine.replace('◦', '').trim();
+      elements.push(
+        <div key={index} className="flex items-start mb-2 ml-4">
+          <span className="text-white mr-2 mt-1 flex-shrink-0">◦</span>
+          <span className="text-white">{parseTextWithBold(bulletContent)}</span>
+        </div>
+      );
+    } else if (/^\d+\./.test(trimmedLine)) {
+      // Numbered list item
+      elements.push(
+        <div key={index} className="flex items-start mb-2 ml-4">
+          <span className="text-white">{parseTextWithBold(trimmedLine)}</span>
+        </div>
+      );
+    } else {
+      // Regular paragraph
+      elements.push(
+        <div key={index} className="text-white mb-2">
+          {parseTextWithBold(trimmedLine)}
+        </div>
+      );
+    }
+  });
+
+  return <div>{elements}</div>;
+};
+
 const AccordionItem = ({ title, children, isOpen, onToggle }) => {
   return (
     <div className="bg-[#ff690dd3] rounded-[20px] shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
@@ -21,8 +93,8 @@ const AccordionItem = ({ title, children, isOpen, onToggle }) => {
       </button>
       {isOpen && (
         <div className="px-4 pb-4">
-          <div className="text-white text-[16px] leading-[20px]">
-            {children}
+          <div className="text-[16px] leading-[22px]">
+            {formatFAQContent(children)}
           </div>
         </div>
       )}
