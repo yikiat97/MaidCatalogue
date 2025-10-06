@@ -1,18 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export const CardContent = ({ children, className = '', ...props }) => (
-  <div className={`py-2 ${className}`} {...props}>
-    {children}
-  </div>
-);
-export const CardHeader = ({ children, className = '', ...props }) => (
-  <div className={`border-b pb-3 mb-3 ${className}`} {...props}>
-    {children}
-  </div>
-);
-
-export const Card = ({ 
+const Card = ({ 
   children, 
   className = '', 
   variant = 'default',
@@ -55,6 +44,30 @@ export const Card = ({
   );
 };
 
+const CardContent = ({ 
+  children, 
+  className = '', 
+  ...props 
+}) => {
+  return (
+    <div className={`p-6 ${className}`} {...props}>
+      {children}
+    </div>
+  );
+};
+
+const CardHeader = ({ 
+  children, 
+  className = '', 
+  ...props 
+}) => {
+  return (
+    <div className={`flex flex-col space-y-1.5 p-6 ${className}`} {...props}>
+      {children}
+    </div>
+  );
+};
+
 Card.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
@@ -64,4 +77,15 @@ Card.propTypes = {
   rounded: PropTypes.bool,
 };
 
+CardContent.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
+};
+
+CardHeader.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
+};
+
+export { Card, CardContent, CardHeader };
 export default Card;
