@@ -154,7 +154,7 @@ export default function MaidCardVariation2({
 
   const handleWhatsAppContact = () => {
     const message = `Hi, I'm interested in maid ${maid.name} (ID: ${maid.id}).`;
-    window.open(`https://wa.me/88270086?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/6588270086?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const displayLabel = maid.type?.includes("Transfer")

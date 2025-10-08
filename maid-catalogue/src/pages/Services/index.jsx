@@ -15,7 +15,7 @@ const ServicesPage = () => {
   // WhatsApp consultation handler
   const handleConsultantWhatsApp = () => {
     const message = "Hello! I'd like to speak to a consultant about your maid services.";
-    const phoneNumber = "88270086";
+    const phoneNumber = "6588270086";
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');

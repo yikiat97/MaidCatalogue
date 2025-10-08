@@ -1,5 +1,5 @@
 const FloatingWhatsApp = ({ 
-  phoneNumber = "88270086", 
+  phoneNumber = "6588270086", 
   message = "Hello! I'm interested in your maid services." 
 }) => {
   const handleWhatsAppClick = () => {

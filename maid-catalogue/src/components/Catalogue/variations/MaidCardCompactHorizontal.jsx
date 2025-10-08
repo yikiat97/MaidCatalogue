@@ -177,7 +177,7 @@ export default function MaidCardCompactHorizontal({
   const handleWhatsAppClick = (e) => {
     e.stopPropagation();
     const message = `Hi, I'm interested in ${maid.name} (ID: ${maid.id}). Could you please provide more details?`;
-    window.open(`https://wa.me/88270086?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/6588270086?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleViewDetails = (e) => {

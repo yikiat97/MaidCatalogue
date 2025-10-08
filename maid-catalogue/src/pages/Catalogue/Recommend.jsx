@@ -570,7 +570,7 @@ export default function Recommended() {
     message += `Could you provide more information about their availability and arrange interviews? Thank you!`;
 
     // Open WhatsApp with the message
-    const whatsappUrl = `https://wa.me/88270086?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/6588270086?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 

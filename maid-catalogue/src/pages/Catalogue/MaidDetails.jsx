@@ -589,7 +589,7 @@ export default function MaidDetails() {
                            startIcon={<WhatsAppIcon />}
                            onClick={() => {
                              const message = `Hi, I'm interested in maid ${maid.name} (ID: ${maid.id}).`;
-                             window.open(`https://wa.me/88270086?text=${encodeURIComponent(message)}`, '_blank');
+                             window.open(`https://wa.me/6588270086?text=${encodeURIComponent(message)}`, '_blank');
                            }}
                            sx={{
                              background: `linear-gradient(135deg, #25D366 0%, #128C7E 100%)`,

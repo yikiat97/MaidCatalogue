@@ -179,7 +179,7 @@ export default function Header(){
           <button
             onClick={() => {
               const message = "Hi, I'm interested in your maid services.";
-              window.open(`https://wa.me/6588270086?text=${encodeURIComponent(message)}`, '_blank');
+              window.open(`https://wa.me/656588270086?text=${encodeURIComponent(message)}`, '_blank');
             }}
             className="px-4 lg:px-6 py-1.5 lg:py-2 bg-gradient-to-r from-[#25D366] to-[#1aab54] text-white rounded-xl font-bold text-sm lg:text-base xl:text-lg hover:from-[#1aab54] hover:to-[#128c42] hover:scale-105 transition-all duration-300 shadow-lg flex items-center gap-2 min-h-[36px]"
           >
@@ -373,7 +373,7 @@ export default function Header(){
             <button
               onClick={() => {
                 const message = "Hi, I'm interested in your maid services.";
-                window.open(`https://wa.me/6588270086?text=${encodeURIComponent(message)}`, '_blank');
+                window.open(`https://wa.me/656588270086?text=${encodeURIComponent(message)}`, '_blank');
                 setMenuOpen(false);
               }}
               className="w-full max-w-sm px-4 py-2 bg-gradient-to-r from-[#25D366] to-[#1aab54] text-white rounded-lg font-bold text-sm sm:text-base hover:from-[#1aab54] hover:to-[#128c42] transition-all duration-300 shadow-lg flex items-center justify-center gap-2 min-h-[40px]"

@@ -266,7 +266,7 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Check if WhatsApp can be opened
-      const whatsappUrl = `https://wa.me/88270086?text=${encodeURIComponent(message)}`;
+      const whatsappUrl = `https://wa.me/6588270086?text=${encodeURIComponent(message)}`;
       const newWindow = window.open(whatsappUrl, '_blank');
 
       if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
