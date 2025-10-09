@@ -212,6 +212,21 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
     }
   };
 
+  // Format employment years
+  const formatEmploymentYears = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const startYear = start.getFullYear();
+    const endYear = end.getFullYear();
+    
+    // If less than a year, show same year twice
+    if (startYear === endYear) {
+      return `${startYear} - ${startYear}`;
+    }
+    
+    return `${startYear} - ${endYear}`;
+  };
+
   const displayLabel = displayMaid.type?.includes("Transfer") 
     ? "Transfer"
     : displayMaid.type?.includes("New/Fresh")
@@ -561,6 +576,9 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
                           </h4>
                           <p className="text-sm text-gray-600">
                             {formatEmploymentDuration(employment.startDate, employment.endDate)}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {formatEmploymentYears(employment.startDate, employment.endDate)}
                           </p>
                         </div>
                         <Badge className="bg-orange-100 text-orange-600 font-semibold">
