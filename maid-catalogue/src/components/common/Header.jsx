@@ -120,7 +120,7 @@ export default function Header(){
           >
             About Us
           </Link>
-          <Link
+          {/* <Link
             to="/services"
             className={`text-lg font-semibold transition-all duration-300 hover:scale-105 ${
               isActive('/services') 
@@ -129,7 +129,7 @@ export default function Header(){
             } hover:text-[#ff914d]`}
           >
             Services
-          </Link>
+          </Link> */}
           <Link
             to="/faqs"
             className={`text-lg font-semibold transition-all duration-300 hover:scale-105 ${
@@ -309,7 +309,7 @@ export default function Header(){
             >
               About Us
             </Link>
-            <Link
+            {/* <Link
               to="/services"
               onClick={() => setMenuOpen(false)}
               className={`text-sm sm:text-base font-semibold transition-all duration-300 hover:scale-105 py-2 px-4 min-h-[44px] flex items-center ${
@@ -319,7 +319,7 @@ export default function Header(){
               } hover:text-[#ff914d]`}
             >
               Services
-            </Link>
+            </Link> */}
             <Link
               to="/faqs"
               onClick={() => setMenuOpen(false)}

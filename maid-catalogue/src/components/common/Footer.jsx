@@ -72,12 +72,12 @@ const Footer = () => {
                   >
                     About Us
                   </Link>
-                  <Link
+                  {/* <Link
                     to="/services"
                     className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
                   >
                     Services
-                  </Link>
+                  </Link> */}
                   <Link
                     to="/faqs"
                     className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
@@ -123,12 +123,12 @@ const Footer = () => {
                   >
                     Transfer Helpers
                   </Link>
-                  <Link
+                  {/* <Link
                     to="/services"
                     className="text-white font-inter text-sm hover:text-[#ff690d] transition-colors duration-300"
                   >
                     Documentation Support
-                  </Link>
+                  </Link> */}
                 </nav>
               </div>
             </div>
