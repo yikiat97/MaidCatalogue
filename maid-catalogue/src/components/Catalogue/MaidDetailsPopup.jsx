@@ -327,7 +327,7 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
                 id="maid-profile-title"
                 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight"
               >
-                {displayMaid.name} - Domestic Helper Profile
+                {displayMaid.name}
               </DialogTitle>
               <p
                 id="maid-profile-description"
