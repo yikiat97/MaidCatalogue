@@ -25,6 +25,7 @@ import SuppliersManagement from './pages/admin/SuppliersManagement';
 import ResetPassword from './pages/ResetPassword';
 import FloatingWhatsApp from './components/common/FloatingWhatsApp';
 import ScrollToTop from './components/common/ScrollToTop';
+import ProtectedRouteWithDialog from './components/common/ProtectedRouteWithDialog';
 
 
 // Component to conditionally render WhatsApp widget
@@ -46,7 +47,14 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
-        {/* <Route path="/services" element={<ServicesPage />} /> */}
+        <Route
+          path="/services"
+          element={
+            <ProtectedRouteWithDialog isAuthenticated={isAuthenticated} isLoading={isLoading}>
+              <ServicesPage />
+            </ProtectedRouteWithDialog>
+          }
+        />
         <Route path="/faqs" element={<FAQsPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/pricing" element={<PricingPage />} />

@@ -275,7 +275,7 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
     try {
       // Generate WhatsApp message with profile link
       const profileLink = generateProfileLink(displayMaid.id);
-      const message = `Hi! I'm interested in the following domestic helper:\n\n${displayMaid.name} (ID: ${displayMaid.id})\nView Profile: ${profileLink}\n\nCould you provide more information about their availability and arrange an interview? Thank you!`;
+      const message = `Hi! I'm interested in the following domestic helper:\n\n${displayMaid.name} (Supplier ID: ${displayMaid.supplier})\nView Profile: ${profileLink}\n\nCould you provide more information about their availability and arrange an interview? Thank you!`;
 
       // Small delay to show loading state
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -400,7 +400,7 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
                   <p className="text-sm text-gray-600 font-semibold mb-1">
                     Monthly Salary
                   </p>
-                  <p className="text-3xl font-bold text-orange-500">
+                  <p className="text-2xl font-bold text-orange-500">
                     ${displayMaid.salary}
                   </p>
                 </div>
@@ -409,7 +409,7 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
                     <p className="text-sm text-gray-600 font-semibold mb-1">
                       Loan Amount
                     </p>
-                    <p className="text-xl font-bold text-amber-500">
+                    <p className="text-2xl font-bold text-orange-500">
                       ${displayMaid.loan}
                     </p>
                   </div>

@@ -17,12 +17,15 @@ import {
   WorkOutline as WorkIcon,
   ArrowRightOutlined as ArrowRightIcon,
   Close as CloseIcon,
-  Receipt as ReceiptIcon
+  Receipt as ReceiptIcon,
+  Lock as LockIcon
 } from '@mui/icons-material';
 import { MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const HelperFinderCard = () => {
+  const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -149,12 +152,17 @@ const HelperFinderCard = () => {
   }, [nationality, experience]);
 
   const handleViewCatalogue = () => {
+    if (!isAuthenticated) return;
     const params = new URLSearchParams();
     if (experience) params.append('experience', experience);
     if (nationality) params.append('nationality', nationality);
     
     const queryString = params.toString();
     navigate(`/Catalogue${queryString ? `?${queryString}` : ''}`);
+  };
+
+  const handleLoginClick = () => {
+    navigate('/login');
   };
 
   const pricing = getPricingData();
@@ -367,6 +375,7 @@ const HelperFinderCard = () => {
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
+      style={{ position: 'relative' }}
     >
       <Paper 
         elevation={0}
@@ -389,7 +398,12 @@ const HelperFinderCard = () => {
             right: 0,
             height: { xs: '3px', lg: '4px' },
             background: 'linear-gradient(90deg, #ff690d 0%, #ff914d 50%, #ffa366 100%)'
-          }
+          },
+          ...(!isAuthenticated && !isLoading && {
+            filter: 'blur(8px)',
+            pointerEvents: 'none',
+            userSelect: 'none'
+          })
         }}
       >
         {/* Header */}
@@ -448,9 +462,11 @@ const HelperFinderCard = () => {
                   <MuiButton
                     key={option.value}
                     onClick={() => {
+                      if (!isAuthenticated) return;
                       setExperience(option.value);
                       if (experienceError) setExperienceError(false);
                     }}
+                    disabled={!isAuthenticated}
                     variant={experience === option.value ? "contained" : "outlined"}
                     sx={{
                       flex: 1,
@@ -506,9 +522,11 @@ const HelperFinderCard = () => {
                   <MuiButton
                     key={option.value}
                     onClick={() => {
+                      if (!isAuthenticated) return;
                       setNationality(option.value);
                       if (nationalityError) setNationalityError(false);
                     }}
+                    disabled={!isAuthenticated}
                     variant={nationality === option.value ? "contained" : "outlined"}
                     sx={{
                       flex: 1,
@@ -573,20 +591,26 @@ const HelperFinderCard = () => {
                 {/* Compact Cost Summary */}
                 <Box sx={{ mb: { xs: 1.5, lg: 2.25 } }}>
                   <Box
-                    onClick={() => setShowPricingModal(true)}
+                    onClick={() => {
+                      if (!isAuthenticated) return;
+                      setShowPricingModal(true);
+                    }}
                     sx={{
                       p: { xs: 2, lg: 2.5 },
                       borderRadius: '12px',
                       backgroundColor: 'rgba(255, 105, 13, 0.05)',
                       border: '2px solid rgba(255, 105, 13, 0.15)',
-                      cursor: 'pointer',
+                      cursor: isAuthenticated ? 'pointer' : 'not-allowed',
+                      opacity: isAuthenticated ? 1 : 0.6,
                       transition: 'all 0.2s ease',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 105, 13, 0.1)',
-                        borderColor: 'rgba(255, 105, 13, 0.3)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 8px 25px rgba(255, 105, 13, 0.2)'
-                      }
+                      ...(isAuthenticated && {
+                        '&:hover': {
+                          backgroundColor: 'rgba(255, 105, 13, 0.1)',
+                          borderColor: 'rgba(255, 105, 13, 0.3)',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 8px 25px rgba(255, 105, 13, 0.2)'
+                        }
+                      })
                     }}
                   >
                     <Box sx={{ 
@@ -695,6 +719,7 @@ const HelperFinderCard = () => {
             <Box>
               <MuiButton
                 onClick={handleViewCatalogue}
+                disabled={!isAuthenticated}
                 fullWidth
                 variant="contained"
                 size="large"
@@ -728,6 +753,108 @@ const HelperFinderCard = () => {
 
         </Box>
       </Paper>
+
+      {/* Login Overlay - shown when not authenticated */}
+      {!isAuthenticated && !isLoading && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10,
+            pointerEvents: 'auto'
+          }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Paper
+              elevation={8}
+              sx={{
+                p: { xs: 3, lg: 4 },
+                borderRadius: '16px',
+                background: 'linear-gradient(145deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%)',
+                backdropFilter: 'blur(20px)',
+                border: '2px solid rgba(255, 105, 13, 0.2)',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(255, 255, 255, 0.3)',
+                maxWidth: { xs: '280px', lg: '320px' },
+                textAlign: 'center'
+              }}
+            >
+              <Box
+                sx={{
+                  width: { xs: 48, lg: 64 },
+                  height: { xs: 48, lg: 64 },
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #ff690d 0%, #ff914d 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mx: 'auto',
+                  mb: 2,
+                  boxShadow: '0 8px 16px rgba(255, 105, 13, 0.3)'
+                }}
+              >
+                <LockIcon sx={{ color: 'white', fontSize: { xs: '1.5rem', lg: '2rem' } }} />
+              </Box>
+              
+              <Typography 
+                variant="h6" 
+                fontWeight="bold" 
+                color="#0c191b"
+                mb={1}
+                sx={{
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                  fontSize: { xs: '1rem', lg: '1.25rem' }
+                }}
+              >
+                Login Required
+              </Typography>
+              
+              <Typography 
+                variant="body2" 
+                color="#5a6c6f"
+                mb={3}
+                sx={{ 
+                  fontSize: { xs: '0.75rem', lg: '0.875rem' },
+                  lineHeight: 1.6
+                }}
+              >
+                Please login to view and use the helper finder feature
+              </Typography>
+              
+              <MuiButton
+                onClick={handleLoginClick}
+                variant="contained"
+                fullWidth
+                sx={{
+                  py: { xs: 1.25, lg: 1.5 },
+                  borderRadius: '12px',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: { xs: '0.875rem', lg: '1rem' },
+                  background: 'linear-gradient(135deg, #ff690d 0%, #ff914d 100%)',
+                  color: 'white',
+                  boxShadow: '0 4px 12px rgba(255, 105, 13, 0.3)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #e55a0a 0%, #ff690d 100%)',
+                    boxShadow: '0 6px 16px rgba(255, 105, 13, 0.4)'
+                  }
+                }}
+              >
+                Go to Login
+              </MuiButton>
+            </Paper>
+          </motion.div>
+        </Box>
+      )}
       
       {/* Pricing Breakdown Modal */}
       <PricingBreakdownModal />

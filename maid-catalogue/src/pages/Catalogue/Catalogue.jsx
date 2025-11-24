@@ -270,7 +270,7 @@ export default function Catalogue() {
     
     selectedMaidDetails.forEach((maid, index) => {
       const profileLink = generateProfileLink(maid.id);
-      message += `${index + 1}. ${maid.name} (ID: ${maid.id})\n`;
+      message += `${index + 1}. ${maid.name} (Supplier ID: ${maid.supplier})\n`;
       message += `   View Profile: ${profileLink}\n\n`;
     });
     
