@@ -827,7 +827,7 @@ const HelperFinderCard = () => {
                   lineHeight: 1.6
                 }}
               >
-                Please login to view and use the helper finder feature
+                MOM regulations require users to be logged in before accessing the package details. You can register for a free account if needed.
               </Typography>
               
               <MuiButton
