@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Alert } from '../../components/ui/alert';
 import { Card } from '../../components/ui/card';
 import { useAnimation } from '../../hooks/useAnimation';
+import { trackButtonConversion } from '../../utils/googleAdsTracking';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -42,6 +43,10 @@ const ContactPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Track conversion for contact form submission
+    trackButtonConversion(1.0, 'SGD');
+    
     setIsSubmitting(true);
     
     // Simulate form submission
@@ -124,7 +129,10 @@ const ContactPage = () => {
                 <div className="space-y-4">
                   <Button 
                     className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-4 text-lg font-semibold flex items-center justify-center space-x-3 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                    onClick={() => window.open('https://wa.me/6591234567', '_blank')}
+                    onClick={() => {
+                      trackButtonConversion(1.0, 'SGD');
+                      window.open('https://wa.me/6591234567', '_blank');
+                    }}
                   >
                     <span className="text-2xl">💬</span>
                     <span>WhatsApp Us Now</span>

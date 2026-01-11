@@ -1,8 +1,13 @@
+import { trackButtonConversion } from '../../utils/googleAdsTracking';
+
 const FloatingWhatsApp = ({ 
   phoneNumber = "6588270086", 
   message = "Hello! I'm interested in your maid services." 
 }) => {
   const handleWhatsAppClick = () => {
+    // Track conversion for WhatsApp click
+    trackButtonConversion(1.0, 'SGD');
+    
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');

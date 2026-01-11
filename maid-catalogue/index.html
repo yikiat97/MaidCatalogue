@@ -7,6 +7,37 @@
     <link rel="shortcut icon" href="/assets/logoBlack.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EASYHIRESG</title>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-11379248226"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'AW-11379248226');
+    </script>
+    
+    <!-- Event snippet for Outbound click (1) conversion page -->
+    <script>
+      function gtag_report_conversion(url) {
+        var callback = function () {
+          if (typeof(url) != 'undefined') {
+            window.location = url;
+          }
+        };
+        gtag('event', 'conversion', {
+          'send_to': 'AW-11379248226/n2-JCPWW5t4bEOKYhrIq',
+          'value': 1.0,
+          'currency': 'SGD',
+          'event_callback': callback
+        });
+        return false;
+      }
+      
+      // Make it available globally for React components
+      window.gtag_report_conversion = gtag_report_conversion;
+    </script>
+    
     <script type="module" src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fbojasons1002back.builtwithrocket.new&_v=0.1.2"></script>
     <link rel="stylesheet" href="/src/index.css" />
   </head>

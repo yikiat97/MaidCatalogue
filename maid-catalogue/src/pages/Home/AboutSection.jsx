@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
+import { trackButtonConversion } from '../../utils/googleAdsTracking';
 import { Badge } from '../../components/ui/badge';
 import { Card } from '../../components/ui/card';
 import { useAnimation } from '../../hooks/useAnimation';
@@ -236,7 +237,10 @@ const AboutSection = () => {
                     size="lg" 
                     className="bg-[#ff690d] hover:bg-[#e55a0a] text-white px-6 sm:px-8 py-3 font-semibold transition-all duration-200 transform hover:scale-105 min-h-[44px] min-w-[44px]"
                     style={{ fontSize: 'clamp(0.875rem, 2vw, 1.125rem)' }}
-                    onClick={() => navigate('/catalogue')}
+                    onClick={() => {
+                      trackButtonConversion(1.0, 'SGD');
+                      navigate('/catalogue');
+                    }}
                   >
                     FIND A HELPER
                   </Button>

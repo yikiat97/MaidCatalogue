@@ -6,6 +6,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { trackButtonConversion } from '../utils/googleAdsTracking';
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -47,6 +48,9 @@ export default function SignUp() {
 
   const handleSignUp = async () => {
     if (!validateForm()) return;
+    
+    // Track conversion for signup
+    trackButtonConversion(1.0, 'SGD');
     
     setIsLoading(true);
     setErrors({});
