@@ -499,6 +499,7 @@ export default function MaidDetails() {
                          height: 'auto',
                          borderRadius: 12,
                          objectFit: 'cover',
+                         objectPosition: 'top center',
                          filter: isAuthenticated === true ? 'none' : 'blur(10px)',
                          transition: 'filter 0.3s ease'
                        }}

@@ -273,9 +273,9 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
     setErrorMessage('');
 
     try {
-      // Generate WhatsApp message with profile link
+      // Generate WhatsApp message with profile link (Supplier ID: ${displayMaid.supplier})
       const profileLink = generateProfileLink(displayMaid.id);
-      const message = `Hi! I'm interested in the following domestic helper:\n\n${displayMaid.name} (Supplier ID: ${displayMaid.supplier})\nView Profile: ${profileLink}\n\nCould you provide more information about their availability and arrange an interview? Thank you!`;
+      const message = `Hi! I'm interested in the following domestic helper:\n\n${displayMaid.name} \nView Profile: ${profileLink}\n\nCould you provide more information about their availability and arrange an interview? Thank you!`;
 
       // Small delay to show loading state
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -360,7 +360,7 @@ export default function MaidDetailsPopup({ open, onClose, maid, isAuthenticated 
               alt={displayMaid.name}
               loading="lazy"
               className={cn(
-                "w-full max-w-sm h-80 rounded-xl object-cover transition-all duration-300",
+                "w-full max-w-sm h-80 rounded-xl object-cover object-top transition-all duration-300",
                 !isAuthenticated && "blur-lg scale-110",
                 !imageLoaded && "opacity-0",
                 imageError && "absolute -top-[9999px]"
