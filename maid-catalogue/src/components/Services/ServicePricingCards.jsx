@@ -59,7 +59,7 @@ const ServicePricingCards = () => {
       subtitle: 'New Helper Package',
       variant: 'accent',
       country: 'Philippines',
-      price: '$1,993',
+      price: '$2,500',
       period: 'total cost',
       category: 'new',
       description: 'Premium package for new Filipino domestic helpers with extensive government documentation.',
@@ -70,8 +70,8 @@ const ServicePricingCards = () => {
         'Medical check up: $80',
         'Transportation upon arrival: $140',
         'Air Ticket: $250',
-        'POEA/Document fee to Philippines government: $700',
-        'Agency Fee: $598'
+        'All processes required in Philippines (POEA etc): $1427',
+        'Agency Fee: $378'
       ],
       ctaText: 'Find a Helper',
       popular: false,
@@ -126,7 +126,7 @@ const ServicePricingCards = () => {
       subtitle: 'Experienced Helper Package',
       variant: 'default',
       country: 'Philippines',
-      price: '$1,918',
+      price: '$2,425',
       period: 'total cost',
       category: 'experienced',
       description: 'Package for experienced Filipino domestic helpers with established track record.',
@@ -137,8 +137,8 @@ const ServicePricingCards = () => {
         'Medical check up: $80',
         'Transportation upon arrival: $140',
         'Air Ticket: $250',
-        'POEA/Document fee to Philippines government: $700',
-        'Agency Fee: $598'
+        'All processes required in Philippines (POEA etc): $1427',
+        'Agency Fee: $378'
       ],
       ctaText: 'Find a Helper',
       popular: false,
