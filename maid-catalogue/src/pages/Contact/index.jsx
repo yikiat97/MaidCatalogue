@@ -315,24 +315,24 @@ const ContactPage = () => {
                     <div>
                       <h4 className="font-semibold text-gray-900">Address</h4>
                       <p className="text-gray-700">
-                        123 Orchard Road<br />
-                        #12-34 Plaza Singapura<br />
-                        Singapore 238123
+                        9 Meyappa Chettiar Rd<br />
+                        Singapore 358456<br />
+                        
                       </p>
                     </div>
                     
                     <div>
                       <h4 className="font-semibold text-gray-900">Nearest MRT</h4>
                       <p className="text-gray-700">
-                        Dhoby Ghaut MRT Station (NS24/NE6/CC1)<br />
-                        5 minutes walk from Exit B
+                        Potong Pasir MRT Station (NE10)<br />
+                        2 minutes walk from Exit C
                       </p>
                     </div>
 
                     <div>
                       <h4 className="font-semibold text-gray-900">Parking</h4>
                       <p className="text-gray-700">
-                        Plaza Singapura has ample parking<br />
+                        Nearby Poiz Centre has ample parking<br />
                         Validation available for consultations
                       </p>
                     </div>
